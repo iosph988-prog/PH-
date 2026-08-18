@@ -1,4 +1,4 @@
-name: Build PHATT iOS
+name: Build Proxy iOS
 
 on:
   workflow_dispatch:
