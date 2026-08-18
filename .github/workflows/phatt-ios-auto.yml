@@ -1,21 +1,25 @@
 name: Build Proxy iOS
 
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
 
+
 jobs:
   build:
     runs-on: macos-latest
+
 
     steps:
       - name: Baixar o repositório
         uses: actions/checkout@v4
 
+
       - name: Extrair o pacote Proxy
         run: |
-          ARCHIVE='./3105-1.0.1-kyojinx-integrado.tar(2).gz'
+          ARCHIVE='./3105-1.0.1-kyojinx-integrado.tar.gz'
           if [ ! -f "$ARCHIVE" ]; then
             echo "Arquivo não encontrado: $ARCHIVE"
             exit 1
@@ -23,10 +27,12 @@ jobs:
           mkdir -p source
           tar -xzf "$ARCHIVE" -C source
 
+
       - name: Localizar projeto Xcode
         run: |
           WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
           PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
+
 
           if [ -n "$WORKSPACE" ]; then
             echo "BUILD_KIND=workspace" >> "$GITHUB_ENV"
@@ -42,6 +48,7 @@ jobs:
             exit 1
           fi
 
+
       - name: Mostrar schemes disponíveis
         run: |
           if [ "$BUILD_KIND" = "workspace" ]; then
@@ -49,6 +56,7 @@ jobs:
           else
             xcodebuild -list -project "$BUILD_PATH"
           fi
+
 
       - name: Compilar Proxy sem assinatura
         run: |
@@ -77,13 +85,5 @@ jobs:
               CODE_SIGNING_REQUIRED=NO
           fi
 
-      - name: Publicar o build
-        uses: actions/upload-artifact@v4
-        with:
-          name: proxy-build
-          path: build/Build/Products/Release-iphoneos/
-          if-no-files-found: error
-          retention-days: 7
 
-# Este Workflow gera um build não assinado para validar a compilação.
-# Um IPA instalável exige certificado e provisioning profile legítimos da Apple.
+      - name: Publicar o build
