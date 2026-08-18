@@ -13,11 +13,11 @@ jobs:
       - name: Baixar o repositório
         uses: actions/checkout@v4
 
-      - name: Extrair o pacote PHATT
+      - name: Extrair o pacote Proxy
         run: |
-          ARCHIVE='./3105-proxy-cheats-ok.tar.gz'
-          if [ -z "$ARCHIVE" ]; then
-            echo "Nenhum arquivo .tar.gz ou .tgz foi encontrado na raiz."
+          ARCHIVE='./3105-1.0.1-kyojinx-integrado.tar.gz'
+          if [ ! -f "$ARCHIVE" ]; then
+            echo "Arquivo não encontrado: $ARCHIVE"
             exit 1
           fi
           mkdir -p source
@@ -50,7 +50,7 @@ jobs:
             xcodebuild -list -project "$BUILD_PATH"
           fi
 
-      - name: Compilar PHATT sem assinatura
+      - name: Compilar Proxy sem assinatura
         run: |
           SCHEME="$DEFAULT_SCHEME"
           if [ "$BUILD_KIND" = "workspace" ]; then
@@ -78,7 +78,7 @@ jobs:
       - name: Publicar o build
         uses: actions/upload-artifact@v4
         with:
-          name: phatt-build
+          name: proxy-build
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
