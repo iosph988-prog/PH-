@@ -1,0 +1,63 @@
+name: Build 3105 iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Baixar arquivos do repositório
+        uses: actions/checkout@v4
+
+      - name: Extrair pacote 3105
+        run: |
+          ARCHIVE=$(find . -maxdepth 1 -type f -name '*.tar.gz' | head -n 1)
+          test -n "$ARCHIVE"
+          mkdir -p source
+          tar -xzf "$ARCHIVE" -C source
+
+      - name: Localizar projeto
+        run: |
+          PROJECT=$(find source -name 'ThreeOneOSFive.xcodeproj' -type d | head -n 1)
+          test -n "$PROJECT"
+          echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+          echo "PROJECT_DIR=$(dirname "$PROJECT")" >> "$GITHUB_ENV"
+
+      - name: Verificar scheme
+        run: xcodebuild -list -project "$PROJECT"
+
+      - name: Compilar archive sem assinatura
+        run: |
+          xcodebuild \
+            -project "$PROJECT" \
+            -scheme 3105 \
+            -sdk iphoneos \
+            -configuration Release \
+            -archivePath "$PWD/build/3105.xcarchive" \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Montar IPA não assinado
+        run: |
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R build/3105.xcarchive/Products/Applications/*.app build/Payload/
+          cd build
+          zip -qry 3105-unsigned.ipa Payload
+
+      - name: Publicar resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-build
+          path: |
+            build/3105-unsigned.ipa
+            build/3105.xcarchive
+          retention-days: 7
+
+# Este workflow gera um IPA não assinado para teste/inspeção.
+# A instalação em iPhone exige assinatura e provisioning profile válidos da Apple.
