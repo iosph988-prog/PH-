@@ -1,0 +1,87 @@
+name: Build PHATT iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+
+      - name: Extrair o pacote PHATT
+        run: |
+          ARCHIVE=$(find . -maxdepth 1 -type f \( -name '*.tar.gz' -o -name '*.tgz' \) | head -n 1)
+          if [ -z "$ARCHIVE" ]; then
+            echo "Nenhum arquivo .tar.gz ou .tgz foi encontrado na raiz."
+            exit 1
+          fi
+          mkdir -p source
+          tar -xzf "$ARCHIVE" -C source
+
+      - name: Localizar projeto Xcode
+        run: |
+          WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
+          PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
+
+          if [ -n "$WORKSPACE" ]; then
+            echo "BUILD_KIND=workspace" >> "$GITHUB_ENV"
+            echo "BUILD_PATH=$WORKSPACE" >> "$GITHUB_ENV"
+            echo "DEFAULT_SCHEME=$(basename "$WORKSPACE" .xcworkspace)" >> "$GITHUB_ENV"
+          elif [ -n "$PROJECT" ]; then
+            echo "BUILD_KIND=project" >> "$GITHUB_ENV"
+            echo "BUILD_PATH=$PROJECT" >> "$GITHUB_ENV"
+            echo "DEFAULT_SCHEME=$(basename "$PROJECT" .xcodeproj)" >> "$GITHUB_ENV"
+          else
+            echo "Nenhum .xcodeproj ou .xcworkspace foi encontrado."
+            find source -maxdepth 3 -type f | sort | head -200
+            exit 1
+          fi
+
+      - name: Mostrar schemes disponíveis
+        run: |
+          if [ "$BUILD_KIND" = "workspace" ]; then
+            xcodebuild -list -workspace "$BUILD_PATH"
+          else
+            xcodebuild -list -project "$BUILD_PATH"
+          fi
+
+      - name: Compilar PHATT sem assinatura
+        run: |
+          SCHEME="$DEFAULT_SCHEME"
+          if [ "$BUILD_KIND" = "workspace" ]; then
+            xcodebuild \
+              -workspace "$BUILD_PATH" \
+              -scheme "$SCHEME" \
+              -sdk iphoneos \
+              -configuration Release \
+              -derivedDataPath "$PWD/build" \
+              build \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO
+          else
+            xcodebuild \
+              -project "$BUILD_PATH" \
+              -scheme "$SCHEME" \
+              -sdk iphoneos \
+              -configuration Release \
+              -derivedDataPath "$PWD/build" \
+              build \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO
+          fi
+
+      - name: Publicar o build
+        uses: actions/upload-artifact@v4
+        with:
+          name: phatt-build
+          path: build/Build/Products/Release-iphoneos/
+          if-no-files-found: error
+          retention-days: 7
+
+# Este Workflow gera um build não assinado para validar a compilação.
+# Um IPA instalável exige certificado e provisioning profile legítimos da Apple.
