@@ -15,7 +15,7 @@ jobs:
 
       - name: Extrair o pacote Proxy
         run: |
-          ARCHIVE='./3105-1.0.1-kyojinx-integrado.tar.gz'
+          ARCHIVE='./3105-1.0.1-kyojinx-integrado.tar(1).gz'
           if [ ! -f "$ARCHIVE" ]; then
             echo "Arquivo não encontrado: $ARCHIVE"
             exit 1
