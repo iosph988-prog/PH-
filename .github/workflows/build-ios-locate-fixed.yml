@@ -1,0 +1,112 @@
+name: Build 3105 iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Baixar arquivos do repositório
+        uses: actions/checkout@v4
+
+      - name: Extrair pacote
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="$(find . -maxdepth 1 -type f -iname '*.tar.gz' -print -quit)"
+          if [ -z "${ARCHIVE}" ]; then
+            echo "ERRO: nenhum arquivo .tar.gz foi encontrado na raiz do repositório."
+            find . -maxdepth 2 -type f -print
+            exit 1
+          fi
+          echo "Pacote encontrado: ${ARCHIVE}"
+          mkdir -p source
+          tar -xzf "${ARCHIVE}" -C source
+          echo "Conteúdo extraído:"
+          find source -maxdepth 5 -print | sort | head -300
+
+      - name: Localizar projeto Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          WORKSPACE="$(find source -type d -name '*.xcworkspace' -print -quit)"
+          PROJECT="$(find source -type d -name '*.xcodeproj' -print -quit)"
+          if [ -z "${WORKSPACE}" ] && [ -z "${PROJECT}" ]; then
+            echo "ERRO: o pacote não contém .xcodeproj nem .xcworkspace."
+            echo "Projetos encontrados no pacote:"
+            find source -type f \( -name '*.xcodeproj' -o -name '*.xcworkspace' \) -print
+            echo "Primeiros arquivos extraídos:"
+            find source -maxdepth 8 -type f -print | sort | head -300
+            exit 1
+          fi
+          if [ -n "${WORKSPACE}" ]; then
+            echo "WORKSPACE=${WORKSPACE}" >> "$GITHUB_ENV"
+            echo "Usando workspace: ${WORKSPACE}"
+          else
+            echo "PROJECT=${PROJECT}" >> "$GITHUB_ENV"
+            echo "Usando projeto: ${PROJECT}"
+          fi
+
+      - name: Verificar schemes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${WORKSPACE:-}" ]; then
+            xcodebuild -list -workspace "${WORKSPACE}"
+          else
+            xcodebuild -list -project "${PROJECT}"
+          fi
+
+      - name: Compilar archive sem assinatura
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          if [ -n "${WORKSPACE:-}" ]; then
+            xcodebuild \
+              -workspace "${WORKSPACE}" \
+              -scheme 3105 \
+              -sdk iphoneos \
+              -configuration Release \
+              -destination 'generic/platform=iOS' \
+              -archivePath "$PWD/build/3105.xcarchive" \
+              archive \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO
+          else
+            xcodebuild \
+              -project "${PROJECT}" \
+              -scheme 3105 \
+              -sdk iphoneos \
+              -configuration Release \
+              -destination 'generic/platform=iOS' \
+              -archivePath "$PWD/build/3105.xcarchive" \
+              archive \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO
+          fi
+
+      - name: Montar IPA não assinado
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R build/3105.xcarchive/Products/Applications/*.app build/Payload/
+          cd build
+          zip -qry 3105-unsigned.ipa Payload
+
+      - name: Publicar resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-build
+          path: |
+            build/3105-unsigned.ipa
+            build/3105.xcarchive
+          retention-days: 7
+
+# O archive não é assinado. A instalação em um iPhone exige certificado
+# e provisioning profile válidos da Apple.
