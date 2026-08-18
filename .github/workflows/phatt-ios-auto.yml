@@ -59,6 +59,7 @@ jobs:
               -scheme "$SCHEME" \
               -sdk iphoneos \
               -configuration Release \
+              -destination 'generic/platform=iOS' \
               -derivedDataPath "$PWD/build" \
               build \
               CODE_SIGNING_ALLOWED=NO \
@@ -69,6 +70,7 @@ jobs:
               -scheme "$SCHEME" \
               -sdk iphoneos \
               -configuration Release \
+              -destination 'generic/platform=iOS' \
               -derivedDataPath "$PWD/build" \
               build \
               CODE_SIGNING_ALLOWED=NO \
