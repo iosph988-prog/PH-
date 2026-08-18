@@ -1,4 +1,4 @@
-name: Build Proxy iOS
+name: Compilar PHATT iOS
 
 on:
   workflow_dispatch:
@@ -7,47 +7,89 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
+
     steps:
       - name: Baixar o repositório
         uses: actions/checkout@v4
 
-      - name: Extrair o pacote Proxy
+      - name: Selecionar Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Localizar e extrair o pacote do projeto
+        shell: bash
         run: |
-          ARCHIVE='./3105-1.0.1-kyojinx-integrado.tar.gz'
-          if [ ! -f "$ARCHIVE" ]; then
-            echo "Arquivo não encontrado: $ARCHIVE"
+          set -euo pipefail
+          ARCHIVE="$(find . -maxdepth 2 -type f -name '*.tar.gz' -print -quit)"
+          if [ -z "$ARCHIVE" ]; then
+            echo 'Erro: nenhum arquivo .tar.gz foi encontrado na raiz do repositório.'
+            find . -maxdepth 3 -type f | sort
             exit 1
           fi
+          echo "Pacote encontrado: $ARCHIVE"
+          rm -rf source
           mkdir -p source
           tar -xzf "$ARCHIVE" -C source
+          echo 'Conteúdo extraído:'
+          find source -maxdepth 4 -type f \( -name '*.xcodeproj' -o -name '*.xcworkspace' \) -print
 
-      - name: Localizar e compilar o projeto Xcode
+      - name: Localizar o projeto e listar schemes
+        shell: bash
         run: |
-          WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
-          PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
-          SCHEME='3105'
+          set -euo pipefail
+          PROJECT="$(find source -name '*.xcodeproj' -type d -print -quit)"
+          WORKSPACE="$(find source -name '*.xcworkspace' -type d -print -quit)"
           if [ -n "$WORKSPACE" ]; then
-            echo "Workspace encontrado: $WORKSPACE"
             xcodebuild -list -workspace "$WORKSPACE"
-            xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           elif [ -n "$PROJECT" ]; then
-            echo "Projeto encontrado: $PROJECT"
             xcodebuild -list -project "$PROJECT"
-            xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           else
-            echo "Nenhum .xcodeproj ou .xcworkspace foi encontrado dentro de source."
-            find source -maxdepth 5 -type f | sort | head -200
+            echo 'Erro: nenhum projeto Xcode foi encontrado dentro do pacote.'
             exit 1
           fi
 
-      - name: Publicar o build
+      - name: Compilar sem assinatura
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT="$(find source -name '*.xcodeproj' -type d -print -quit)"
+          WORKSPACE="$(find source -name '*.xcworkspace' -type d -print -quit)"
+          SCHEME='3105'
+          rm -rf build
+
+          if [ -n "$WORKSPACE" ]; then
+            xcodebuild \
+              -workspace "$WORKSPACE" \
+              -scheme "$SCHEME" \
+              -sdk iphoneos \
+              -configuration Release \
+              -destination 'generic/platform=iOS' \
+              -derivedDataPath "$PWD/build" \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              build
+          else
+            xcodebuild \
+              -project "$PROJECT" \
+              -scheme "$SCHEME" \
+              -sdk iphoneos \
+              -configuration Release \
+              -destination 'generic/platform=iOS' \
+              -derivedDataPath "$PWD/build" \
+              CODE_SIGNING_ALLOWED=NO \
+              CODE_SIGNING_REQUIRED=NO \
+              build
+          fi
+
+      - name: Publicar o aplicativo compilado
         uses: actions/upload-artifact@v4
         with:
-          name: proxy-build
+          name: PHATT-build-unsigned
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
 
-# Build não assinado para validar a compilação.
-# Um IPA instalável exige certificado e provisioning profile legítimos da Apple.
+# Este workflow gera um build sem assinatura apenas para validar a compilação.
+# Para gerar um IPA instalável, são necessários certificado e provisioning profile da Apple.
