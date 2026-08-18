@@ -31,11 +31,11 @@ jobs:
           if [ -n "$WORKSPACE" ]; then
             echo "BUILD_KIND=workspace" >> "$GITHUB_ENV"
             echo "BUILD_PATH=$WORKSPACE" >> "$GITHUB_ENV"
-            echo "DEFAULT_SCHEME=$(basename "$WORKSPACE" .xcworkspace)" >> "$GITHUB_ENV"
+            echo "DEFAULT_SCHEME=3105" >> "$GITHUB_ENV"
           elif [ -n "$PROJECT" ]; then
             echo "BUILD_KIND=project" >> "$GITHUB_ENV"
             echo "BUILD_PATH=$PROJECT" >> "$GITHUB_ENV"
-            echo "DEFAULT_SCHEME=$(basename "$PROJECT" .xcodeproj)" >> "$GITHUB_ENV"
+            echo "DEFAULT_SCHEME=3105" >> "$GITHUB_ENV"
           else
             echo "Nenhum .xcodeproj ou .xcworkspace foi encontrado."
             find source -maxdepth 3 -type f | sort | head -200
