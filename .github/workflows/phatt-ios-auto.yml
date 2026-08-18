@@ -1,4 +1,4 @@
-name: Compilar PHATT iOS 
+name: Compilar PHATT iOS
 
 on:
   workflow_dispatch:
