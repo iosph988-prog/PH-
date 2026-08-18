@@ -2,7 +2,11 @@ name: Build Proxy iOS
 
 
 
+
+
+
 on:
+
 
   workflow_dispatch:
   
@@ -12,12 +16,17 @@ on:
     
 
 
+
+
 jobs:
+
 
   build:
   
     runs-on: macos-latest
     
+
+
 
 
     steps:
@@ -26,6 +35,8 @@ jobs:
       
         uses: actions/checkout@v4
         
+
+
 
 
       - name: Extrair o pacote Proxy
@@ -48,205 +59,53 @@ jobs:
           
 
 
-      - name: Localizar projeto Xcode
-      
-        run: |
-        
-          WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
-          
-          PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
-          
 
 
-          if [ -n "$WORKSPACE" ]; then
-          
-            echo "BUILD_KIND=workspace" >> "$GITHUB_ENV"
-            
-            echo "BUILD_PATH=$WORKSPACE" >> "$GITHUB_ENV"
-            
-            echo "DEFAULT_SCHEME=3105" >> "$GITHUB_ENV"
-            
-          elif [ -n "$PROJECT" ]; then
-          
-            echo "BUILD_KIND=project" >> "$GITHUB_ENV"
-            
-            echo "BUILD_PATH=$PROJECT" >> "$GITHUB_ENV"
-            
-            echo "DEFAULT_SCHEME=3105" >> "$GITHUB_ENV"
-            
-          else
-          
-            echo "Nenhum .xcodeproj ou .xcworkspace foi encontrado."
-            
-            find source -maxdepth 3 -type f | sort | head -200
-            
-            exit 1
-            
-          fi
-          
+      - name: Localizar e compilar o projeto Xcode
+  run: |
+    WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
+    PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
+    SCHEME='3105'
 
+    if [ -n "$WORKSPACE" ]; then
+      echo "Workspace encontrado: $WORKSPACE"
+      xcodebuild -list -workspace "$WORKSPACE"
+      xcodebuild \
+        -workspace "$WORKSPACE" \
+        -scheme "$SCHEME" \
+        -sdk iphoneos \
+        -configuration Release \
+        -destination 'generic/platform=iOS' \
+        -derivedDataPath "$PWD/build" \
+        build \
+        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGNING_REQUIRED=NO
+    elif [ -n "$PROJECT" ]; then
+      echo "Projeto encontrado: $PROJECT"
+      xcodebuild -list -project "$PROJECT"
+      xcodebuild \
+        -project "$PROJECT" \
+        -scheme "$SCHEME" \
+        -sdk iphoneos \
+        -configuration Release \
+        -destination 'generic/platform=iOS' \
+        -derivedDataPath "$PWD/build" \
+        build \
+        CODE_SIGNING_ALLOWED=NO \
+        CODE_SIGNING_REQUIRED=NO
+    else
+      echo "Nenhum .xcodeproj ou .xcworkspace foi encontrado dentro de source."
+      find source -maxdepth 5 -type f | sort | head -200
+      exit 1
+    fi
 
-      - name: Mostrar schemes disponíveis
-      
-        run: |
-        
-          if [ "$BUILD_KIND" = "workspace" ]; then
-          
-            xcodebuild -list -workspace "$BUILD_PATH"
-            
-          else
-          
-            xcodebuild -list -project "$BUILD_PATH"
-            
-          fi
-          
-
-
-      - name: Compilar Proxy sem assinatura
-      
-        run: |
-        
-          SCHEME="$DEFAULT_SCHEME"
-          
-          if [ "$BUILD_KIND" = "workspace" ]; then
-          
-            xcodebuild \
-            
-              -workspace "$BUILD_PATH" \
-              
-              -scheme "$SCHEME" \
-              
-              -sdk iphoneos \
-              
-              -configuration Release \
-              
-              -destination 'generic/platform=iOS' \
-              
-              -derivedDataPath "$PWD/build" \
-              
-              build \
-              
-              CODE_SIGNING_ALLOWED=NO \
-              
-              CODE_SIGNING_REQUIRED=NO
-              
-          else
-          
-            xcodebuild \
-            
-              -project "$BUILD_PATH" \
-              
-              -scheme "$SCHEME" \
-              
-              -sdk iphoneos \
-              
-              -configuration Release \
-              
-              -destination 'generic/platform=iOS' \
-              
-              -derivedDataPath "$PWD/build" \
-              
-              build \
-              
-              CODE_SIGNING_ALLOWED=NO \
-              
-              CODE_SIGNING_REQUIRED=NO
-              
-          fi
-          
-
-
-      - name: Publicar o build
-      
-        uses: actions/upload-artifact@v4
-        
-        with:
-        
-          name: proxy-build
-          
-          path: build/Build/Products/Release-iphoneos/
-          
-          if-no-files-found: error
-          
-          retention-days: 7
-          
-
+- name: Publicar o build
+  uses: actions/upload-artifact@v4
+  with:
+    name: proxy-build
+    path: build/Build/Products/Release-iphoneos/
+    if-no-files-found: error
+    retention-days: 7
 
 # Este Workflow gera um build não assinado para validar a compilação.
-
 # Um IPA instalável exige certificado e provisioning profile legítimos da Apple.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
