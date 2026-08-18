@@ -15,7 +15,7 @@ jobs:
 
       - name: Extrair o pacote PHATT
         run: |
-          ARCHIVE=$(find . -maxdepth 1 -type f \( -name '*.tar.gz' -o -name '*.tgz' \) | head -n 1)
+          ARCHIVE='./3105-proxy-cheats-ok.tar.gz'
           if [ -z "$ARCHIVE" ]; then
             echo "Nenhum arquivo .tar.gz ou .tgz foi encontrado na raiz."
             exit 1
