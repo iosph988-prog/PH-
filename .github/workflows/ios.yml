@@ -7,10 +7,26 @@ name: Build 3105 iOS
 
 
 
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
+
+
+
+
 
 
 
@@ -30,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p source
-          tar -xzf ./PHATT_injector_freefiremax_v5.tar.gz -C source
+          tar -xzf ./PHATT_info_card_v6.tar.gz -C source
           tar -xzf ./PHATT_preloaded_assets_a.tar.gz -C source
           tar -xzf ./PHATT_preloaded_assets_b.tar.gz -C source
           test -d "$(find source -type d -name '*.xcodeproj' -print -quit)"
