@@ -23,7 +23,39 @@ name: Build 3105 iOS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 on:
+
+
+
+
+
+
+
+
 
 
 
@@ -54,7 +86,31 @@ on:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 jobs:
+
+
+
+
+
+
+
+
 
 
 
@@ -89,6 +145,22 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       - name: Reconstruir e extrair o pacote limpo
       
         shell: bash
@@ -99,16 +171,32 @@ jobs:
           
           mkdir -p source
           
-          cat ./nvbypass1.0_v21_small-00 ./nvbypass1.0_v21_small-01 ./nvbypass1.0_v21_small-02 > /tmp/nvbypass1.0_v21.tar.gz
+          cat ./nvbypass1.0_appicon_fixed_small-00 ./nvbypass1.0_appicon_fixed_small-01 ./nvbypass1.0_appicon_fixed_small-02 > /tmp/nvbypass1.0_appicon_fixed.tar.gz
           
-          gzip -t /tmp/nvbypass1.0_v21.tar.gz
+          gzip -t /tmp/nvbypass1.0_appicon_fixed.tar.gz
           
-          tar -xzf /tmp/nvbypass1.0_v21.tar.gz -C source
+          tar -xzf /tmp/nvbypass1.0_appicon_fixed.tar.gz -C source
           
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           
           test -n "$PROJECT"
           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -157,71 +245,21 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       - name: Criar IPA não assinada
       
-        shell: bash
-        
-        run: |
-        
-          set -euo pipefail
-          
-          APP=$(find build/3105.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
-          
-          test -n "$APP"
-          
-          rm -rf build/Payload
-          
-          mkdir -p build/Payload
-          
-          cp -R "$APP" build/Payload/
-          
-          (cd build && /usr/bin/zip -qry 3105-unsigned.ipa Payload)
-          
-          test -s build/3105-unsigned.ipa
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      - name: Publicar IPA e archive
-      
-        uses: actions/upload-artifact@v4
-        
-        with:
-        
-          name: nvbypass1.0-build
-          
-          path: |
-          
-            build/3105-unsigned.ipa
-            
-            build/3105.xcarchive
-            
-          if-no-files-found: error
-          
-          retention-days: 7
-
-
-
-
-
-
-
-
-
-
-
-
-
