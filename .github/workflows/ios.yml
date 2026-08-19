@@ -36,20 +36,10 @@ jobs:
           
           mkdir -p source
           
-          cat ./PHATT_both_games_v13_small-00 \
+          cat ./PHATT_both_games_v13_small-00 ./PHATT_both_games_v13_small-01 ./PHATT_both_games_v13_small-02 ./PHATT_both_games_v13_small-03 ./PHATT_both_games_v13_small-04 ./PHATT_both_games_v13_small-05 ./PHATT_both_games_v13_small-06 > /tmp/PHATT_both_games_v13.tar.gz
           
-              ./PHATT_both_games_v13_small-01 \
-              
-              ./PHATT_both_games_v13_small-02 \
-              
-              ./PHATT_both_games_v13_small-03 \
-              
-              ./PHATT_both_games_v13_small-04 \
-              
-              ./PHATT_both_games_v13_small-05 \
-              
-              ./PHATT_both_games_v13_small-06 > /tmp/PHATT_both_games_v13.tar.gz
-              
+          gzip -t /tmp/PHATT_both_games_v13.tar.gz
+          
           tar -xzf /tmp/PHATT_both_games_v13.tar.gz -C source
           
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
@@ -106,7 +96,7 @@ jobs:
         
         with:
         
-          name: 3105-build-v13
+          name: 3105-build-v13-fixed
           
           path: |
           
@@ -117,14 +107,6 @@ jobs:
           if-no-files-found: error
           
           retention-days: 7
-          
-
-
-
-
-
-
-
 
 
 
