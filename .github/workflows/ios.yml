@@ -1,1 +1,55 @@
-name: Build 3105 iOSon:  workflow_dispatch:  push:    branches: [ main ]jobs:  build:    runs-on: macos-latest    steps:      - name: Baixar arquivos do repositório        uses: actions/checkout@v4      - name: Reconstruir e extrair o pacote v16        shell: bash        run: |          set -euo pipefail          mkdir -p source          cat ./PHATT_both_games_named_v18_small-00 ./PHATT_both_games_named_v18_small-01 ./PHATT_both_games_named_v18_small-02 > /tmp/PHATT_both_games_named_v18.tar.gz          gzip -t /tmp/PHATT_both_games_named_v18.tar.gz          tar -xzf /tmp/PHATT_both_games_named_v18.tar.gz -C source          PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)          test -n "$PROJECT"      - name: Compilar projeto Xcode        shell: bash        run: |          set -euo pipefail          PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)          test -n "$PROJECT"          xcodebuild -list -project "$PROJECT"          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO      - name: Criar IPA não assinada        shell: bash        run: |          set -euo pipefail          APP=$(find build/3105.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)          test -n "$APP"          rm -rf build/Payload          mkdir -p build/Payload          cp -R "$APP" build/Payload/          (cd build && /usr/bin/zip -qry 3105-unsigned.ipa Payload)          test -s build/3105-unsigned.ipa      - name: Publicar IPA e archive        uses: actions/upload-artifact@v4        with:          name: 3105-build-named-v18          path: |            build/3105-unsigned.ipa            build/3105.xcarchive          if-no-files-found: error          retention-days: 7
+name: Build 3105 iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Baixar arquivos do repositório
+        uses: actions/checkout@v4
+
+      - name: Reconstruir e extrair o pacote final
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source
+          cat ./PHATT_both_games_named_v18_small-00 ./PHATT_both_games_named_v18_small-01 ./PHATT_both_games_named_v18_small-02 > /tmp/PHATT_both_games_named_v18.tar.gz
+          gzip -t /tmp/PHATT_both_games_named_v18.tar.gz
+          tar -xzf /tmp/PHATT_both_games_named_v18.tar.gz -C source
+          PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
+          test -n "$PROJECT"
+
+      - name: Compilar projeto Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
+          test -n "$PROJECT"
+          xcodebuild -list -project "$PROJECT"
+          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Criar IPA não assinada
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP=$(find build/3105.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP"
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R "$APP" build/Payload/
+          (cd build && /usr/bin/zip -qry 3105-unsigned.ipa Payload)
+          test -s build/3105-unsigned.ipa
+
+      - name: Publicar IPA e archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-build-named-v18
+          path: |
+            build/3105-unsigned.ipa
+            build/3105.xcarchive
+          if-no-files-found: error
+          retention-days: 7
