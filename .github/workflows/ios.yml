@@ -1,68 +1,211 @@
 name: Build 3105 iOS
 
+
+
 on:
+
   workflow_dispatch:
+  
   push:
+  
     branches: [ main ]
+    
+
 
 jobs:
-  build:
-    runs-on: macos-latest
-    steps:
-      - name: Baixar arquivos do repositório
-        uses: actions/checkout@v4
 
-      - name: Extrair pacote
+  build:
+  
+    runs-on: macos-latest
+    
+    steps:
+    
+      - name: Baixar arquivos do repositório
+      
+        uses: actions/checkout@v4
+        
+
+
+      - name: Extrair código e projetos pré-carregados
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           ARCHIVE='./PHATT_kyojinx_integrado.tar.gz'
-          if [ ! -f "$ARCHIVE" ]; then
-            echo "ERRO: pacote integrado não encontrado: $ARCHIVE"
-            exit 1
-          fi
+          
+          ASSETS_A='./PHATT_preloaded_assets_a.tar.gz'
+          
+          ASSETS_B='./PHATT_preloaded_assets_b.tar.gz'
+          
+          for file in "$ARCHIVE" "$ASSETS_A" "$ASSETS_B"; do
+          
+            if [ ! -f "$file" ]; then
+            
+              echo "ERRO: pacote não encontrado: $file"
+              
+              exit 1
+              
+            fi
+            
+          done
+          
           mkdir -p source
+          
           tar -xzf "$ARCHIVE" -C source
-          find source -maxdepth 5 -print | sort | head -300
+          
+          tar -xzf "$ASSETS_A" -C source
+          
+          tar -xzf "$ASSETS_B" -C source
+          
+          find source -maxdepth 6 -print | sort | head -400
+          
+
 
       - name: Verificar e compilar projeto Xcode
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           WORKSPACE=$(find source -type d -name '*.xcworkspace' -print -quit)
+          
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
+          
           mkdir -p build
+          
           if [ -n "$WORKSPACE" ]; then
+          
             echo "Workspace: $WORKSPACE"
+            
             xcodebuild -list -workspace "$WORKSPACE"
+            
             xcodebuild -workspace "$WORKSPACE" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+            
           elif [ -n "$PROJECT" ]; then
+          
             echo "Projeto: $PROJECT"
+            
             xcodebuild -list -project "$PROJECT"
+            
             xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+            
           else
+          
             echo "ERRO: nenhum .xcodeproj ou .xcworkspace foi encontrado no pacote."
+            
             find source -maxdepth 8 -print | sort | head -300
+            
             exit 1
+            
           fi
+          
+
 
       - name: Montar IPA não assinado
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           rm -rf build/Payload
+          
           mkdir -p build/Payload
+          
           cp -R build/3105.xcarchive/Products/Applications/*.app build/Payload/
+          
           cd build
+          
           zip -qry 3105-unsigned.ipa Payload
+          
+
 
       - name: Publicar resultado
+      
         uses: actions/upload-artifact@v4
+        
         with:
+        
           name: 3105-build
+          
           path: |
+          
             build/3105-unsigned.ipa
+            
             build/3105.xcarchive
+            
           retention-days: 7
+          
+
 
 # O archive não é assinado. A instalação exige certificado e provisioning profile da Apple.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
