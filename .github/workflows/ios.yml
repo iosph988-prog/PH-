@@ -2,7 +2,11 @@ name: Build 3105 iOS
 
 
 
+
+
+
 on:
+
 
   workflow_dispatch:
   
@@ -12,7 +16,10 @@ on:
     
 
 
+
+
 jobs:
+
 
   build:
   
@@ -26,6 +33,8 @@ jobs:
         
 
 
+
+
       - name: Reconstruir e extrair o pacote limpo
       
         shell: bash
@@ -36,16 +45,18 @@ jobs:
           
           mkdir -p source
           
-          cat ./PHATT_both_games_clean_v19_small-00 ./PHATT_both_games_clean_v19_small-01 ./PHATT_both_games_clean_v19_small-02 > /tmp/PHATT_both_games_clean_v19.tar.gz
+          cat ./PHATT_both_games_clean_v20_small-00 ./PHATT_both_games_clean_v20_small-01 ./PHATT_both_games_clean_v20_small-02 > /tmp/PHATT_both_games_clean_v20.tar.gz
           
-          gzip -t /tmp/PHATT_both_games_clean_v19.tar.gz
+          gzip -t /tmp/PHATT_both_games_clean_v20.tar.gz
           
-          tar -xzf /tmp/PHATT_both_games_clean_v19.tar.gz -C source
+          tar -xzf /tmp/PHATT_both_games_clean_v20.tar.gz -C source
           
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           
           test -n "$PROJECT"
           
+
+
 
 
       - name: Compilar projeto Xcode
@@ -64,6 +75,8 @@ jobs:
           
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           
+
+
 
 
       - name: Criar IPA não assinada
@@ -90,13 +103,15 @@ jobs:
           
 
 
+
+
       - name: Publicar IPA e archive
       
         uses: actions/upload-artifact@v4
         
         with:
         
-          name: 3105-build-clean-v19
+          name: 3105-build-clean-v20
           
           path: |
           
@@ -107,6 +122,51 @@ jobs:
           if-no-files-found: error
           
           retention-days: 7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
