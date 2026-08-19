@@ -1,257 +1,44 @@
 name: Build 3105 iOS
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 on:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   workflow_dispatch:
-  
   push:
-  
     branches: [ main ]
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 jobs:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   build:
-  
     runs-on: macos-latest
-    
     steps:
-    
       - name: Baixar arquivos do repositório
-      
         uses: actions/checkout@v4
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       - name: Extrair código e projetos pré-carregados
-      
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
-          ARCHIVE='./PHATT_freefire_card_v2.tar.gz'
-          
-          ASSETS_A='./PHATT_preloaded_assets_a.tar.gz'
-          
-          ASSETS_B='./PHATT_preloaded_assets_b.tar.gz'
-          
-          for file in "$ARCHIVE" "$ASSETS_A" "$ASSETS_B"; do
-          
-            if [ ! -f "$file" ]; then
-            
-              echo "ERRO: pacote não encontrado: $file"
-              
-              exit 1
-              
-            fi
-            
-          done
-          
           mkdir -p source
-          
-          tar -xzf "$ARCHIVE" -C source
-          
-          tar -xzf "$ASSETS_A" -C source
-          
-          tar -xzf "$ASSETS_B" -C source
-          
-          find source -maxdepth 6 -print | sort | head -400
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      - name: Verificar e compilar projeto Xcode
-      
+          tar -xzf ./PHATT_freefire_card_v2.tar.gz -C source
+          tar -xzf ./PHATT_preloaded_assets_a.tar.gz -C source
+          tar -xzf ./PHATT_preloaded_assets_b.tar.gz -C source
+          test -d "$(find source -type d -name '*.xcodeproj' -print -quit)"
+      - name: Compilar projeto Xcode
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
-          WORKSPACE=$(find source -type d -name '*.xcworkspace' -print -quit)
-          
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
-          
-          mkdir -p build
-          
-          if [ -n "$WORKSPACE" ]; then
-          
-            echo "Workspace: $WORKSPACE"
+          test -n "$PROJECT"
+          xcodebuild -list -project "$PROJECT"
+          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
       - name: Criar IPA não assinada
         shell: bash
         run: |
           set -euo pipefail
-          cd build
-          zip -qry 3105-unsigned.ipa Payload
+          APP=$(find build/3105.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP"
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R "$APP" build/Payload/
+          (cd build && /usr/bin/zip -qry 3105-unsigned.ipa Payload)
+          test -s build/3105-unsigned.ipa
       - name: Publicar IPA e archive
         uses: actions/upload-artifact@v4
         with:
