@@ -15,10 +15,42 @@ name: Build 3105 iOS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -46,9 +78,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p source
-          tar -xzf ./PHATT_info_card_v6.tar.gz -C source
-          tar -xzf ./PHATT_preloaded_assets_a.tar.gz -C source
-          tar -xzf ./PHATT_preloaded_assets_b.tar.gz -C source
+          cat ./PHATT_both_games_v9.tar.gz.part-00 ./PHATT_both_games_v9.tar.gz.part-01 ./PHATT_both_games_v9.tar.gz.part-02 > /tmp/PHATT_both_games_v9.tar.gz
+          tar -xzf /tmp/PHATT_both_games_v9.tar.gz -C source
           test -d "$(find source -type d -name '*.xcodeproj' -print -quit)"
       - name: Compilar projeto Xcode
         shell: bash
