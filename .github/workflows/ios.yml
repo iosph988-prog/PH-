@@ -1,71 +1,9 @@
 name: Build 3105 iOS
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 jobs:
   build:
@@ -73,14 +11,23 @@ jobs:
     steps:
       - name: Baixar arquivos do repositório
         uses: actions/checkout@v4
-      - name: Extrair código e projetos pré-carregados
+
+      - name: Reconstruir e extrair o pacote v9
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p source
-          cat ./PHATT_both_games_v9.tar.gz.part-00 ./PHATT_both_games_v9.tar.gz.part-01 ./PHATT_both_games_v9.tar.gz.part-02 > /tmp/PHATT_both_games_v9.tar.gz
+          cat ./PHATT_both_games_v9_small-00 \
+              ./PHATT_both_games_v9_small-01 \
+              ./PHATT_both_games_v9_small-02 \
+              ./PHATT_both_games_v9_small-03 \
+              ./PHATT_both_games_v9_small-04 \
+              ./PHATT_both_games_v9_small-05 \
+              ./PHATT_both_games_v9_small-06 > /tmp/PHATT_both_games_v9.tar.gz
           tar -xzf /tmp/PHATT_both_games_v9.tar.gz -C source
-          test -d "$(find source -type d -name '*.xcodeproj' -print -quit)"
+          PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
+          test -n "$PROJECT"
+
       - name: Compilar projeto Xcode
         shell: bash
         run: |
@@ -89,6 +36,7 @@ jobs:
           test -n "$PROJECT"
           xcodebuild -list -project "$PROJECT"
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
       - name: Criar IPA não assinada
         shell: bash
         run: |
@@ -100,6 +48,7 @@ jobs:
           cp -R "$APP" build/Payload/
           (cd build && /usr/bin/zip -qry 3105-unsigned.ipa Payload)
           test -s build/3105-unsigned.ipa
+
       - name: Publicar IPA e archive
         uses: actions/upload-artifact@v4
         with:
