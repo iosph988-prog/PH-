@@ -1,265 +1,54 @@
-name: Build 3105 iOS
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+name: Build nvbypass1.0 iOS
 
 on:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   workflow_dispatch:
-  
   push:
-  
     branches: [ main ]
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 jobs:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   build:
-  
     runs-on: macos-latest
-    
     steps:
-    
       - name: Baixar arquivos do repositório
-      
         uses: actions/checkout@v4
-        
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      - name: Reconstruir e extrair o pacote limpo
-      
+      - name: Reconstruir e extrair o pacote corrigido
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
           mkdir -p source
-          
           cat ./nvbypass1.0_appicon_fixed_small-00 ./nvbypass1.0_appicon_fixed_small-01 ./nvbypass1.0_appicon_fixed_small-02 > /tmp/nvbypass1.0_appicon_fixed.tar.gz
-          
           gzip -t /tmp/nvbypass1.0_appicon_fixed.tar.gz
-          
           tar -xzf /tmp/nvbypass1.0_appicon_fixed.tar.gz -C source
-          
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
-          
           test -n "$PROJECT"
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       - name: Compilar projeto Xcode
-      
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
-          
           test -n "$PROJECT"
-          
           xcodebuild -list -project "$PROJECT"
-          
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       - name: Criar IPA não assinada
-      
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP=$(find build/3105.xcarchive/Products/Applications -maxdepth 1 -name '*.app' -print -quit)
+          test -n "$APP"
+          mkdir -p build/Payload
+          cp -R "$APP" build/Payload/
+          cd build
+          zip -qry nvbypass1.0.ipa Payload
+
+      - name: Publicar IPA e archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvbypass1.0-build
+          path: |
+            build/nvbypass1.0.ipa
+            build/3105.xcarchive
+          if-no-files-found: error
+          retention-days: 7
