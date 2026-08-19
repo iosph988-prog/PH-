@@ -12,19 +12,19 @@ jobs:
       - name: Baixar arquivos do repositório
         uses: actions/checkout@v4
 
-      - name: Reconstruir e extrair o pacote v9
+      - name: Reconstruir e extrair o pacote v10 corrigido
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p source
-          cat ./PHATT_both_games_v9_small-00 \
-              ./PHATT_both_games_v9_small-01 \
-              ./PHATT_both_games_v9_small-02 \
-              ./PHATT_both_games_v9_small-03 \
-              ./PHATT_both_games_v9_small-04 \
-              ./PHATT_both_games_v9_small-05 \
-              ./PHATT_both_games_v9_small-06 > /tmp/PHATT_both_games_v9.tar.gz
-          tar -xzf /tmp/PHATT_both_games_v9.tar.gz -C source
+          cat ./PHATT_both_games_v10_small-00 \
+              ./PHATT_both_games_v10_small-01 \
+              ./PHATT_both_games_v10_small-02 \
+              ./PHATT_both_games_v10_small-03 \
+              ./PHATT_both_games_v10_small-04 \
+              ./PHATT_both_games_v10_small-05 \
+              ./PHATT_both_games_v10_small-06 > /tmp/PHATT_both_games_v10.tar.gz
+          tar -xzf /tmp/PHATT_both_games_v10.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
 
@@ -52,7 +52,7 @@ jobs:
       - name: Publicar IPA e archive
         uses: actions/upload-artifact@v4
         with:
-          name: 3105-build
+          name: 3105-build-v10
           path: |
             build/3105-unsigned.ipa
             build/3105.xcarchive
