@@ -5,7 +5,15 @@ name: Build 3105 iOS
 
 
 
+
+
+
+
+
+
 on:
+
+
 
 
   workflow_dispatch:
@@ -18,7 +26,13 @@ on:
 
 
 
+
+
+
+
 jobs:
+
+
 
 
   build:
@@ -35,6 +49,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Extrair código e projetos pré-carregados
       
         shell: bash
@@ -43,7 +61,7 @@ jobs:
         
           set -euo pipefail
           
-          ARCHIVE='./PHATT_injector_somente_toggle.tar.gz'
+          ARCHIVE='./PHATT_freefire_card.tar.gz'
           
           ASSETS_A='./PHATT_preloaded_assets_a.tar.gz'
           
@@ -71,6 +89,10 @@ jobs:
           
           find source -maxdepth 6 -print | sort | head -400
           
+
+
+
+
 
 
 
@@ -119,6 +141,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Montar IPA não assinado
       
         shell: bash
@@ -141,6 +167,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Publicar resultado
       
         uses: actions/upload-artifact@v4
@@ -157,34 +187,5 @@ jobs:
             
           retention-days: 7
           
-
-
-
-
-# O archive não é assinado. A instalação exige certificado e provisioning profile da Apple.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
