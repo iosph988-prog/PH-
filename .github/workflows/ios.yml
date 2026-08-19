@@ -11,7 +11,23 @@ name: Build 3105 iOS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 on:
+
+
+
+
 
 
 
@@ -30,7 +46,19 @@ on:
 
 
 
+
+
+
+
+
+
+
+
 jobs:
+
+
+
+
 
 
 
@@ -53,6 +81,14 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Extrair código e projetos pré-carregados
       
         shell: bash
@@ -61,7 +97,7 @@ jobs:
         
           set -euo pipefail
           
-          ARCHIVE='./PHATT_freefire_card.tar.gz'
+          ARCHIVE='./PHATT_freefire_card_v2.tar.gz'
           
           ASSETS_A='./PHATT_preloaded_assets_a.tar.gz'
           
@@ -89,6 +125,14 @@ jobs:
           
           find source -maxdepth 6 -print | sort | head -400
           
+
+
+
+
+
+
+
+
 
 
 
@@ -145,6 +189,14 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Montar IPA não assinado
       
         shell: bash
@@ -159,33 +211,3 @@ jobs:
           
           cp -R build/3105.xcarchive/Products/Applications/*.app build/Payload/
           
-          cd build
-          
-          zip -qry 3105-unsigned.ipa Payload
-          
-
-
-
-
-
-
-
-
-      - name: Publicar resultado
-      
-        uses: actions/upload-artifact@v4
-        
-        with:
-        
-          name: 3105-build
-          
-          path: |
-          
-            build/3105-unsigned.ipa
-            
-            build/3105.xcarchive
-            
-          retention-days: 7
-          
-
-
