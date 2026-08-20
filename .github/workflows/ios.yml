@@ -1,9 +1,11 @@
 name: Build PH XITER interface modificada
 
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
 
 jobs:
   build:
@@ -12,18 +14,20 @@ jobs:
       - name: Baixar projeto e pacote da interface modificada
         uses: actions/checkout@v4
 
+
       - name: Reconstruir pacote da interface modificada
         shell: bash
         run: |
           set -euo pipefail
           rm -rf source
           mkdir -p source
-          cat PH_XITER_interface_modificada.part-aa PH_XITER_interface_modificada.part-ab PH_XITER_interface_modificada.part-ac > /tmp/ph_xiter_interface_modificada.tar.gz
+          cat PH_XITER_interface_layout_v2.part-aa PH_XITER_interface_layout_v2.part-ab PH_XITER_interface_layout_v2.part-ac > /tmp/ph_xiter_interface_modificada.tar.gz
           tar -xzf /tmp/ph_xiter_interface_modificada.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
           echo "Projeto selecionado: $PROJECT"
+
 
       - name: Criar archive Xcode da interface modificada
         shell: bash
@@ -32,6 +36,7 @@ jobs:
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
           echo "Scheme selecionado: $SCHEME"
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/ph_xiter_interface_modificada.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
 
       - name: Criar IPA da interface modificada
         shell: bash
@@ -48,6 +53,7 @@ jobs:
           test -d dist/ph_xiter_interface_modificada.xcarchive
           ls -lah dist
 
+
       - name: Publicar IPA e XCARCHIVE da interface modificada
         uses: actions/upload-artifact@v4
         with:
@@ -55,3 +61,4 @@ jobs:
           path: dist
           if-no-files-found: error
           retention-days: 7
+
