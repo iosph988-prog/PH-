@@ -266,3 +266,25 @@ jobs:
 
 
 
+
+
+import UniformTypeIdentifiers
+
+struct FileDocumentPicker: View {
+    let allowedContentTypes: [UTType]
+    let copiesSelectedDocument: Bool
+    let allowsMultipleSelection: Bool
+    let onSelection: (Result<[URL], Error>) -> Void
+    let onCancel: () -> Void
+
+    init(allowedContentTypes: [UTType] = [], copiesSelectedDocument: Bool = false, allowsMultipleSelection: Bool, onSelection: @escaping (Result<[URL], Error>) -> Void, onCancel: @escaping () -> Void) {
+        self.allowedContentTypes = allowedContentTypes
+        self.copiesSelectedDocument = copiesSelectedDocument
+        self.allowsMultipleSelection = allowsMultipleSelection
+        self.onSelection = onSelection
+        self.onCancel = onCancel
+    }
+
+    var body: some View { EmptyView() }
+}
+SWIFT
