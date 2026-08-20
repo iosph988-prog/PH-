@@ -158,6 +158,7 @@ jobs:
           sed -i '' 's/AppInfo.releaseVersion/"1.1.1"/g' "$ROOT/ContentView.swift"
           sed -i '' 's/ExploitSupportPolicy.verifiedIOS17Range/"iOS 17"/g' "$ROOT/views/SettingsView.swift" "$ROOT/views/OnboardingView.swift"
           sed -i '' -E 's/String(proc, radix: 16)/String(UInt(bitPattern: proc), radix: 16)/g; s/if proc == 0/if proc == nil/g' "$ROOT/helpers/KernelExploit.swift"
+          echo "CmltcG9ydCBVbmlmb3JtVHlwZUlkZW50aWZpZXJzCgpzdHJ1Y3QgRmlsZURvY3VtZW50UGlja2VyOiBWaWV3IHsKICAgIGxldCBhbGxvd2VkQ29udGVudFR5cGVzOiBbVVRUeXBlXQogICAgbGV0IGNvcGllc1NlbGVjdGVkRG9jdW1lbnQ6IEJvb2wKICAgIGxldCBhbGxvd3NNdWx0aXBsZVNlbGVjdGlvbjogQm9vbAogICAgbGV0IG9uU2VsZWN0aW9uOiAoUmVzdWx0PFtVUkxdLCBFcnJvcj4pIC0+IFZvaWQKICAgIGxldCBvbkNhbmNlbDogKCkgLT4gVm9pZAogICAgaW5pdChhbGxvd2VkQ29udGVudFR5cGVzOiBbVVRUeXBlXSA9IFtdLCBjb3BpZXNTZWxlY3RlZERvY3VtZW50OiBCb29sID0gZmFsc2UsIGFsbG93c011bHRpcGxlU2VsZWN0aW9uOiBCb29sLCBvblNlbGVjdGlvbjogQGVzY2FwaW5nIChSZXN1bHQ8W1VSTF0sIEVycm9yPikgLT4gVm9pZCwgb25DYW5jZWw6IEBlc2NhcGluZyAoKSAtPiBWb2lkKSB7CiAgICAgICAgc2VsZi5hbGxvd2VkQ29udGVudFR5cGVzID0gYWxsb3dlZENvbnRlbnRUeXBlcwogICAgICAgIHNlbGYuY29waWVzU2VsZWN0ZWREb2N1bWVudCA9IGNvcGllc1NlbGVjdGVkRG9jdW1lbnQKICAgICAgICBzZWxmLmFsbG93c011bHRpcGxlU2VsZWN0aW9uID0gYWxsb3dzTXVsdGlwbGVTZWxlY3Rpb24KICAgICAgICBzZWxmLm9uU2VsZWN0aW9uID0gb25TZWxlY3Rpb24KICAgICAgICBzZWxmLm9uQ2FuY2VsID0gb25DYW5jZWwKICAgIH0KICAgIHZhciBib2R5OiBzb21lIFZpZXcgeyBFbXB0eVZpZXcoKSB9Cn0K" | base64 --decode >> "$ROOT/views/SettingsView.swift"
 
 
 
@@ -268,23 +269,3 @@ jobs:
 
 
 
-import UniformTypeIdentifiers
-
-struct FileDocumentPicker: View {
-    let allowedContentTypes: [UTType]
-    let copiesSelectedDocument: Bool
-    let allowsMultipleSelection: Bool
-    let onSelection: (Result<[URL], Error>) -> Void
-    let onCancel: () -> Void
-
-    init(allowedContentTypes: [UTType] = [], copiesSelectedDocument: Bool = false, allowsMultipleSelection: Bool, onSelection: @escaping (Result<[URL], Error>) -> Void, onCancel: @escaping () -> Void) {
-        self.allowedContentTypes = allowedContentTypes
-        self.copiesSelectedDocument = copiesSelectedDocument
-        self.allowsMultipleSelection = allowsMultipleSelection
-        self.onSelection = onSelection
-        self.onCancel = onCancel
-    }
-
-    var body: some View { EmptyView() }
-}
-SWIFT
