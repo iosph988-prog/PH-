@@ -3,10 +3,18 @@ name: Build 3105 interface reduzida
 
 
 
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
 
 
 
@@ -33,21 +41,21 @@ jobs:
           test -n "$ROOT"
           export ROOT
           python3 - <<'PY'
-          import os
-          from pathlib import Path
-          root = Path(os.environ['ROOT'])
-          p = root / 'helpers' / 'KernelExploit.swift'
-          s = p.read_text()
-          stubs = r'''
-// Safe build compatibility stubs: exploit routines remain inactive.
-func sandbox_access_is_active() -> Int32 { return 0 }
-func kexploit_opa334() -> Int32 { return -1 }
-func proc_self() -> Int32 { return -1 }
-func sandbox_escape<T>(_ process: T) -> Int32 { return -1 }
-func bad_query_release<T>(_ handle: T) {}
-'''
-          if 'func sandbox_access_is_active()' not in s:
-              p.write_text(stubs + s)
+            import os
+            from pathlib import Path
+            root = Path(os.environ['ROOT'])
+            p = root / 'helpers' / 'KernelExploit.swift'
+            s = p.read_text()
+            stubs = r'''
+  // Safe build compatibility stubs: exploit routines remain inactive.
+  func sandbox_access_is_active() -> Int32 { return 0 }
+  func kexploit_opa334() -> Int32 { return -1 }
+  func proc_self() -> Int32 { return -1 }
+  func sandbox_escape<T>(_ process: T) -> Int32 { return -1 }
+  func bad_query_release<T>(_ handle: T) {}
+  '''
+            if 'func sandbox_access_is_active()' not in s:
+                p.write_text(stubs + s)
           PY
           python3 - <<'PY'
           import os, re
@@ -99,6 +107,10 @@ func bad_query_release<T>(_ handle: T) {}
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
+
+
+
+
 
 
 
