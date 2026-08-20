@@ -7,10 +7,26 @@ name: Build 3105 interface reduzida
 
 
 
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
+
+
+
+
 
 
 
@@ -25,6 +41,14 @@ jobs:
     steps:
       - name: Baixar repositorio
         uses: actions/checkout@v4
+
+
+
+
+
+
+
+
 
 
 
@@ -49,18 +73,40 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Aplicar somente a navegacao solicitada
         shell: bash
         run: |
           set -euo pipefail
           ROOT=$(find source -type d -path '*/ThreeOneOSFive' | head -n 1)
           test -n "$ROOT"
+          if ! grep -q 'NVBYPASS_LICENSE_COMPAT' "$ROOT/App.swift"; then
+            printf '%s\n' '// NVBYPASS_LICENSE_COMPAT: inert fallback for absent license UI symbols.' 'final class LicenseManager: ObservableObject { @Published var isValidated = true }' 'struct LicenseGateView: View { var body: some View { EmptyView() } }' >> "$ROOT/App.swift"
+          fi
+          if ! grep -q 'NVBYPASS_MCM_COMPAT' "$ROOT/helpers/KernelExploit.swift"; then
+            printf '%s\n' '// NVBYPASS_MCM_COMPAT: inert fallback; does not activate containers.' 'func MCMActivateContainerPath(_ uid: Int32, _ bundleID: String, _ create: Bool, _ error: UnsafeMutablePointer<Int32>?) -> UnsafeMutablePointer<CChar>? { return nil }' >> "$ROOT/helpers/KernelExploit.swift"
+          fi
           if ! grep -q 'DisplayIdentityAttestationToken' "$ROOT/helpers/KernelExploit.swift"; then
             printf '%s\n' 'func DisplayIdentityAttestationToken() -> String { return "" }' 'func DisplayIdentityAttributionURL() -> Foundation.URL? { return nil }' >> "$ROOT/helpers/KernelExploit.swift"
           fi
           sed -i '' -E 's/\[ *\.home *, *\.patches *, *\.files *\]/[.home, .patches]/g' "$ROOT/helpers/AppTabNavigationState.swift"
           sed -i '' 's/"tab.home"/"Início"/g; s/"tab.patches"/"Injetor"/g' "$ROOT/ContentView.swift"
           sed -i '' -E 's/Text\(language\.text\("onboarding\.step".*$/EmptyView()/g' "$ROOT/ContentView.swift"
+
+
+
+
+
+
+
+
 
 
 
@@ -78,13 +124,24 @@ jobs:
 
 
 
+
+
+
+
       - name: Compilar projeto Xcode
         shell: bash
         run: |
           set -euo pipefail
           PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
-          EXCLUDED=''
-          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build EXCLUDED_SOURCE_FILE_NAMES="$EXCLUDED" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+
+
+
+
+
+
+
 
 
 
@@ -100,6 +157,14 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
+
+
+
+
+
+
+
+
 
 
 
