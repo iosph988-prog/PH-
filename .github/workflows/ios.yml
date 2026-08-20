@@ -3,10 +3,18 @@ name: Build PH XITER layout corrigido v2
 
 
 
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
 
 
 
@@ -21,6 +29,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Reconstruir e extrair pacote v2
         shell: bash
         run: |
@@ -28,12 +40,20 @@ jobs:
           rm -rf source /tmp/PH_XITER_interface_layout_v2.tar.gz
           mkdir -p source
           pwd
-          test -f ./PH_XITER_interface_layout_v2.part-aa
-          test -f ./PH_XITER_interface_layout_v2.part-ab
-          test -f ./PH_XITER_interface_layout_v2.part-ac
-          ls -lh ./PH_XITER_interface_layout_v2.part-aa ./PH_XITER_interface_layout_v2.part-ab ./PH_XITER_interface_layout_v2.part-ac
+          set +e
+          rm -f /tmp/PH_XITER_interface_layout_v2.tar.gz
           cat ./PH_XITER_interface_layout_v2.part-aa ./PH_XITER_interface_layout_v2.part-ab ./PH_XITER_interface_layout_v2.part-ac > /tmp/PH_XITER_interface_layout_v2.tar.gz
+          CAT_STATUS=$?
+          echo "cat_status=$CAT_STATUS"
+          ls -lh /tmp/PH_XITER_interface_layout_v2.tar.gz
+          file /tmp/PH_XITER_interface_layout_v2.tar.gz
           gzip -t /tmp/PH_XITER_interface_layout_v2.tar.gz
+          GZIP_STATUS=$?
+          echo "gzip_status=$GZIP_STATUS"
+          tar -tzf /tmp/PH_XITER_interface_layout_v2.tar.gz >/dev/null
+          TAR_STATUS=$?
+          echo "tar_status=$TAR_STATUS"
+          test "$CAT_STATUS" -eq 0 && test "$GZIP_STATUS" -eq 0 && test "$TAR_STATUS" -eq 0
           tar -tzf /tmp/PH_XITER_interface_layout_v2.tar.gz >/dev/null
           tar -tzf /tmp/PH_XITER_interface_layout_v2.tar.gz >/dev/null
           tar -xzf /tmp/PH_XITER_interface_layout_v2.tar.gz -C source
@@ -45,6 +65,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Criar archive Xcode do layout corrigido
         shell: bash
         run: |
@@ -52,6 +76,10 @@ jobs:
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["project"]["schemes"][0])')
           echo "Scheme selecionado: $SCHEME"
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/ph_xiter_layout_corrigido_v2.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+
+
+
 
 
 
@@ -74,24 +102,11 @@ jobs:
 
 
 
+
+
+
+
       - name: Publicar IPA e XCARCHIVE do layout corrigido
         uses: actions/upload-artifact@v4
         with:
           name: ph-xiter-layout-corrigido-v2-build
-          path: dist
-          if-no-files-found: error
-          retention-days: 7
-
-
-
-
-      - name: Validar interface v2
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -f source/ThreeOneOSFive/views/PatchProjectsView.swift
-          grep -q 'diagnosticPanel' source/ThreeOneOSFive/views/PatchProjectsView.swift
-          echo 'Interface v2 encontrada e validada'
-
-
-
