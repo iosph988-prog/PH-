@@ -1,10 +1,14 @@
 name: Build nvbypass1.0 iOS
 
 
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
 
 
 jobs:
@@ -15,16 +19,20 @@ jobs:
         uses: actions/checkout@v4
 
 
+
+
       - name: Reconstruir e extrair o pacote corrigido
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p source
-          cat ./nvbypass1.0_versao1827_migrada_small-00 ./nvbypass1.0_versao1827_migrada_small-01 ./nvbypass1.0_versao1827_migrada_small-02 ./nvbypass1.0_versao1827_migrada_small-03 > /tmp/nvbypass1.0_versao1827_migrada.tar.gz
-          gzip -t /tmp/nvbypass1.0_versao1827_migrada.tar.gz
-          tar -xzf /tmp/nvbypass1.0_versao1827_migrada.tar.gz -C source
+          cat ./nvbypass1.0_versao1827_safe_small-00 ./nvbypass1.0_versao1827_safe_small-01 ./nvbypass1.0_versao1827_safe_small-02 > /tmp/nvbypass1.0_versao1827_safe.tar.gz
+          gzip -t /tmp/nvbypass1.0_versao1827_safe.tar.gz
+          tar -xzf /tmp/nvbypass1.0_versao1827_safe.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
+
+
 
 
       - name: Compilar projeto Xcode
@@ -35,6 +43,8 @@ jobs:
           test -n "$PROJECT"
           xcodebuild -list -project "$PROJECT"
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+
 
 
       - name: Criar IPA não assinada
@@ -49,13 +59,17 @@ jobs:
           zip -qry nvbypass1.0.ipa Payload
 
 
+
+
       - name: Publicar IPA e archive
         uses: actions/upload-artifact@v4
         with:
-          name: nvbypass1.0-versao1827-build
+          name: nvbypass1.0-versao1827-safe-build
           path: |
             build/nvbypass1.0.ipa
             build/3105.xcarchive
           if-no-files-found: error
           retention-days: 7
+
+
 
