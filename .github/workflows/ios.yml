@@ -1,39 +1,8 @@
 name: Build 3105 interface reduzida
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 jobs:
   build:
@@ -56,49 +25,9 @@ jobs:
           ROOT=$(find source -type d -path '*/ThreeOneOSFive' | head -n 1)
           test -n "$ROOT"
           export ROOT
-          python3 - <<'PY'
-            import os
-            from pathlib import Path
-            root = Path(os.environ['ROOT'])
-            p = root / 'helpers' / 'KernelExploit.swift'
-            s = p.read_text()
-            stubs = r'''
-  // Safe build compatibility stubs: exploit routines remain inactive.
-  func sandbox_access_is_active() -> Int32 { return 0 }
-  func kexploit_opa334() -> Int32 { return -1 }
-  func proc_self() -> Int32 { return -1 }
-  func sandbox_escape<T>(_ process: T) -> Int32 { return -1 }
-  func bad_query_release<T>(_ handle: T) {}
-  '''
-            if 'func sandbox_access_is_active()' not in s:
-                p.write_text(stubs + s)
-          PY
-          python3 - <<'PY'
-            import os, re
-            from pathlib import Path
-            root = Path(os.environ['ROOT'])
-            state = root / 'helpers' / 'AppTabNavigationState.swift'
-            text = state.read_text()
-            text2 = re.sub(r'\[\s*\.home\s*,\s*\.patches\s*,\s*\.files\s*\]', '[.home, .patches]', text)
-            if text2 != text:
-                state.write_text(text2)
-            content = root / 'ContentView.swift'
-            text = content.read_text()
-            text = text.replace('case .home: return "tab.home"', 'case .home: return "tab.home"')
-            text = text.replace('case .patches: return "tab.patches"', 'case .patches: return "tab.patches"')
-            # Remove the visible step counter text without changing onboarding logic.
-            text = re.sub(r'Text\(language\.text\("onboarding\.step"[^\n]*\)\)', 'EmptyView()', text)
-            content.write_text(text)
-            # Translate only the two remaining navigation labels when they are declared in localization dictionaries.
-            for p in root.rglob('*.swift'):
-                s = p.read_text()
-                n = re.sub(r'("tab\.home"\s*:\s*)"[^"]*"', r'\1"Início"', s)
-                n = re.sub(r'("tab\.patches"\s*:\s*)"[^"]*"', r'\1"Injetor"', n)
-                if n != s:
-                    p.write_text(n)
-          PY
-          echo 'Tabs configuradas:'
-          grep -RniE --include='*.swift' '\.home.*\.patches|tab\.home|tab\.patches|onboarding\.step' "$ROOT" || true
+          python3 -c "$(echo aW1wb3J0IG9zCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApwPVBhdGgob3MuZW52aXJvblsiUk9PVCJdKS8iaGVscGVycyIvIktlcm5lbEV4cGxvaXQuc3dpZnQiCnM9cC5yZWFkX3RleHQoKQpzdHVicz0iIiIKLy8gU2FmZSBidWlsZCBjb21wYXRpYmlsaXR5IHN0dWJzOiBleHBsb2l0IHJvdXRpbmVzIHJlbWFpbiBpbmFjdGl2ZS4KZnVuYyBzYW5kYm94X2FjY2Vzc19pc19hY3RpdmUoKSAtPiBJbnQzMiB7IHJldHVybiAwIH0KZnVuYyBrZXhwbG9pdF9vcGEzMzQoKSAtPiBJbnQzMiB7IHJldHVybiAtMSB9CmZ1bmMgcHJvY19zZWxmKCkgLT4gSW50MzIgeyByZXR1cm4gLTEgfQpmdW5jIHNhbmRib3hfZXNjYXBlPFQ+KF8gcHJvY2VzczogVCkgLT4gSW50MzIgeyByZXR1cm4gLTEgfQpmdW5jIGJhZF9xdWVyeV9yZWxlYXNlPFQ+KF8gaGFuZGxlOiBUKSB7fQoiIiIKaWYgImZ1bmMgc2FuZGJveF9hY2Nlc3NfaXNfYWN0aXZlKCkiIG5vdCBpbiBzOiBwLndyaXRlX3RleHQoc3R1YnMrcyk= | base64 -d)"
+          python3 -c "$(echo aW1wb3J0IG9zLHJlCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApyb290PVBhdGgob3MuZW52aXJvblsiUk9PVCJdKQpzdGF0ZT1yb290LyJoZWxwZXJzIi8iQXBwVGFiTmF2aWdhdGlvblN0YXRlLnN3aWZ0Igp0ZXh0PXN0YXRlLnJlYWRfdGV4dCgpCnRleHQyPXJlLnN1YihyIlxbXHMqXC5ob21lXHMqLFxzKlwucGF0Y2hlc1xzKixccypcLmZpbGVzXHMqXF0iLCJbLmhvbWUsIC5wYXRjaGVzXSIsdGV4dCkKaWYgdGV4dDIhPXRleHQ6IHN0YXRlLndyaXRlX3RleHQodGV4dDIpCmNvbnRlbnQ9cm9vdC8iQ29udGVudFZpZXcuc3dpZnQiCnRleHQ9Y29udGVudC5yZWFkX3RleHQoKQp0ZXh0PXJlLnN1YihyJ1RleHRcKGxhbmd1YWdlXC50ZXh0XCgib25ib2FyZGluZ1wuc3RlcCJbXlxuXSpcKVwpJywnRW1wdHlWaWV3KCknLHRleHQpCmNvbnRlbnQud3JpdGVfdGV4dCh0ZXh0KQpmb3IgcCBpbiByb290LnJnbG9iKCIqLnN3aWZ0Iik6CiBzPXAucmVhZF90ZXh0KCkKIG49cmUuc3ViKHInKCJ0YWJcLmhvbWUiXHMqOlxzKikiW14iXSoiJyxyJ1wxIkluw61jaW8iJyxzKQogbj1yZS5zdWIocicoInRhYlwucGF0Y2hlcyJccyo6XHMqKSJbXiJdKiInLHInXDEiSW5qZXRvciInLG4pCiBpZiBuIT1zOiBwLndyaXRlX3RleHQobik= | base64 -d)"
+          echo "Tabs configuradas"
       - name: Localizar projeto Xcode
         id: locate
         shell: bash
@@ -106,7 +35,7 @@ jobs:
           set -euo pipefail
           WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
           PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
-          if [ -n "$WORKSPACE" ]; then echo "workspace=$WORKSPACE" >> "$GITHUB_OUTPUT"; echo 'kind=workspace' >> "$GITHUB_OUTPUT"; else echo "project=$PROJECT" >> "$GITHUB_OUTPUT"; echo 'kind=project' >> "$GITHUB_OUTPUT"; fi
+          if [ -n "$WORKSPACE" ]; then echo "workspace=$WORKSPACE" >> "$GITHUB_OUTPUT"; echo "kind=workspace" >> "$GITHUB_OUTPUT"; else echo "project=$PROJECT" >> "$GITHUB_OUTPUT"; echo "kind=project" >> "$GITHUB_OUTPUT"; fi
       - name: Compilar projeto Xcode
         shell: bash
         run: |
@@ -123,18 +52,3 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
