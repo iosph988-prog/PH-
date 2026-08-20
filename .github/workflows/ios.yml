@@ -85,3 +85,12 @@ jobs:
 
       - name: Validar interface v2
         shell: bash
+
+
+      - name: Validar interface v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f source/ThreeOneOSFive/views/PatchProjectsView.swift
+          grep -q diagnosticPanel source/ThreeOneOSFive/views/PatchProjectsView.swift
+          echo 'Interface v2 encontrada e validada'
