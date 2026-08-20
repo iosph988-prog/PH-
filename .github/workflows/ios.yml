@@ -1,11 +1,9 @@
-name: Build nvbypass1.0 integrado
-
+name: Build nvbypass1.0 versão 18
 
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
-
 
 jobs:
   build:
@@ -14,60 +12,42 @@ jobs:
       - name: Baixar arquivos do repositório
         uses: actions/checkout@v4
 
-
-      - name: Reconstruir projeto v21 corrigido
+      - name: Reconstruir versão 18 funcional
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p source
-          cat ./nvbypass1.0_v21_small-00 ./nvbypass1.0_v21_small-01 ./nvbypass1.0_v21_small-02 > /tmp/nvbypass1_v21.tar.gz
-          gzip -t /tmp/nvbypass1_v21.tar.gz
-          tar -xzf /tmp/nvbypass1_v21.tar.gz -C source
-          PATCH_COUNT=$(find source -type f -name '*.PHPRJ' | wc -l | tr -d ' ')
-          echo "PHPRJ encontrados: $PATCH_COUNT"
-          test "$PATCH_COUNT" = "15"
-          mkdir -p safe-source
-          cat ./nvbypass1.0_versao1827_safe_small-00 ./nvbypass1.0_versao1827_safe_small-01 ./nvbypass1.0_versao1827_safe_small-02 > /tmp/nvbypass_safe.tar.gz
-          gzip -t /tmp/nvbypass_safe.tar.gz
-          tar -xzf /tmp/nvbypass_safe.tar.gz -C safe-source
-          SAFE_ASSETS=$(find safe-source -type d -name 'Assets.xcassets' -print -quit)
-          SAFE_ICON=$(find "$SAFE_ASSETS" -type d -name 'AppIcon.appiconset' -print -quit)
-          TARGET_ASSETS=$(find source -type d -name 'Assets.xcassets' -print -quit)
-          test -n "$SAFE_ICON"
-          test -n "$TARGET_ASSETS"
-          rm -rf "$TARGET_ASSETS/AppIcon.appiconset"
-          cp -R "$SAFE_ICON" "$TARGET_ASSETS/"
+          cat ./nvbypass1.0_versao1827_safe_small-00 ./nvbypass1.0_versao1827_safe_small-01 ./nvbypass1.0_versao1827_safe_small-02 > /tmp/nvbypass1_versao18.tar.gz
+          gzip -t /tmp/nvbypass1_versao18.tar.gz
+          tar -xzf /tmp/nvbypass1_versao18.tar.gz -C source
+          PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
+          test -n "$PROJECT"
 
-
-      - name: Compilar projeto Xcode
+      - name: Compilar sem alterar a lógica da versão 18
         shell: bash
         run: |
           set -euo pipefail
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
-          test -n "$PROJECT"
           xcodebuild -list -project "$PROJECT"
-          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nvbypass1.0.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-
+          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nvbypass1.0-versao18.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
       - name: Criar IPA não assinada
         shell: bash
         run: |
           set -euo pipefail
-          APP=$(find build/nvbypass1.0.xcarchive/Products/Applications -maxdepth 1 -name '*.app' -print -quit)
+          APP=$(find build/nvbypass1.0-versao18.xcarchive/Products/Applications -maxdepth 1 -name '*.app' -print -quit)
           test -n "$APP"
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
           cd build
-          zip -qry nvbypass1.0-integrated.ipa Payload
+          zip -qry nvbypass1.0-versao18.ipa Payload
 
-
-      - name: Publicar build integrada
+      - name: Publicar build da versão 18
         uses: actions/upload-artifact@v4
         with:
-          name: nvbypass1.0-integrated-build
+          name: nvbypass1.0-versao18-api-interface-build
           path: |
-            build/nvbypass1.0-integrated.ipa
-            build/nvbypass1.0.xcarchive
+            build/nvbypass1.0-versao18.ipa
+            build/nvbypass1.0-versao18.xcarchive
           if-no-files-found: error
           retention-days: 7
-
