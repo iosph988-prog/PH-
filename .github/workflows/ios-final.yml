@@ -14,7 +14,8 @@ jobs:
           set -euo pipefail
           rm -rf source /tmp/base /tmp/overlay
           mkdir -p source /tmp/base /tmp/overlay
-          tar -xzf PHATT_PH_XITER.tar.gz -C /tmp/base
+          cat PHATT_both_games_clean_v21_small-00 PHATT_both_games_clean_v21_small-01 PHATT_both_games_clean_v21_small-02 > /tmp/base/v21.tar.gz
+          tar -xzf /tmp/base/v21.tar.gz -C /tmp/base
           tar -xzf PH_XITER_interface_overlay.tar.gz -C /tmp/overlay
           BASE_ROOT=$(find /tmp/base -type d -name '*.xcodeproj' -print -quit)
           test -n "$BASE_ROOT"
