@@ -1,9 +1,15 @@
 name: Build 3105 interface reduzida
 
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
 
 jobs:
   build:
@@ -11,6 +17,9 @@ jobs:
     steps:
       - name: Baixar repositorio
         uses: actions/checkout@v4
+
+
+
 
       - name: Reconstruir base funcional
         shell: bash
@@ -20,6 +29,9 @@ jobs:
           cat ./3105_111_phxiter_safe_small-00 ./3105_111_phxiter_safe_small-01 ./3105_111_phxiter_safe_small-02 > /tmp/base.tar.gz
           gzip -t /tmp/base.tar.gz
           tar -xzf /tmp/base.tar.gz -C source
+
+
+
 
       - name: Aplicar somente a navegacao solicitada
         shell: bash
@@ -31,10 +43,12 @@ jobs:
           python3 /tmp/nvbypass_compat.py "$ROOT"
           sed -i '' -E 's/[ *.home *, *.patches *, *.files *]/[.home, .patches]/g' "$ROOT/helpers/AppTabNavigationState.swift"
           sed -i '' 's/"tab.home"/"Início"/g; s/"tab.patches"/"Injetor"/g' "$ROOT/ContentView.swift"
-          sed -i '' -E 's/Text(language.text("onboarding.step".*$/EmptyView()/g' "$ROOT/ContentView.swift"
           sed -i '' 's/AppInfo.releaseVersion/"1.1.1"/g' "$ROOT/ContentView.swift"
           sed -i '' 's/ExploitSupportPolicy.verifiedIOS17Range/"iOS 17"/g' "$ROOT/views/SettingsView.swift" "$ROOT/views/OnboardingView.swift"
           sed -i '' -E 's/String(proc, radix: 16)/String(UInt(bitPattern: proc), radix: 16)/g; s/if proc == 0/if proc == nil/g' "$ROOT/helpers/KernelExploit.swift"
+
+
+
 
       - name: Compilar projeto Xcode
         shell: bash
@@ -43,6 +57,9 @@ jobs:
           PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
+
+
+
       - name: Publicar build
         uses: actions/upload-artifact@v4
         with:
@@ -50,3 +67,6 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
+
+
+
