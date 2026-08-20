@@ -1,52 +1,169 @@
 name: PH XITER - IPA final corrigida
 
+
+
 on:
+
   workflow_dispatch:
+  
+
 
 jobs:
+
   build:
+  
     runs-on: macos-latest
+    
     steps:
+    
       - uses: actions/checkout@v4
-      - name: Montar base e sobrepor tela Patches
+      
+      - name: Montar base e sobrepor refinamento final
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           rm -rf source /tmp/base /tmp/overlay
+          
           mkdir -p source /tmp/base /tmp/overlay
+          
           cat PHATT_both_games_clean_v21_small-00 PHATT_both_games_clean_v21_small-01 PHATT_both_games_clean_v21_small-02 > /tmp/base/v21.tar.gz
+          
           tar -xzf /tmp/base/v21.tar.gz -C /tmp/base
-          tar -xzf PH_XITER_license_card_overlay.tar.gz -C /tmp/overlay
+          
+          tar -xzf PH_XITER_final_refinement_overlay.tar.gz -C /tmp/overlay
+          
           BASE_ROOT=$(find /tmp/base -type d -name '*.xcodeproj' -print -quit)
+          
           test -n "$BASE_ROOT"
+          
           cp -R "$(dirname "$BASE_ROOT")/." source/
+          
           cp -R /tmp/overlay/ThreeOneOSFive/. source/ThreeOneOSFive/
+          
           PATCH_COUNT=$(find source/ThreeOneOSFive/PreloadedProjects -maxdepth 1 -type f -name '*.PHPRJ' | wc -l | tr -d ' ')
+          
           test "$PATCH_COUNT" -eq 15
+          
           PROJECT=$(find source -maxdepth 2 -type d -name '*.xcodeproj' -print -quit)
+          
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+          
           echo "PATCH_COUNT=$PATCH_COUNT" >> "$GITHUB_ENV"
+          
       - name: Compilar archive e IPA
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
+          
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/PHXITER.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          
           APP=$(find build/PHXITER.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          
           test -n "$APP"
+          
           rm -rf build/Payload dist
+          
           mkdir -p build/Payload dist
+          
           cp -R "$APP" build/Payload/
+          
           (cd build && zip -qry "$GITHUB_WORKSPACE/dist/PH_XITER_layout_final.ipa" Payload)
+          
           cp -R build/PHXITER.xcarchive dist/
+          
           test -s dist/PH_XITER_layout_final.ipa
-      - name: Validar
+          
+      - name: Validar refinamento
+      
+        shell: bash
+        
         run: |
+        
+          set -euo pipefail
+          
           grep -q 'INFORMAÇÕES DA LICENÇA' /tmp/overlay/ThreeOneOSFive/ContentView.swift
+          
+          grep -q 'displayedKey' /tmp/overlay/ThreeOneOSFive/helpers/LicenseManager.swift
+          
+          grep -q 'expirationText' /tmp/overlay/ThreeOneOSFive/helpers/LicenseManager.swift
+          
+          grep -q 'deviceIdentifier' /tmp/overlay/ThreeOneOSFive/helpers/Utils.swift
+          
+          if grep -q 'IntegrityGuard' /tmp/overlay/ThreeOneOSFive/App.swift; then echo 'IntegrityGuard ainda presente'; exit 1; fi
+          
           test "$PATCH_COUNT" -eq 15
+          
       - uses: actions/upload-artifact@v4
+      
         with:
+        
           name: PH-XITER-layout-final
+          
           path: dist
+          
           if-no-files-found: error
+          
           retention-days: 7
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
