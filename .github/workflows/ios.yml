@@ -7,10 +7,26 @@ name: Build nvbypass1.0 iOS
 
 
 
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
+
+
+
+
 
 
 
@@ -33,16 +49,32 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Reconstruir e extrair o pacote corrigido
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p source
-          cat ./3105_111_phxiter_migrado_small-00 ./3105_111_phxiter_migrado_small-01 ./3105_111_phxiter_migrado_small-02 > /tmp/3105_111_phxiter_migrado.tar.gz
-          gzip -t /tmp/3105_111_phxiter_migrado.tar.gz
-          tar -xzf /tmp/3105_111_phxiter_migrado.tar.gz -C source
+          cat ./3105_111_phxiter_safe_small-00 ./3105_111_phxiter_safe_small-01 ./3105_111_phxiter_safe_small-02 > /tmp/3105_111_phxiter_safe.tar.gz
+          gzip -t /tmp/3105_111_phxiter_safe.tar.gz
+          tar -xzf /tmp/3105_111_phxiter_safe.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
+
+
+
+
+
+
+
+
 
 
 
@@ -59,6 +91,14 @@ jobs:
           test -n "$PROJECT"
           xcodebuild -list -project "$PROJECT"
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+
+
+
+
+
+
+
 
 
 
@@ -85,15 +125,31 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Publicar IPA e archive
         uses: actions/upload-artifact@v4
         with:
-          name: 3105-1.1.1-phxiter-build
+          name: 3105-1.1.1-nvbypass-safe-build
           path: |
             build/nvbypass1.0.ipa
             build/3105.xcarchive
           if-no-files-found: error
           retention-days: 7
+
+
+
+
+
+
+
+
 
 
 
