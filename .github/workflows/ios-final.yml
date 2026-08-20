@@ -16,7 +16,7 @@ jobs:
           mkdir -p source /tmp/base /tmp/overlay
           cat PHATT_both_games_clean_v21_small-00 PHATT_both_games_clean_v21_small-01 PHATT_both_games_clean_v21_small-02 > /tmp/base/v21.tar.gz
           tar -xzf /tmp/base/v21.tar.gz -C /tmp/base
-          tar -xzf PH_XITER_interface_overlay_remove_three.tar.gz -C /tmp/overlay
+          tar -xzf PH_XITER_license_card_overlay.tar.gz -C /tmp/overlay
           BASE_ROOT=$(find /tmp/base -type d -name '*.xcodeproj' -print -quit)
           test -n "$BASE_ROOT"
           cp -R "$(dirname "$BASE_ROOT")/." source/
@@ -42,7 +42,7 @@ jobs:
           test -s dist/PH_XITER_layout_final.ipa
       - name: Validar
         run: |
-          grep -q 'DIAGNÓSTICO EM TEMPO REAL' /tmp/overlay/ThreeOneOSFive/views/PatchProjectsView.swift
+          grep -q 'INFORMAÇÕES DA LICENÇA' /tmp/overlay/ThreeOneOSFive/ContentView.swift
           test "$PATCH_COUNT" -eq 15
       - uses: actions/upload-artifact@v4
         with:
