@@ -3,10 +3,18 @@ name: Build 3105 interface reduzida
 
 
 
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
 
 
 
@@ -21,6 +29,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Reconstruir base funcional
         shell: bash
         run: |
@@ -29,6 +41,10 @@ jobs:
           cat ./3105_111_phxiter_safe_small-00 ./3105_111_phxiter_safe_small-01 ./3105_111_phxiter_safe_small-02 > /tmp/base.tar.gz
           gzip -t /tmp/base.tar.gz
           tar -xzf /tmp/base.tar.gz -C source
+
+
+
+
 
 
 
@@ -49,6 +65,10 @@ jobs:
 
 
 
+
+
+
+
           sed -i '' 's/AppInfo\.releaseVersion/"1.1.1"/g' "$ROOT/ContentView.swift"
           sed -i '' 's/ExploitSupportPolicy\.verifiedIOS17Range/"iOS 17"/g' "$ROOT/views/SettingsView.swift"
           if ! grep -q 'NVBYPASS_SAFE_COMPAT' "$ROOT/helpers/KernelExploit.swift"; then
@@ -56,13 +76,19 @@ jobs:
           fi
 
 
+
+
       - name: Compilar projeto Xcode
         shell: bash
         run: |
           set -euo pipefail
           PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
-          EXCLUDED='AppDataBrowserView.swift ContainerStore.swift ContainerIdentityResolver.swift ContainerBrowserLogic.swift CleanerView.swift WallpaperLabView.swift OnboardingView.swift DisplayIdentityAttribution.swift'
+          EXCLUDED=''
           xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build EXCLUDED_SOURCE_FILE_NAMES="$EXCLUDED" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+
+
+
 
 
 
@@ -74,6 +100,10 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
+
+
+
+
 
 
 
