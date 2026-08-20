@@ -1,64 +1,69 @@
-name: Build PH XITER interface modificada
-
+name: Build PH XITER layout corrigido v2
 
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
 
-
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      - name: Baixar projeto e pacote da interface modificada
+      - name: Baixar pacote do layout corrigido
         uses: actions/checkout@v4
 
-
-      - name: Reconstruir pacote da interface modificada
+      - name: Reconstruir e extrair pacote v2
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf source
+          rm -rf source /tmp/PH_XITER_interface_layout_v2.tar.gz
           mkdir -p source
-          cat PH_XITER_interface_layout_v2.part-aa PH_XITER_interface_layout_v2.part-ab PH_XITER_interface_layout_v2.part-ac > /tmp/ph_xiter_interface_modificada.tar.gz
-          tar -xzf /tmp/ph_xiter_interface_modificada.tar.gz -C source
+          cat PH_XITER_interface_layout_v2.part-aa \
+              PH_XITER_interface_layout_v2.part-ab \
+              PH_XITER_interface_layout_v2.part-ac \
+              > /tmp/PH_XITER_interface_layout_v2.tar.gz
+          tar -tzf /tmp/PH_XITER_interface_layout_v2.tar.gz >/dev/null
+          tar -xzf /tmp/PH_XITER_interface_layout_v2.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
           echo "Projeto selecionado: $PROJECT"
 
-
-      - name: Criar archive Xcode da interface modificada
+      - name: Criar archive Xcode do layout corrigido
         shell: bash
         run: |
           set -euo pipefail
-          SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
+          SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["project"]["schemes"][0])')
           echo "Scheme selecionado: $SCHEME"
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/ph_xiter_interface_modificada.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/ph_xiter_layout_corrigido_v2.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
-
-      - name: Criar IPA da interface modificada
+      - name: Criar IPA do layout corrigido
         shell: bash
         run: |
           set -euo pipefail
-          APP=$(find build/ph_xiter_interface_modificada.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          APP=$(find build/ph_xiter_layout_corrigido_v2.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           rm -rf build/Payload dist
           mkdir -p build/Payload dist
           cp -R "$APP" build/Payload/
-          (cd build && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/ph_xiter_interface_modificada.ipa" Payload)
-          cp -R build/ph_xiter_interface_modificada.xcarchive dist/
-          test -s dist/ph_xiter_interface_modificada.ipa
-          test -d dist/ph_xiter_interface_modificada.xcarchive
+          (cd build && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/ph_xiter_layout_corrigido_v2.ipa" Payload)
+          cp -R build/ph_xiter_layout_corrigido_v2.xcarchive dist/
+          test -s dist/ph_xiter_layout_corrigido_v2.ipa
+          test -d dist/ph_xiter_layout_corrigido_v2.xcarchive
           ls -lah dist
 
-
-      - name: Publicar IPA e XCARCHIVE da interface modificada
+      - name: Publicar IPA e XCARCHIVE do layout corrigido
         uses: actions/upload-artifact@v4
         with:
-          name: ph-xiter-interface-modificada-build
+          name: ph-xiter-layout-corrigido-v2-build
           path: dist
           if-no-files-found: error
           retention-days: 7
 
+      - name: Validar interface v2
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f source/ThreeOneOSFive/views/PatchProjectsView.swift
+          grep -q 'diagnosticPanel' source/ThreeOneOSFive/views/PatchProjectsView.swift
+          echo 'Interface v2 encontrada e validada'
