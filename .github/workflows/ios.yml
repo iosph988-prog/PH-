@@ -1,54 +1,132 @@
 name: Build 3105 interface reduzida
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
 
+on:
+
+  workflow_dispatch:
+  
+  push:
+  
+    branches: [ main ]
+    
 jobs:
+
   build:
+  
     runs-on: macos-latest
+    
     steps:
-      - name: Baixar repositório
+    
+      - name: Baixar repositorio
+      
         uses: actions/checkout@v4
+        
       - name: Reconstruir base funcional
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           mkdir -p source
+          
           cat ./3105_111_phxiter_safe_small-00 ./3105_111_phxiter_safe_small-01 ./3105_111_phxiter_safe_small-02 > /tmp/base.tar.gz
+          
           gzip -t /tmp/base.tar.gz
+          
           tar -xzf /tmp/base.tar.gz -C source
-      - name: Aplicar somente a navegação solicitada
+          
+      - name: Aplicar somente a navegacao solicitada
+      
         shell: bash
+        
         run: |
+        
           set -euo pipefail
+          
           ROOT=$(find source -type d -path '*/ThreeOneOSFive' | head -n 1)
+          
           test -n "$ROOT"
-          export ROOT
-          python3 -c "$(echo aW1wb3J0IG9zCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApwPVBhdGgob3MuZW52aXJvblsiUk9PVCJdKS8iaGVscGVycyIvIktlcm5lbEV4cGxvaXQuc3dpZnQiCnM9cC5yZWFkX3RleHQoKQpzdHVicz0iIiIKLy8gU2FmZSBidWlsZCBjb21wYXRpYmlsaXR5IHN0dWJzOiBleHBsb2l0IHJvdXRpbmVzIHJlbWFpbiBpbmFjdGl2ZS4KZnVuYyBzYW5kYm94X2FjY2Vzc19pc19hY3RpdmUoKSAtPiBJbnQzMiB7IHJldHVybiAwIH0KZnVuYyBrZXhwbG9pdF9vcGEzMzQoKSAtPiBJbnQzMiB7IHJldHVybiAtMSB9CmZ1bmMgcHJvY19zZWxmKCkgLT4gSW50MzIgeyByZXR1cm4gLTEgfQpmdW5jIHNhbmRib3hfZXNjYXBlPFQ+KF8gcHJvY2VzczogVCkgLT4gSW50MzIgeyByZXR1cm4gLTEgfQpmdW5jIGJhZF9xdWVyeV9yZWxlYXNlPFQ+KF8gaGFuZGxlOiBUKSB7fQoiIiIKaWYgImZ1bmMgc2FuZGJveF9hY2Nlc3NfaXNfYWN0aXZlKCkiIG5vdCBpbiBzOiBwLndyaXRlX3RleHQoc3R1YnMrcyk= | base64 -d)"
-          python3 -c "$(echo aW1wb3J0IG9zLHJlCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aApyb290PVBhdGgob3MuZW52aXJvblsiUk9PVCJdKQpzdGF0ZT1yb290LyJoZWxwZXJzIi8iQXBwVGFiTmF2aWdhdGlvblN0YXRlLnN3aWZ0Igp0ZXh0PXN0YXRlLnJlYWRfdGV4dCgpCnRleHQyPXJlLnN1YihyIlxbXHMqXC5ob21lXHMqLFxzKlwucGF0Y2hlc1xzKixccypcLmZpbGVzXHMqXF0iLCJbLmhvbWUsIC5wYXRjaGVzXSIsdGV4dCkKaWYgdGV4dDIhPXRleHQ6IHN0YXRlLndyaXRlX3RleHQodGV4dDIpCmNvbnRlbnQ9cm9vdC8iQ29udGVudFZpZXcuc3dpZnQiCnRleHQ9Y29udGVudC5yZWFkX3RleHQoKQp0ZXh0PXJlLnN1YihyJ1RleHRcKGxhbmd1YWdlXC50ZXh0XCgib25ib2FyZGluZ1wuc3RlcCJbXlxuXSpcKVwpJywnRW1wdHlWaWV3KCknLHRleHQpCmNvbnRlbnQud3JpdGVfdGV4dCh0ZXh0KQpmb3IgcCBpbiByb290LnJnbG9iKCIqLnN3aWZ0Iik6CiBzPXAucmVhZF90ZXh0KCkKIG49cmUuc3ViKHInKCJ0YWJcLmhvbWUiXHMqOlxzKikiW14iXSoiJyxyJ1wxIkluw61jaW8iJyxzKQogbj1yZS5zdWIocicoInRhYlwucGF0Y2hlcyJccyo6XHMqKSJbXiJdKiInLHInXDEiSW5qZXRvciInLG4pCiBpZiBuIT1zOiBwLndyaXRlX3RleHQobik= | base64 -d)"
-          echo "Tabs configuradas"
-      - name: Localizar projeto Xcode
-        id: locate
-        shell: bash
-        run: |
-          set -euo pipefail
-          WORKSPACE=$(find source -name '*.xcworkspace' -type d | head -n 1)
-          PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
-          if [ -n "$WORKSPACE" ]; then echo "workspace=$WORKSPACE" >> "$GITHUB_OUTPUT"; echo "kind=workspace" >> "$GITHUB_OUTPUT"; else echo "project=$PROJECT" >> "$GITHUB_OUTPUT"; echo "kind=project" >> "$GITHUB_OUTPUT"; fi
-      - name: Compilar projeto Xcode
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ "${{ steps.locate.outputs.kind }}" = workspace ]; then
-            xcodebuild -workspace "${{ steps.locate.outputs.workspace }}" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          else
-            xcodebuild -project "${{ steps.locate.outputs.project }}" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          
+          if ! grep -q 'DisplayIdentityAttestationToken' "$ROOT/helpers/KernelExploit.swift"; then
+          
+            printf '%s\n' 'func DisplayIdentityAttestationToken() -> String { return "" }' 'func DisplayIdentityAttributionURL() -> Foundation.URL? { return nil }' >> "$ROOT/helpers/KernelExploit.swift"
+            
           fi
+          
+          sed -i '' -E 's/\[ *\.home *, *\.patches *, *\.files *\]/[.home, .patches]/g' "$ROOT/helpers/AppTabNavigationState.swift"
+          
+          sed -i '' 's/"tab.home"/"Início"/g; s/"tab.patches"/"Injetor"/g' "$ROOT/ContentView.swift"
+          
+          sed -i '' -E 's/Text\(language\.text\("onboarding\.step".*$/EmptyView()/g' "$ROOT/ContentView.swift"
+          
+      - name: Compilar projeto Xcode
+      
+        shell: bash
+        
+        run: |
+        
+          set -euo pipefail
+          
+          PROJECT=$(find source -name '*.xcodeproj' -type d | head -n 1)
+          
+          EXCLUDED='AppDataBrowserView.swift ContainerStore.swift ContainerIdentityResolver.swift ContainerBrowserLogic.swift FileBrowserView.swift FileReplacementService.swift FileManagerService.swift CleanerView.swift CleanerCatalog.swift LimitedCleanerService.swift WallpaperLabView.swift WallpaperLabService.swift WallpaperInstaller.swift WallpaperLabModels.swift OnboardingView.swift DisplayIdentityAttribution.swift'
+          
+          xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath "$PWD/build" build EXCLUDED_SOURCE_FILE_NAMES="$EXCLUDED" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          
       - name: Publicar build
+      
         uses: actions/upload-artifact@v4
+        
         with:
+        
           name: 3105-interface-inicio-injetor
+          
           path: build/Build/Products/Release-iphoneos/
+          
           if-no-files-found: error
+          
           retention-days: 7
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
