@@ -1,4 +1,4 @@
-name: Build nvbypass1.0 correto
+name: Build PH XITER interface modificada
 
 on:
   workflow_dispatch:
@@ -9,48 +9,49 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-      - name: Baixar arquivos do repositório
+      - name: Baixar projeto e pacote da interface modificada
         uses: actions/checkout@v4
 
-      - name: Reconstruir pacote nvbypass1.0 safe
+      - name: Reconstruir pacote da interface modificada
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf source
           mkdir -p source
-          cat nvbypass1.0_versao1827_safe_small-00 nvbypass1.0_versao1827_safe_small-01 nvbypass1.0_versao1827_safe_small-02 > /tmp/nvbypass1.0.tar.gz
-          tar -xzf /tmp/nvbypass1.0.tar.gz -C source
+          cat PH_XITER_interface_modificada.part-aa PH_XITER_interface_modificada.part-ab PH_XITER_interface_modificada.part-ac > /tmp/ph_xiter_interface_modificada.tar.gz
+          tar -xzf /tmp/ph_xiter_interface_modificada.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+          echo "Projeto selecionado: $PROJECT"
 
-      - name: Criar archive Xcode
+      - name: Criar archive Xcode da interface modificada
         shell: bash
         run: |
           set -euo pipefail
-          PROJECT="$PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          echo "Usando scheme: $SCHEME"
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nvbypass1.0.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          echo "Scheme selecionado: $SCHEME"
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/ph_xiter_interface_modificada.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
-      - name: Criar IPA nvbypass1.0
+      - name: Criar IPA da interface modificada
         shell: bash
         run: |
           set -euo pipefail
-          APP=$(find build/nvbypass1.0.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          APP=$(find build/ph_xiter_interface_modificada.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           rm -rf build/Payload dist
           mkdir -p build/Payload dist
           cp -R "$APP" build/Payload/
-          (cd build && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/nvbypass1.0.ipa" Payload)
-          cp -R build/nvbypass1.0.xcarchive dist/
-          test -s dist/nvbypass1.0.ipa
-          test -d dist/nvbypass1.0.xcarchive
+          (cd build && /usr/bin/zip -qry "$GITHUB_WORKSPACE/dist/ph_xiter_interface_modificada.ipa" Payload)
+          cp -R build/ph_xiter_interface_modificada.xcarchive dist/
+          test -s dist/ph_xiter_interface_modificada.ipa
+          test -d dist/ph_xiter_interface_modificada.xcarchive
           ls -lah dist
 
-      - name: Publicar IPA e XCARCHIVE
+      - name: Publicar IPA e XCARCHIVE da interface modificada
         uses: actions/upload-artifact@v4
         with:
-          name: nvbypass1.0-safe-build
+          name: ph-xiter-interface-modificada-build
           path: dist
           if-no-files-found: error
           retention-days: 7
