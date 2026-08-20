@@ -1,4 +1,4 @@
-name: Diagnosticar interface 3105
+name: Diagnosticar video e steps
 
 on:
   workflow_dispatch:
@@ -11,17 +11,19 @@ jobs:
     steps:
       - name: Baixar repositório
         uses: actions/checkout@v4
-      - name: Reconstruir base funcional
+      - name: Reconstruir e localizar video
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p source
           cat ./3105_111_phxiter_migrado_small-00 ./3105_111_phxiter_migrado_small-01 ./3105_111_phxiter_migrado_small-02 > /tmp/base.tar.gz
-          gzip -t /tmp/base.tar.gz
           tar -xzf /tmp/base.tar.gz -C source
-          echo '=== Swift files ==='
-          find source -type f -name '*.swift' -print | sort
-          echo '=== UI labels and video references ==='
-          grep -RniE --include='*.swift' 'Home|Files|Patches|Cleaner|Wallpapers|Step|step|Video|video|1234' source || true
-          echo '=== Xcode projects ==='
-          find source -type d \( -name '*.xcodeproj' -o -name '*.xcworkspace' \) -print
+          ROOT=source/3105_111_migrated/ThreeOneOSFive
+          echo '=== video/steps matches ==='
+          grep -RniE --include='*.swift' 'Video|video|Step|step|1234|AVPlayer|MediaPlayer|VideoPlayer' "$ROOT" || true
+          echo '=== ContentView 100-210 ==='
+          sed -n '100,210p' "$ROOT/ContentView.swift" || true
+          echo '=== AppTabNavigationState ==='
+          cat "$ROOT/helpers/AppTabNavigationState.swift" || true
+          echo '=== localization tab entries ==='
+          grep -RniE --include='*.swift' 'tab.home|tab.files|tab.patches|tab.cleaner|tab.wallpapers' "$ROOT" || true
