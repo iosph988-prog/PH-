@@ -15,10 +15,42 @@ name: Build 3105 interface reduzida
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -41,6 +73,22 @@ jobs:
     steps:
       - name: Baixar repositorio
         uses: actions/checkout@v4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -81,6 +129,22 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       - name: Aplicar somente a navegacao solicitada
         shell: bash
         run: |
@@ -91,10 +155,10 @@ jobs:
             printf '%s\n' '// NVBYPASS_LICENSE_COMPAT: inert fallback for absent license UI symbols.' 'final class LicenseManager: ObservableObject { @Published var isValidated = true }' 'struct LicenseGateView: View { var body: some View { EmptyView() } }' >> "$ROOT/App.swift"
           fi
           if ! grep -q 'NVBYPASS_MCM_COMPAT' "$ROOT/helpers/KernelExploit.swift"; then
-            printf '%s\n' '// NVBYPASS_MCM_COMPAT: inert fallback; does not activate containers.' 'func MCMActivateContainerPath(_ uid: Int32, _ bundleID: String, _ create: Bool, _ error: UnsafeMutablePointer<Int32>?) -> UnsafeMutablePointer<CChar>? { return nil }' >> "$ROOT/helpers/KernelExploit.swift"
+            printf '%s\n' '// NVBYPASS_MCM_COMPAT: inert fallback; does not activate containers.' 'func MCMActivateContainerPath(_ uid: Int32, _ bundleID: String, _ create: Bool, _ error: UnsafeMutablePointer<Int32>?) -> UnsafeMutablePointer<CChar>? { return nil }' 'func MCMActivateContainerPath(_ uid: Int32, _ bundleID: String, _ create: Bool, _ error: UnsafeMutablePointer<NSString?>?) -> UnsafeMutablePointer<CChar>? { return nil }' 'func MCMActivateContainer(_ uid: Int32, _ bundleID: String, _ create: Bool, _ error: UnsafeMutablePointer<Int32>?) -> Int32 { return -1 }' >> "$ROOT/helpers/KernelExploit.swift"
           fi
           if ! grep -q 'DisplayIdentityAttestationToken' "$ROOT/helpers/KernelExploit.swift"; then
-            printf '%s\n' 'func DisplayIdentityAttestationToken() -> String { return "" }' 'func DisplayIdentityAttributionURL() -> Foundation.URL? { return nil }' >> "$ROOT/helpers/KernelExploit.swift"
+            printf '%s\n' 'func DisplayIdentityAttestationToken() -> String { return "" }' 'func bad_query_list(_ args: CVarArg...) -> Int32 { return -1 }' 'func bad_query(_ path: UnsafeMutablePointer<CChar>?, _ recursive: Bool, _ filter: UnsafeMutableRawPointer?, _ includeHidden: Bool) -> Int32 { return -1 }' 'func bad_query_release(_ handle: Int32) { }'(_ args: CVarArg...) -> Int32 { return -1 }' 'func bad_query(_ path: UnsafeMutablePointer<CChar>?, _ recursive: Bool, _ filter: UnsafeMutableRawPointer?, _ includeHidden: Bool) -> Int32 { return -1 }' 'func bad_query_release(_ handle: Int32) { }' 'func DisplayIdentityAttributionURL() -> Foundation.URL? { return nil }' >> "$ROOT/helpers/KernelExploit.swift"
           fi
           sed -i '' -E 's/\[ *\.home *, *\.patches *, *\.files *\]/[.home, .patches]/g' "$ROOT/helpers/AppTabNavigationState.swift"
           sed -i '' 's/"tab.home"/"Início"/g; s/"tab.patches"/"Injetor"/g' "$ROOT/ContentView.swift"
@@ -115,11 +179,36 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           sed -i '' 's/AppInfo\.releaseVersion/"1.1.1"/g' "$ROOT/ContentView.swift"
           sed -i '' 's/ExploitSupportPolicy\.verifiedIOS17Range/"iOS 17"/g' "$ROOT/views/SettingsView.swift"
+          sed -i '' 's/ExploitSupportPolicy\.verifiedIOS17Range/"iOS 17"/g' "$ROOT/views/OnboardingView.swift"
           if ! grep -q 'NVBYPASS_SAFE_COMPAT' "$ROOT/helpers/KernelExploit.swift"; then
-            printf '%s\n' '// NVBYPASS_SAFE_COMPAT: inert compatibility symbols for safe UI build.' 'private func sandbox_access_is_active() -> Int32 { return 0 }' 'private func kexploit_opa334() -> Int32 { return -1 }' 'private func proc_self() -> UnsafeMutableRawPointer? { return nil }' 'private func sandbox_escape(_ proc: UnsafeMutableRawPointer?) -> Int32 { return -1 }' 'private enum ContainerStore { static func resolveAppContainerPath(bundleID: String) -> String? { return nil }; static func isApplicationContainerPath(_ path: String) -> Bool { return false } }' >> "$ROOT/helpers/KernelExploit.swift"
+            printf '%s\n' '// NVBYPASS_SAFE_COMPAT: inert compatibility symbols for safe UI build.' 'private func sandbox_access_is_active() -> Int32 { return 0 }' 'private func kexploit_opa334() -> Int32 { return -1 }' 'private func proc_self() -> UInt64 { return 0 }' 'private func sandbox_escape(_ proc: UInt64) -> Int32 { return -1 }' 'private enum ContainerStore { static func resolveAppContainerPath(bundleID: String) -> String? { return nil }; static func isApplicationContainerPath(_ path: String) -> Bool { return false } }' >> "$ROOT/helpers/KernelExploit.swift"
           fi
+
+
+
+
+
+
+
+
 
 
 
@@ -150,6 +239,22 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       - name: Publicar build
         uses: actions/upload-artifact@v4
         with:
@@ -157,18 +262,6 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
