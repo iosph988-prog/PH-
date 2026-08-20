@@ -1,9 +1,11 @@
 name: Build 3105 interface reduzida
 
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
 
 jobs:
   build:
@@ -16,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p source
-          cat ./3105_111_phxiter_migrado_small-00 ./3105_111_phxiter_migrado_small-01 ./3105_111_phxiter_migrado_small-02 > /tmp/base.tar.gz
+          cat ./3105_111_phxiter_safe_small-00 ./3105_111_phxiter_safe_small-01 ./3105_111_phxiter_safe_small-02 > /tmp/base.tar.gz
           gzip -t /tmp/base.tar.gz
           tar -xzf /tmp/base.tar.gz -C source
       - name: Aplicar somente a navegação solicitada
@@ -76,3 +78,4 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
+
