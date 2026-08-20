@@ -1,0 +1,51 @@
+name: PH XITER - IPA layout final
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Montar base e sobrepor tela Patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf source /tmp/base /tmp/overlay
+          mkdir -p source /tmp/base /tmp/overlay
+          tar -xzf PHATT_PH_XITER.tar.gz -C /tmp/base
+          tar -xzf PH_XITER_interface_overlay.tar.gz -C /tmp/overlay
+          BASE_ROOT=$(find /tmp/base -type d -name '*.xcodeproj' -print -quit)
+          test -n "$BASE_ROOT"
+          cp -R "$(dirname "$BASE_ROOT")/." source/
+          cp -R /tmp/overlay/ThreeOneOSFive/. source/ThreeOneOSFive/
+          PATCH_COUNT=$(find source/ThreeOneOSFive/PreloadedProjects -maxdepth 1 -type f -name '*.PHPRJ' | wc -l | tr -d ' ')
+          test "$PATCH_COUNT" -eq 15
+          PROJECT=$(find source -maxdepth 2 -type d -name '*.xcodeproj' -print -quit)
+          echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+          echo "PATCH_COUNT=$PATCH_COUNT" >> "$GITHUB_ENV"
+      - name: Compilar archive e IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/PHXITER.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          APP=$(find build/PHXITER.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP"
+          rm -rf build/Payload dist
+          mkdir -p build/Payload dist
+          cp -R "$APP" build/Payload/
+          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/PH_XITER_layout_final.ipa" Payload)
+          cp -R build/PHXITER.xcarchive dist/
+          test -s dist/PH_XITER_layout_final.ipa
+      - name: Validar
+        run: |
+          grep -q 'DIAGNÓSTICO EM TEMPO REAL' /tmp/overlay/ThreeOneOSFive/views/PatchProjectsView.swift
+          test "$PATCH_COUNT" -eq 15
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PH-XITER-layout-final
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
