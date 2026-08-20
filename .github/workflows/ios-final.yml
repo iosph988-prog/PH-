@@ -7,8 +7,24 @@ name: PH XITER - IPA final corrigida
 
 
 
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
+
+
+
+
+
+
+
+
 
 
 
@@ -30,7 +46,7 @@ jobs:
           mkdir -p source /tmp/base /tmp/overlay
           cat PHATT_both_games_clean_v21_small-00 PHATT_both_games_clean_v21_small-01 PHATT_both_games_clean_v21_small-02 > /tmp/base/v21.tar.gz
           tar -xzf /tmp/base/v21.tar.gz -C /tmp/base
-          tar -xzf PH_XITER_nubank_brand_overlay_v2.tar.gz -C /tmp/overlay
+          tar -xzf PH_XITER_nubank_logs_names_overlay_v3.tar.gz -C /tmp/overlay
           BASE_ROOT=$(find /tmp/base -type d -name '*.xcodeproj' -print -quit)
           test -n "$BASE_ROOT"
           cp -R "$(dirname "$BASE_ROOT")/." source/
@@ -66,5 +82,3 @@ jobs:
         with:
           name: PH-XITER-license-card-no-key
           path: dist
-          if-no-files-found: error
-          retention-days: 7
