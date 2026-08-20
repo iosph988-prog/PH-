@@ -1,10 +1,14 @@
 name: Build PH XITER layout corrigido v2
 
 
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
 
 
 jobs:
@@ -15,6 +19,8 @@ jobs:
         uses: actions/checkout@v4
 
 
+
+
       - name: Reconstruir e extrair pacote v2
         shell: bash
         run: |
@@ -22,17 +28,21 @@ jobs:
           rm -rf source /tmp/PH_XITER_interface_layout_v2.tar.gz
           mkdir -p source
           pwd
-          find . -maxdepth 1 -type f -name 'PH_XITER_interface_layout_v2.part-*' -print -exec ls -lh {} \;
-          PARTS=(PH_XITER_interface_layout_v2.part-*)
-          test "${#PARTS[@]}" -eq 3
-          cat "${PARTS[0]}" "${PARTS[1]}" "${PARTS[2]}" > /tmp/PH_XITER_interface_layout_v2.tar.gz
+          test -f ./PH_XITER_interface_layout_v2.part-aa
+          test -f ./PH_XITER_interface_layout_v2.part-ab
+          test -f ./PH_XITER_interface_layout_v2.part-ac
+          ls -lh ./PH_XITER_interface_layout_v2.part-aa ./PH_XITER_interface_layout_v2.part-ab ./PH_XITER_interface_layout_v2.part-ac
+          cat ./PH_XITER_interface_layout_v2.part-aa ./PH_XITER_interface_layout_v2.part-ab ./PH_XITER_interface_layout_v2.part-ac > /tmp/PH_XITER_interface_layout_v2.tar.gz
           gzip -t /tmp/PH_XITER_interface_layout_v2.tar.gz
+          tar -tzf /tmp/PH_XITER_interface_layout_v2.tar.gz >/dev/null
           tar -tzf /tmp/PH_XITER_interface_layout_v2.tar.gz >/dev/null
           tar -xzf /tmp/PH_XITER_interface_layout_v2.tar.gz -C source
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
           test -n "$PROJECT"
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
           echo "Projeto selecionado: $PROJECT"
+
+
 
 
       - name: Criar archive Xcode do layout corrigido
@@ -42,6 +52,8 @@ jobs:
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["project"]["schemes"][0])')
           echo "Scheme selecionado: $SCHEME"
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/ph_xiter_layout_corrigido_v2.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+
 
 
       - name: Criar IPA do layout corrigido
@@ -60,6 +72,8 @@ jobs:
           ls -lah dist
 
 
+
+
       - name: Publicar IPA e XCARCHIVE do layout corrigido
         uses: actions/upload-artifact@v4
         with:
@@ -69,6 +83,8 @@ jobs:
           retention-days: 7
 
 
+
+
       - name: Validar interface v2
         shell: bash
         run: |
@@ -76,4 +92,6 @@ jobs:
           test -f source/ThreeOneOSFive/views/PatchProjectsView.swift
           grep -q 'diagnosticPanel' source/ThreeOneOSFive/views/PatchProjectsView.swift
           echo 'Interface v2 encontrada e validada'
+
+
 
