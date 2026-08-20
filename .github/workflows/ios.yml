@@ -7,10 +7,26 @@ name: Build 3105 interface reduzida
 
 
 
+
+
+
+
+
+
+
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
+
+
+
+
+
+
+
 
 
 
@@ -58,28 +74,28 @@ jobs:
                 p.write_text(stubs + s)
           PY
           python3 - <<'PY'
-          import os, re
-          from pathlib import Path
-          root = Path(os.environ['ROOT'])
-          state = root / 'helpers' / 'AppTabNavigationState.swift'
-          text = state.read_text()
-          text2 = re.sub(r'\[\s*\.home\s*,\s*\.patches\s*,\s*\.files\s*\]', '[.home, .patches]', text)
-          if text2 != text:
-              state.write_text(text2)
-          content = root / 'ContentView.swift'
-          text = content.read_text()
-          text = text.replace('case .home: return "tab.home"', 'case .home: return "tab.home"')
-          text = text.replace('case .patches: return "tab.patches"', 'case .patches: return "tab.patches"')
-          # Remove the visible step counter text without changing onboarding logic.
-          text = re.sub(r'Text\(language\.text\("onboarding\.step"[^\n]*\)\)', 'EmptyView()', text)
-          content.write_text(text)
-          # Translate only the two remaining navigation labels when they are declared in localization dictionaries.
-          for p in root.rglob('*.swift'):
-              s = p.read_text()
-              n = re.sub(r'("tab\.home"\s*:\s*)"[^"]*"', r'\1"Início"', s)
-              n = re.sub(r'("tab\.patches"\s*:\s*)"[^"]*"', r'\1"Injetor"', n)
-              if n != s:
-                  p.write_text(n)
+            import os, re
+            from pathlib import Path
+            root = Path(os.environ['ROOT'])
+            state = root / 'helpers' / 'AppTabNavigationState.swift'
+            text = state.read_text()
+            text2 = re.sub(r'\[\s*\.home\s*,\s*\.patches\s*,\s*\.files\s*\]', '[.home, .patches]', text)
+            if text2 != text:
+                state.write_text(text2)
+            content = root / 'ContentView.swift'
+            text = content.read_text()
+            text = text.replace('case .home: return "tab.home"', 'case .home: return "tab.home"')
+            text = text.replace('case .patches: return "tab.patches"', 'case .patches: return "tab.patches"')
+            # Remove the visible step counter text without changing onboarding logic.
+            text = re.sub(r'Text\(language\.text\("onboarding\.step"[^\n]*\)\)', 'EmptyView()', text)
+            content.write_text(text)
+            # Translate only the two remaining navigation labels when they are declared in localization dictionaries.
+            for p in root.rglob('*.swift'):
+                s = p.read_text()
+                n = re.sub(r'("tab\.home"\s*:\s*)"[^"]*"', r'\1"Início"', s)
+                n = re.sub(r'("tab\.patches"\s*:\s*)"[^"]*"', r'\1"Injetor"', n)
+                if n != s:
+                    p.write_text(n)
           PY
           echo 'Tabs configuradas:'
           grep -RniE --include='*.swift' '\.home.*\.patches|tab\.home|tab\.patches|onboarding\.step' "$ROOT" || true
@@ -107,6 +123,14 @@ jobs:
           path: build/Build/Products/Release-iphoneos/
           if-no-files-found: error
           retention-days: 7
+
+
+
+
+
+
+
+
 
 
 
