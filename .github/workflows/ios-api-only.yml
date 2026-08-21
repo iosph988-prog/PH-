@@ -3,8 +3,16 @@ name: 3105 - Nubank API Only
 
 
 
+
+
+
+
 on:
   workflow_dispatch:
+
+
+
+
 
 
 
@@ -26,8 +34,8 @@ jobs:
           cp api-source/ThreeOneOSFive/SDK/APIClient.h source/ThreeOneOSFive/SDK/
           cp api-source/ThreeOneOSFive/SDK/libKyojinxSDK.a source/ThreeOneOSFive/SDK/
           cp api-source/ThreeOneOSFive/helpers/LicenseManager.swift source/ThreeOneOSFive/helpers/
-# Keep the destination project branding; only adapt the API overlay dependency.
-sed -i '' 's/Branding\.appName/"Nubank"/g' source/ThreeOneOSFive/helpers/LicenseManager.swift
+          # Keep the destination project branding; only adapt the API overlay dependency.
+          sed -i '' 's/Branding\.appName/"Nubank"/g' source/ThreeOneOSFive/helpers/LicenseManager.swift
           grep -q '#import "SDK/APIClient.h"' source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h || printf '\n#import "SDK/APIClient.h"\n' >> source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h
           python3 - source/ThreeOneOSFive.xcodeproj/project.pbxproj <<'PY'
           from pathlib import Path
@@ -60,6 +68,10 @@ sed -i '' 's/Branding\.appName/"Nubank"/g' source/ThreeOneOSFive/helpers/License
         with:
           name: nubank-api-only-original-project
           path: dist
+
+
+
+
 
 
 
