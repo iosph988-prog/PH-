@@ -18,8 +18,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p source/3105-1.1.1/ThreeOneOSFive/PreloadedProjects
-          mkdir -p source/3105-1.1.1/ThreeOneOSFive/SDK
+          if [ ! -e source/ThreeOneOSFive ]; then ln -s 3105-1.1.1/ThreeOneOSFive source/ThreeOneOSFive; fi
+          mkdir -p source/ThreeOneOSFive/PreloadedProjects
+          mkdir -p source/ThreeOneOSFive/SDK
       - name: Apply app startup and navigation changes
         shell: bash
         run: |
