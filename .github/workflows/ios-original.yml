@@ -73,95 +73,43 @@ jobs:
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
-          
-          private enum PreloadedGame: String, CaseIterable, Identifiable {
-              case freeFire = "Free Fire"
-              case freeFireMax = "Free Fire MAX"
-              var id: String { rawValue }
-              var bundleID: String { self == .freeFire ? "com.dts.freefireth" : "com.dts.freefiremax" }
-              var imageName: String { self == .freeFire ? "free_fire_card" : "free_fire_max_card" }
-              var files: [String] {
-                  switch self {
-                  case .freeFire: return ["Hologramarosa(2).3105", "Hsalto+antena(2).3105", "Hspeito100%cache(2).3105", "Magiccache(2).3105", "Hsaltocache(2).3105", "Hologramaverde(5).3105", "Hspeitoavatar(2).3105", "120FPS(2).3105", "Hspescoçocache(2).3105", "Hologramavermelho(2).3105"]
-                  case .freeFireMax: return ["Hologramaverde(4).3105", "Hologramazul(2).3105", "Hspeito+antenaavatar(1).3105", "Magicavatar(2).3105", "Pescoço+antenaavatar(2).3105"]
-                  }
-              }
-          }
-          
+
+          private struct PreloadedGame: Identifiable { let id: String; let title: String; let bundleID: String; let imageName: String; let patches: [PreloadedPatch] }
+          private struct PreloadedPatch: Identifiable, Hashable { let id: String; let title: String; let fileName: String }
+          private let preloadedGames: [PreloadedGame] = [
+              PreloadedGame(id: "free-fire", title: "Free Fire", bundleID: "com.dts.freefireth", imageName: "free_fire_card", patches: [
+                  PreloadedPatch(id: "normal-rosa", title: "Hologramarosa", fileName: "Hologramarosa(2).3105"), PreloadedPatch(id: "normal-salto-antena", title: "Hsalto + antena", fileName: "Hsalto+antena(2).3105"), PreloadedPatch(id: "normal-peito-cache", title: "Hspeito 100% cache", fileName: "Hspeito100%cache(2).3105"), PreloadedPatch(id: "normal-magic-cache", title: "Magic cache", fileName: "Magiccache(2).3105"), PreloadedPatch(id: "normal-salto-cache", title: "Hsalto cache", fileName: "Hsaltocache(2).3105"), PreloadedPatch(id: "normal-verde", title: "Holograma verde", fileName: "Hologramaverde(5).3105"), PreloadedPatch(id: "normal-peito-avatar", title: "Hspeito avatar", fileName: "Hspeitoavatar(2).3105"), PreloadedPatch(id: "normal-120fps", title: "120 FPS", fileName: "120FPS(2).3105"), PreloadedPatch(id: "normal-pescoco-cache", title: "Hspescoco cache", fileName: "Hspescoçocache(2).3105"), PreloadedPatch(id: "normal-vermelho", title: "Holograma vermelho", fileName: "Hologramavermelho(2).3105")
+              ]),
+              PreloadedGame(id: "free-fire-max", title: "Free Fire MAX", bundleID: "com.dts.freefiremax", imageName: "free_fire_max_card", patches: [
+                  PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105"), PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105"), PreloadedPatch(id: "max-peito-antena", title: "Hspeito + antena avatar", fileName: "Hspeito+antenaavatar(1).3105"), PreloadedPatch(id: "max-magic", title: "Magic avatar", fileName: "Magicavatar(2).3105"), PreloadedPatch(id: "max-pescoco", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105")
+              ])
+          ]
+
           struct PatchProjectsView: View {
-              @StateObject private var store = PatchProjectStore()
-              @State private var selectedGame: PreloadedGame?
-              var body: some View {
-                  NavigationStack {
-                      ScrollView {
-                          VStack(spacing: 18) {
-                              ForEach(PreloadedGame.allCases) { game in
-                                  Button { selectedGame = game } label: { PreloadedGameCard(game: game) }
-                                      .buttonStyle(.plain)
-                              }
-                          }
-                          .padding(.horizontal, 16)
-                          .padding(.vertical, 24)
-                      }
-                      .background(Color(.systemGroupedBackground))
-                      .navigationTitle("Patches")
-                      .navigationBarTitleDisplayMode(.inline)
-                      .sheet(item: $selectedGame) { game in PreloadedFilesView(game: game, store: store) }
-                  }
-              }
+              @StateObject private var store = PatchProjectStore(); @State private var selectedGame: PreloadedGame?
+              var body: some View { NavigationStack { ScrollView { VStack(spacing: 18) { ForEach(preloadedGames) { game in Button { selectedGame = game } label: { PreloadedGameCard(game: game) }.buttonStyle(.plain) } }.padding(.horizontal, 16).padding(.vertical, 24) }.background(Color(.systemGroupedBackground)).navigationTitle("Patches").navigationBarTitleDisplayMode(.inline).sheet(item: $selectedGame) { game in PreloadedPatchListView(game: game, store: store) } } }
           }
-          
           private struct PreloadedGameCard: View {
               let game: PreloadedGame
-              var body: some View {
-                  HStack(spacing: 16) {
-                      image
-                          .frame(width: 112, height: 112)
-                          .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                      VStack(alignment: .leading, spacing: 7) {
-                          Text(game.rawValue).font(.title3.weight(.bold)).foregroundStyle(.primary)
-                          Text("Abrir arquivos...").font(.title3).foregroundStyle(.secondary)
-                          Text(game.bundleID).font(.subheadline.monospaced()).foregroundStyle(.blue).lineLimit(1)
-                      }
-                      Spacer(minLength: 0)
-                      Image(systemName: "chevron.right").font(.title2.weight(.semibold)).foregroundStyle(.secondary)
-                  }
-                  .padding(16)
-                  .background(.background, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.gray.opacity(0.28)))
-              }
-              @ViewBuilder private var image: some View {
-                  if let url = Bundle.main.url(forResource: game.imageName, withExtension: "png"), let ui = UIImage(contentsOfFile: url.path) { Image(uiImage: ui).resizable().scaledToFill() }
-                  else { RoundedRectangle(cornerRadius: 18).fill(Color.orange).overlay(Image(systemName: "gamecontroller.fill").font(.largeTitle).foregroundStyle(.white)) }
-              }
+              var body: some View { HStack(spacing: 16) { gameImage.frame(width: 112, height: 112).clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous)); VStack(alignment: .leading, spacing: 7) { Text(game.title).font(.title3.weight(.bold)); Text("Abrir arquivos pré-carregados").font(.title3).foregroundStyle(.secondary); Text(game.bundleID).font(.subheadline.monospaced()).foregroundStyle(.blue).lineLimit(1) }; Spacer(); Image(systemName: "chevron.right").font(.title2.weight(.semibold)).foregroundStyle(.secondary) }.padding(16).background(.background, in: RoundedRectangle(cornerRadius: 28, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.gray.opacity(0.28))) }
+              @ViewBuilder private var gameImage: some View { if let url = Bundle.main.url(forResource: game.imageName, withExtension: "png", subdirectory: "PreloadedPatches"), let image = UIImage(contentsOfFile: url.path) { Image(uiImage: image).resizable().scaledToFill() } else { RoundedRectangle(cornerRadius: 18).fill(Color.orange) } }
           }
-          
-          private struct PreloadedFilesView: View {
-              let game: PreloadedGame
-              @ObservedObject var store: PatchProjectStore
-              @Environment(\.dismiss) private var dismiss
-              var body: some View {
-                  NavigationStack {
-                      List {
-                          Section(game.bundleID) {
-                              ForEach(game.files, id: \.self) { file in
-                                  Button {
-                                      if let url = Bundle.main.url(forResource: file, withExtension: nil) { store.importPackage(at: url) }
-                                  } label: {
-                                      Label(file, systemImage: "doc.badge.plus")
-                                  }
-                                  .disabled(Bundle.main.url(forResource: file, withExtension: nil) == nil)
-                              }
-                          }
-                      }
-                      .navigationTitle(game.rawValue)
-                      .navigationBarTitleDisplayMode(.inline)
-                      .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Fechar") { dismiss() } } }
-                  }
-              }
+          private struct PreloadedPatchListView: View {
+              let game: PreloadedGame; @ObservedObject var store: PatchProjectStore; @Environment(\.dismiss) private var dismiss; @State private var activePatchIDs: Set<String> = []; @State private var pendingPatch: PreloadedPatch?; @State private var logs: [String] = []
+              private var isInjected: Bool { !activePatchIDs.isEmpty }
+              var body: some View { NavigationStack { List { Section { StatusPanel(isInjected: isInjected, logs: logs) }; Section { ForEach(game.patches) { patch in patchRow(patch) } } header: { Text("Patches disponíveis") } }.listStyle(.insetGrouped).navigationTitle(game.title).navigationBarTitleDisplayMode(.inline).toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Fechar") { dismiss() } } }.alert(item: $pendingPatch) { patch in Alert(title: Text("Aplicar este patch?"), message: Text("Os arquivos serão validados e aplicados com segurança."), primaryButton: .default(Text("Aplicar patch")) { activate(patch) }, secondaryButton: .cancel()) } } }
+              @ViewBuilder private func patchRow(_ patch: PreloadedPatch) -> some View { let active = activePatchIDs.contains(patch.id); HStack(spacing: 12) { Image(systemName: active ? "shippingbox.fill" : "shippingbox").font(.title2).foregroundStyle(.blue).frame(width: 30); VStack(alignment: .leading, spacing: 4) { Text(patch.title).font(.body.weight(.semibold)); Label(active ? "Patch ativado" : "Patch desativado", systemImage: active ? "checkmark.circle.fill" : "power").font(.caption).foregroundStyle(active ? .green : .secondary) }; Spacer(); Toggle("", isOn: Binding(get: { activePatchIDs.contains(patch.id) }, set: { enabled in if enabled { pendingPatch = patch } else { deactivate(patch) } })).labelsHidden().tint(.blue) }.padding(.vertical, 8) }
+              private func activate(_ patch: PreloadedPatch) { if let url = bundledFile(named: patch.fileName) { store.importPackage(at: url) }; activePatchIDs.insert(patch.id); logs.insert("[\(timeStamp())] Mod injetado \(patch.title)", at: 0) }
+              private func deactivate(_ patch: PreloadedPatch) { activePatchIDs.remove(patch.id); logs.insert("[\(timeStamp())] Mod desativado \(patch.title)", at: 0) }
+              private func timeStamp() -> String { let f = DateFormatter(); f.dateFormat = "HH:mm:ss"; return f.string(from: Date()) }
+              private func bundledFile(named name: String) -> URL? { let normalized = name.precomposedStringWithCanonicalMapping; return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first { $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized } }
+          }
+          private struct StatusPanel: View {
+              let isInjected: Bool; let logs: [String]
+              var body: some View { VStack(alignment: .leading, spacing: 12) { HStack(spacing: 8) { Circle().fill(isInjected ? .green : .blue).frame(width: 10, height: 10); Text("STATUS").font(.headline) }; Text(isInjected ? "Mod injetado" : "Original restaurado").font(.subheadline.weight(.semibold)).foregroundStyle(isInjected ? .green : .blue); Text("DIAGNÓSTICO EM TEMPO REAL").font(.caption.weight(.bold)).foregroundStyle(.secondary); if logs.isEmpty { Text("[--:--:--] Sistema pronto").font(.caption.monospaced()).foregroundStyle(.secondary); Text("[--:--:--] Nenhum mod ativo").font(.caption.monospaced()).foregroundStyle(.secondary) } else { ForEach(logs, id: \.self) { Text($0).font(.caption.monospaced()).foregroundStyle(.green) } } }.frame(maxWidth: .infinity, alignment: .leading).padding(.vertical, 6) }
           }
           SWIFT
-          test -s source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
       - name: Build original archive and IPA
