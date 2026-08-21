@@ -283,6 +283,80 @@ jobs:
           t = t.replace('patchDraftCoordinator.presentImport(url)', 'guard licenseManager.isValidated else { return }' + nl + '                patchDraftCoordinator.presentImport(url)', 1)
           p.write_text(t)
           PY
+      - name: Add license information card
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          LM="$APP_DIR/LicenseManager.swift"
+          CONTENT="$APP_DIR/ContentView.swift"
+          python3 - "$LM" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          marker='    private let service ='
+          prop='    var expirationText: String { "2026-09-18T19:43:05.960Z" }
+
+'
+          if 'var expirationText: String' not in t:
+              if marker not in t: raise SystemExit('LicenseManager service marker not found')
+              t=t.replace(marker, prop+marker, 1)
+          p.write_text(t)
+          PY
+          python3 - "$CONTENT" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text(); nl=chr(10)
+          env='    @EnvironmentObject private var appState: AppState'
+          if 'private var licenseManager: LicenseManager' not in t:
+              if env not in t: raise SystemExit('DashboardView appState marker not found')
+              t=t.replace(env, env+nl+'    @EnvironmentObject private var licenseManager: LicenseManager', 1)
+          old='            List {
+                deviceSection'
+          new='            List {
+                deviceSection
+                Section { licenseInfoCard }'
+          if 'private var licenseInfoCard: some View' not in t:
+              if old not in t: raise SystemExit('Dashboard list marker not found')
+              t=t.replace(old,new,1)
+              insert='''    private var licenseInfoCard: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("INFORMAÇÕES DA LICENÇA")
+                    .font(.headline.weight(.heavy))
+                    .foregroundStyle(AppTheme.accent)
+                    .padding(.bottom, 14)
+                licenseInfoRow(title: "Produto", value: Branding.appName)
+                Divider().padding(.vertical, 10)
+                licenseInfoRow(title: "Status da Key", value: licenseManager.isValidated ? "VIP ATIVO" : "Aguardando validação")
+                Divider().padding(.vertical, 10)
+                licenseInfoRow(title: "Expiração", value: licenseManager.expirationText)
+                Divider().padding(.vertical, 10)
+                licenseInfoRow(title: "ID do Dispositivo", value: maskedDeviceIdentifier)
+            }
+            .padding(.vertical, 8)
+        }
+    }
+
+    private func licenseInfoRow(title: String, value: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            Spacer(minLength: 8)
+            Text(value).font(.system(.subheadline, design: .monospaced).weight(.semibold)).foregroundStyle(.primary).multilineTextAlignment(.trailing).lineLimit(2)
+        }
+    }
+
+    private var maskedDeviceIdentifier: String {
+        let raw = UIDevice.current.identifierForVendor?.uuidString ?? "Não disponível"
+        return raw.count > 4 ? "••••" + raw.suffix(4) : raw
+    }
+
+'''
+              anchor='    private var deviceSection: some View {'
+              if anchor not in t: raise SystemExit('deviceSection anchor not found')
+              t=t.replace(anchor,insert+anchor,1)
+          p.write_text(t)
+          PY
       - name: Build original archive and IPA
         shell: bash
         run: |
