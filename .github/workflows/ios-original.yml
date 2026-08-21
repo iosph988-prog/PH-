@@ -15,37 +15,24 @@ jobs:
           tar -xzf 3105-1.1.1-original.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
-      - name: Disable first-launch onboarding
+      - name: Apply app startup and navigation changes
         shell: bash
         run: |
           set -euo pipefail
           APP_SWIFT=source/3105-1.1.1/ThreeOneOSFive/App.swift
-          python3 - "$APP_SWIFT" <<'PY'
-          from pathlib import Path
-          import sys
-          path = Path(sys.argv[1])
-          text = path.read_text()
-          old = "@State private var showOnboarding = OnboardingStore.shouldShow()"
-          new = "@State private var showOnboarding = false"
-          if old not in text:
-              raise SystemExit("onboarding state declaration not found")
-          path.write_text(text.replace(old, new, 1))
-          PY
-      - name: Keep only Home and Patches tabs
-        shell: bash
-        run: |
-          set -euo pipefail
           NAV_SWIFT=source/3105-1.1.1/ThreeOneOSFive/helpers/AppTabNavigationState.swift
-          python3 - "$NAV_SWIFT" <<'PY'
+          python3 - "$APP_SWIFT" "$NAV_SWIFT" <<'PY'
           from pathlib import Path
           import sys
-          path = Path(sys.argv[1])
-          text = path.read_text()
+          app, nav = map(Path, sys.argv[1:])
+          a = app.read_text()
+          old = "@State private var showOnboarding = OnboardingStore.shouldShow()"
+          if old not in a: raise SystemExit("onboarding state declaration not found")
+          app.write_text(a.replace(old, "@State private var showOnboarding = false", 1))
+          n = nav.read_text()
           old = "AppSection.allCases.filter(isVisible)"
-          new = "return [.home, .patches].filter(isVisible)"
-          if old not in text:
-              raise SystemExit("visibleSections declaration not found")
-          path.write_text(text.replace(old, new, 1))
+          if old not in n: raise SystemExit("visibleSections declaration not found")
+          nav.write_text(n.replace(old, "return [.home, .patches].filter(isVisible)", 1))
           PY
       - name: Remove Cleaner and Wallpapers feature section
         shell: bash
@@ -54,29 +41,143 @@ jobs:
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           python3 - "$CONTENT_SWIFT" <<'PY'
           from pathlib import Path
-          import re
-          import sys
-          path = Path(sys.argv[1])
-          text = path.read_text()
-          text2 = re.sub(r"^\s*featuresSection\s*$\n?", "", text, count=1, flags=re.MULTILINE)
-          if text2 == text:
-              raise SystemExit("featuresSection call not found")
-          path.write_text(text2)
+          import re, sys
+          p=Path(sys.argv[1]); text=p.read_text()
+          text2=re.sub(r'^\s*featuresSection\s*$\n?', '', text, count=1, flags=re.MULTILINE)
+          if text2 == text: raise SystemExit('featuresSection call not found')
+          p.write_text(text2)
           PY
+      - name: Add preloaded game cards and resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          mkdir -p "$APP_DIR/PreloadedPatches"
+          cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
+          cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
+          for f in Hologramarosa\(2\).3105 Hsalto+antena\(2\).3105 Hspeito100%cache\(2\).3105 Magiccache\(2\).3105 Hsaltocache\(2\).3105 Hologramaverde\(5\).3105 Hspeitoavatar\(2\).3105 120FPS\(2\).3105 Hspescoçocache\(2\).3105 Hologramavermelho\(2\).3105 Hologramaverde\(4\).3105 Hologramazul\(2\).3105 Hspeito+antenaavatar\(1\).3105 Magicavatar\(2\).3105 Pescoço+antenaavatar\(2\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
+          python3 - "$PBX" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          ref='''\t\tA1B2C3D5 /* PreloadedPatches */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PreloadedPatches; sourceTree = "<group>"; };'''
+          build='''\t\tA1B2C3D6 /* PreloadedPatches in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D5 /* PreloadedPatches */; };'''
+          if 'A1B2C3D5' not in t:
+              t=t.replace('/* End PBXFileReference section */', ref+'\n/* End PBXFileReference section */')
+              t=t.replace('/* End PBXBuildFile section */', build+'\n/* End PBXBuildFile section */')
+              t=t.replace('3105A031 /* Assets.xcassets */,', 'A1B2C3D5 /* PreloadedPatches */,\n\t\t\t\t3105A031 /* Assets.xcassets */,')
+              t=t.replace('files = (\n\t\t\t\t3105A211,', 'files = (\n\t\t\t\tA1B2C3D6 /* PreloadedPatches in Resources */,\n\t\t\t\t3105A211,')
+          p.write_text(t)
+          PY
+          cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
+          import SwiftUI
+          import UIKit
+          
+          private enum PreloadedGame: String, CaseIterable, Identifiable {
+              case freeFire = "Free Fire"
+              case freeFireMax = "Free Fire MAX"
+              var id: String { rawValue }
+              var bundleID: String { self == .freeFire ? "com.dts.freefireth" : "com.dts.freefiremax" }
+              var imageName: String { self == .freeFire ? "free_fire_card" : "free_fire_max_card" }
+              var files: [String] {
+                  switch self {
+                  case .freeFire: return ["Hologramarosa(2).3105", "Hsalto+antena(2).3105", "Hspeito100%cache(2).3105", "Magiccache(2).3105", "Hsaltocache(2).3105", "Hologramaverde(5).3105", "Hspeitoavatar(2).3105", "120FPS(2).3105", "Hspescoçocache(2).3105", "Hologramavermelho(2).3105"]
+                  case .freeFireMax: return ["Hologramaverde(4).3105", "Hologramazul(2).3105", "Hspeito+antenaavatar(1).3105", "Magicavatar(2).3105", "Pescoço+antenaavatar(2).3105"]
+                  }
+              }
+          }
+          
+          struct PatchProjectsView: View {
+              @StateObject private var store = PatchProjectStore()
+              @State private var selectedGame: PreloadedGame?
+              var body: some View {
+                  NavigationStack {
+                      ScrollView {
+                          VStack(spacing: 18) {
+                              ForEach(PreloadedGame.allCases) { game in
+                                  Button { selectedGame = game } label: { PreloadedGameCard(game: game) }
+                                      .buttonStyle(.plain)
+                              }
+                          }
+                          .padding(.horizontal, 16)
+                          .padding(.vertical, 24)
+                      }
+                      .background(Color(.systemGroupedBackground))
+                      .navigationTitle("Patches")
+                      .navigationBarTitleDisplayMode(.inline)
+                      .sheet(item: $selectedGame) { game in PreloadedFilesView(game: game, store: store) }
+                  }
+              }
+          }
+          
+          private struct PreloadedGameCard: View {
+              let game: PreloadedGame
+              var body: some View {
+                  HStack(spacing: 16) {
+                      image
+                          .frame(width: 112, height: 112)
+                          .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                      VStack(alignment: .leading, spacing: 7) {
+                          Text(game.rawValue).font(.title3.weight(.bold)).foregroundStyle(.primary)
+                          Text("Abrir arquivos...").font(.title3).foregroundStyle(.secondary)
+                          Text(game.bundleID).font(.subheadline.monospaced()).foregroundStyle(.blue).lineLimit(1)
+                      }
+                      Spacer(minLength: 0)
+                      Image(systemName: "chevron.right").font(.title2.weight(.semibold)).foregroundStyle(.secondary)
+                  }
+                  .padding(16)
+                  .background(.background, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.gray.opacity(0.28)))
+              }
+              @ViewBuilder private var image: some View {
+                  if let url = Bundle.main.url(forResource: game.imageName, withExtension: "png"), let ui = UIImage(contentsOfFile: url.path) { Image(uiImage: ui).resizable().scaledToFill() }
+                  else { RoundedRectangle(cornerRadius: 18).fill(Color.orange).overlay(Image(systemName: "gamecontroller.fill").font(.largeTitle).foregroundStyle(.white)) }
+              }
+          }
+          
+          private struct PreloadedFilesView: View {
+              let game: PreloadedGame
+              @ObservedObject var store: PatchProjectStore
+              @Environment(\.dismiss) private var dismiss
+              var body: some View {
+                  NavigationStack {
+                      List {
+                          Section(game.bundleID) {
+                              ForEach(game.files, id: \.self) { file in
+                                  Button {
+                                      if let url = Bundle.main.url(forResource: file, withExtension: nil) { store.importPackage(at: url) }
+                                  } label: {
+                                      Label(file, systemImage: "doc.badge.plus")
+                                  }
+                                  .disabled(Bundle.main.url(forResource: file, withExtension: nil) == nil)
+                              }
+                          }
+                      }
+                      .navigationTitle(game.rawValue)
+                      .navigationBarTitleDisplayMode(.inline)
+                      .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Fechar") { dismiss() } } }
+                  }
+              }
+          }
+          SWIFT
+          test -s source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
+          test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
       - name: Build original archive and IPA
         shell: bash
         run: |
           set -euo pipefail
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-features-removed.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          APP=$(find build/nubank-features-removed.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
-          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-features-removed.ipa" Payload)
-          cp -R build/nubank-features-removed.xcarchive dist/
-          test -s dist/nubank-features-removed.ipa
+          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-preloaded-cards.ipa" Payload)
+          cp -R build/nubank-preloaded-cards.xcarchive dist/
+          test -s dist/nubank-preloaded-cards.ipa
       - uses: actions/upload-artifact@v4
         with:
-          name: nubank-features-removed-home-patches
+          name: nubank-preloaded-cards-home-patches
           path: dist
