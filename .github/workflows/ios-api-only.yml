@@ -1,4 +1,21 @@
 name: 3105 - Nubank API Only
+# Workflow syntax corrected
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -17,6 +34,22 @@ name: 3105 - Nubank API Only
 
 on:
   workflow_dispatch:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -66,20 +99,3 @@ jobs:
           t=t.replace('\t\t3105A406 /* kexploit */ = {','\t\t3105Z103 /* SDK */ = {isa = PBXGroup; children = (3105Z101 /* APIClient.h */,3105Z102 /* libKyojinxSDK.a */,); path = SDK; sourceTree = "<group>"; };\n\t\t3105A406 /* kexploit */ = {',1)
           t=t.replace('\t\t\t\t3105I201,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;','\t\t\t\t3105I201,\n\t\t\t\t3105Z200,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;',1)
           t=t.replace('\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (','\t\t\t\tLIBRARY_SEARCH_PATHS = ("$(inherited)","$(PROJECT_DIR)/ThreeOneOSFive/SDK",);\n\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (',2)
-          t=t.replace('OTHER_LDFLAGS = "-lz";','OTHER_LDFLAGS = ("-lz","-ObjC","-lc++");')
-          p.write_text(t)
-          PY
-      - name: Build and package IPA
-        shell: bash
-        run: |
-          set -euo pipefail
-          P=source/ThreeOneOSFive.xcodeproj
-          S=$(xcodebuild -list -json -project "$P" | python3 -c 'import json,sys;print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$P" -scheme "$S" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-api-only.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          A=$(find build/nubank-api-only.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
-          mkdir -p build/Payload dist
-          cp -R "$A" build/Payload/
-          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-api-only.ipa" Payload)
-          cp -R build/nubank-api-only.xcarchive dist/
-      - uses: actions/upload-artifact@v4
-        with:
