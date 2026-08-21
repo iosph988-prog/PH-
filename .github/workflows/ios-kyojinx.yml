@@ -130,8 +130,66 @@ jobs:
               private var isInjected: Bool { !activePatchIDs.isEmpty }
               var body: some View { NavigationStack { List { Section { StatusPanel(isInjected: isInjected, logs: logs) }; Section { ForEach(game.patches) { patch in patchRow(patch) } } header: { Text("Patches disponíveis") } }.listStyle(.insetGrouped).navigationTitle(game.title).navigationBarTitleDisplayMode(.inline).toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Fechar") { dismiss() } } }.alert(item: $pendingPatch) { patch in Alert(title: Text("Aplicar este patch?"), message: Text("Os arquivos serão validados e aplicados com segurança."), primaryButton: .default(Text("Aplicar patch")) { activate(patch) }, secondaryButton: .cancel()) } } }
               @ViewBuilder private func patchRow(_ patch: PreloadedPatch) -> some View { let active = activePatchIDs.contains(patch.id); HStack(spacing: 12) { Image(systemName: active ? "shippingbox.fill" : "shippingbox").font(.title2).foregroundStyle(.blue).frame(width: 30); VStack(alignment: .leading, spacing: 4) { Text(patch.title).font(.body.weight(.semibold)); Label(active ? "Patch ativado" : "Patch desativado", systemImage: active ? "checkmark.circle.fill" : "power").font(.caption).foregroundStyle(active ? .green : .secondary) }; Spacer(); Toggle("", isOn: Binding(get: { activePatchIDs.contains(patch.id) }, set: { enabled in if enabled { pendingPatch = patch } else { deactivate(patch) } })).labelsHidden().tint(.blue) }.padding(.vertical, 8) }
-              private func activate(_ patch: PreloadedPatch) { if let url = bundledFile(named: patch.fileName) { store.importPackage(at: url) }; activePatchIDs.insert(patch.id); logs.insert("[\(timeStamp())] Mod injetado \(patch.title)", at: 0) }
-              private func deactivate(_ patch: PreloadedPatch) { activePatchIDs.remove(patch.id); logs.insert("[\(timeStamp())] Mod desativado \(patch.title)", at: 0) }
+
+              @State private var appliedProjectIDs: [String: UUID] = [:]
+
+              private func activate(_ patch: PreloadedPatch) {
+
+                  guard let url = bundledFile(named: patch.fileName) else { logs.insert("[\(timeStamp())] Falha: arquivo não encontrado \(patch.title)", at: 0); return }
+
+                  logs.insert("[\(timeStamp())] Validando \(patch.title)", at: 0)
+
+                  Task.detached(priority: .userInitiated) {
+
+                      do {
+
+                          let data = try PatchProjectLibrary.readPackage(at: url)
+
+                          let decoded = try PatchPackageCodec.decode(data, password: nil)
+
+                          _ = try DevicePatchService.apply(project: decoded.project)
+
+                          await MainActor.run {
+
+                              appliedProjectIDs[patch.id] = decoded.project.id
+
+                              activePatchIDs.insert(patch.id)
+
+                              logs.insert("[\(timeStamp())] Mod injetado: arquivos aplicados \(patch.title)", at: 0)
+
+                          }
+
+                      } catch {
+
+                          await MainActor.run { logs.insert("[\(timeStamp())] Falha ao aplicar \(patch.title): \(error.localizedDescription)", at: 0) }
+
+                      }
+
+                  }
+
+              }
+
+              private func deactivate(_ patch: PreloadedPatch) {
+
+                  guard let projectID = appliedProjectIDs[patch.id], let receipt = DevicePatchService.latestReceipt(projectID: projectID) else { activePatchIDs.remove(patch.id); logs.insert("[\(timeStamp())] Mod desativado \(patch.title)", at: 0); return }
+
+                  Task.detached(priority: .userInitiated) {
+
+                      do {
+
+                          try DevicePatchService.restore(receipt: receipt)
+
+                          await MainActor.run { appliedProjectIDs.removeValue(forKey: patch.id); activePatchIDs.remove(patch.id); logs.insert("[\(timeStamp())] Mod desativado: arquivos restaurados \(patch.title)", at: 0) }
+
+                      } catch {
+
+                          await MainActor.run { logs.insert("[\(timeStamp())] Falha ao restaurar \(patch.title): \(error.localizedDescription)", at: 0) }
+
+                      }
+
+                  }
+
+              }
               private func timeStamp() -> String { let f = DateFormatter(); f.dateFormat = "HH:mm:ss"; return f.string(from: Date()) }
               private func bundledFile(named name: String) -> URL? { let normalized = name.precomposedStringWithCanonicalMapping; return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first { $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized } }
           }
