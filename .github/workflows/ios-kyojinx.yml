@@ -1,8 +1,5 @@
 name: 3105 - Kyojinx Integrated Build
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 jobs:
   build:
     runs-on: macos-latest
