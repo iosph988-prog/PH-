@@ -144,6 +144,32 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
+      - name: Force visible Injector icon and full background
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          definition='''private struct InjectorTabIcon: View {
+    var body: some View {
+        ZStack {
+            Circle().stroke(Color.purple, lineWidth: 2.2).frame(width: 19, height: 19)
+            Capsule().fill(Color.purple).frame(width: 5, height: 13).rotationEffect(.degrees(-38))
+            Circle().fill(Color.white).frame(width: 3, height: 3)
+        }.frame(width: 22, height: 22)
+    }
+}
+
+'''
+          if 'private struct InjectorTabIcon: View' not in t:
+              t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
+          t=t.replace('if let image = UIImage(', 'if title == "Injector" { InjectorTabIcon() } else if let image = UIImage(', 1)
+          p.write_text(t)
+          PY
+
       - name: Apply supplied app background
         shell: bash
         run: |
@@ -158,6 +184,7 @@ jobs:
           from pathlib import Path
           content=Path(sys.argv[1]); patch=Path(sys.argv[2]); t=content.read_text()
           definition=base64.b64decode(sys.argv[3]).decode()
+          definition=definition.replace(".opacity(0.58)", ".opacity(1.0)").replace("Color.black.opacity(0.10)", "Color.clear")
           if 'struct AppBackgroundView: View' not in t:
               t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
           t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(AppBackgroundView())\n            .tint(AppTheme.accent)', 1)
