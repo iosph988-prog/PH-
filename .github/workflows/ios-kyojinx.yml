@@ -254,12 +254,12 @@ jobs:
               if src >= 0:
                   fs = t.find('files = (', src)
                   if fs >= 0 and 'KYOJIN_LICENSE_BUILD' not in t[fs:t.find(');', fs)]:
-                      t = t[:fs] + t[fs:].replace('files = (', 'files = (\\n\\t\\t\\t\\tKYOJIN_LICENSE_BUILD /* LicenseManager.swift in Sources */,', 1)
+                      t = t[:fs] + t[fs:].replace('files = (', 'files = (\n\t\t\t\tKYOJIN_LICENSE_BUILD /* LicenseManager.swift in Sources */,', 1)
               fw = t.find('isa = PBXFrameworksBuildPhase;')
               if fw >= 0:
                   ff = t.find('files = (', fw)
                   if ff >= 0 and 'KYOJIN_SDK_BUILD' not in t[ff:t.find(');', ff)]:
-                      t = t[:ff] + t[ff:].replace('files = (', 'files = (\\n\\t\\t\\t\\tKYOJIN_SDK_BUILD /* libKyojinxSDK.a in Frameworks */,', 1)
+                      t = t[:ff] + t[ff:].replace('files = (', 'files = (\n\t\t\t\tKYOJIN_SDK_BUILD /* libKyojinxSDK.a in Frameworks */,', 1)
               p.write_text(t)
           PY
           python3 - "$APP_DIR/App.swift" <<'PY'
