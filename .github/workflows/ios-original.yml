@@ -144,26 +144,18 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-      - name: Force visible Injector icon and full background
+      - name: Force visible Injector icon
         shell: bash
         run: |
           set -euo pipefail
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          python3 - "$CONTENT_SWIFT" <<'PY'
-          from pathlib import Path
+          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgSW5qZWN0b3JUYWJJY29uOiBWaWV3IHsKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIENpcmNsZSgpLnN0cm9rZShDb2xvci5wdXJwbGUsIGxpbmVXaWR0aDogMi4yKS5mcmFtZSh3aWR0aDogMTksIGhlaWdodDogMTkpCiAgICAgICAgICAgIENhcHN1bGUoKS5maWxsKENvbG9yLnB1cnBsZSkuZnJhbWUod2lkdGg6IDUsIGhlaWdodDogMTMpLnJvdGF0aW9uRWZmZWN0KC5kZWdyZWVzKC0zOCkpCiAgICAgICAgICAgIENpcmNsZSgpLmZpbGwoQ29sb3Iud2hpdGUpLmZyYW1lKHdpZHRoOiAzLCBoZWlnaHQ6IDMpCiAgICAgICAgfS5mcmFtZSh3aWR0aDogMjIsIGhlaWdodDogMjIpCiAgICB9Cn0KCg==" <<'PY'
+          import base64
           import sys
-          p=Path(sys.argv[1]); t=p.read_text()
-          definition='''private struct InjectorTabIcon: View {
-    var body: some View {
-        ZStack {
-            Circle().stroke(Color.purple, lineWidth: 2.2).frame(width: 19, height: 19)
-            Capsule().fill(Color.purple).frame(width: 5, height: 13).rotationEffect(.degrees(-38))
-            Circle().fill(Color.white).frame(width: 3, height: 3)
-        }.frame(width: 22, height: 22)
-    }
-}
-
-'''
+          from pathlib import Path
+          p=Path(sys.argv[1])
+          t=p.read_text()
+          definition=base64.b64decode(sys.argv[2]).decode()
           if 'private struct InjectorTabIcon: View' not in t:
               t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
           t=t.replace('if let image = UIImage(', 'if title == "Injector" { InjectorTabIcon() } else if let image = UIImage(', 1)
