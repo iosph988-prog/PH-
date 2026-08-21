@@ -34,6 +34,23 @@ jobs:
           if old not in n: raise SystemExit("visibleSections declaration not found")
           nav.write_text(n.replace(old, "return [.home, .patches].filter(isVisible)", 1))
           PY
+      - name: Remove terminal and settings toolbar buttons
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import re, sys
+          p = Path(sys.argv[1])
+          text = p.read_text()
+          pattern = r"\n\s*ToolbarItem\(placement: \.navigationBarTrailing\) \{\n\s*Button \{ showLogs = true \} label: \{\n\s*Image\(systemName: \"apple\.terminal\"\)\n\s*\}\n\s*\.accessibilityLabel\(language\.text\(\"accessibility\.open_logs\"\)\)\n\s*\}\n\s*ToolbarItem\(placement: \.navigationBarTrailing\) \{\n\s*Button \{ showSettings = true \} label: \{\n\s*Image\(systemName: \"gearshape\"\)\n\s*\}\n\s*\.accessibilityLabel\(language\.text\(\"accessibility\.open_settings\"\)\)\n\s*\}"
+          updated, count = re.subn(pattern, "", text, count=1)
+          if count != 1:
+              raise SystemExit("terminal/settings toolbar block not found")
+          p.write_text(updated)
+          PY
+
       - name: Remove Cleaner and Wallpapers feature section
         shell: bash
         run: |
