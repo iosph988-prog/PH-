@@ -267,10 +267,32 @@ jobs:
           from pathlib import Path
           import sys
           p = Path(sys.argv[1]); t = p.read_text()
-          if 'LicenseManager()' not in t:
-              t = t.replace('@StateObject private var appState = AppState()', '@StateObject private var appState = AppState()\n    @StateObject private var licenseManager = LicenseManager()', 1)
-              t = t.replace('.environmentObject(appState)', '.environmentObject(appState)\n                    .environmentObject(licenseManager)', 1)
-              p.write_text(t)
+          if 'licenseManager = LicenseManager()' not in t:
+              t = t.replace('@StateObject private var appState = AppState()', '@StateObject private var appState = AppState()
+    @StateObject private var licenseManager = LicenseManager()', 1)
+          if '.environmentObject(licenseManager)' not in t:
+              t = t.replace('.environmentObject(appState)', '.environmentObject(appState)
+                    .environmentObject(licenseManager)', 1)
+          if 'if !licenseManager.isValidated {' not in t:
+              marker = '                if showOnboarding {'
+              gate = '                if !licenseManager.isValidated {
+                    LicenseGateView()
+                        .environmentObject(licenseManager)
+                        .transition(.opacity)
+                        .zIndex(2)
+                }
+
+'
+              if marker not in t: raise SystemExit('onboarding overlay marker not found')
+              t = t.replace(marker, gate + marker, 1)
+          t = t.replace('.allowsHitTesting(!showOnboarding)', '.allowsHitTesting(licenseManager.isValidated && !showOnboarding)', 1)
+          t = t.replace('if !showOnboarding {
+                    appState.detectSupport()', 'if !showOnboarding && licenseManager.isValidated {
+                    appState.detectSupport()', 1)
+          t = t.replace('guard phase == .active, !showOnboarding else { return }', 'guard phase == .active, !showOnboarding, licenseManager.isValidated else { return }', 1)
+          t = t.replace('patchDraftCoordinator.presentImport(url)', 'guard licenseManager.isValidated else { return }
+                patchDraftCoordinator.presentImport(url)', 1)
+          p.write_text(t)
           PY
       - name: Build original archive and IPA
         shell: bash
