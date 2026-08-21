@@ -293,11 +293,9 @@ jobs:
           python3 - "$LM" <<'PY'
           from pathlib import Path
           import sys
-          p=Path(sys.argv[1]); t=p.read_text()
+          p=Path(sys.argv[1]); t=p.read_text(); nl=chr(10)
           marker='    private let service ='
-          prop='    var expirationText: String { "2026-09-18T19:43:05.960Z" }
-
-'
+          prop='    var expirationText: String { "2026-09-18T19:43:05.960Z" }' + nl + nl
           if 'var expirationText: String' not in t:
               if marker not in t: raise SystemExit('LicenseManager service marker not found')
               t=t.replace(marker, prop+marker, 1)
@@ -311,11 +309,8 @@ jobs:
           if 'private var licenseManager: LicenseManager' not in t:
               if env not in t: raise SystemExit('DashboardView appState marker not found')
               t=t.replace(env, env+nl+'    @EnvironmentObject private var licenseManager: LicenseManager', 1)
-          old='            List {
-                deviceSection'
-          new='            List {
-                deviceSection
-                Section { licenseInfoCard }'
+          old='            List {' + nl + '                deviceSection'
+          new='            List {' + nl + '                deviceSection' + nl + '                licenseInfoCard'
           if 'private var licenseInfoCard: some View' not in t:
               if old not in t: raise SystemExit('Dashboard list marker not found')
               t=t.replace(old,new,1)
