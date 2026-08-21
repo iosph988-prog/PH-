@@ -1,8 +1,12 @@
 name: 3105 - Nubank API Build
 
 
+
+
 on:
   workflow_dispatch:
+
+
 
 
 jobs:
@@ -17,6 +21,7 @@ jobs:
           rm -rf source build dist
           mkdir -p source build dist
           tar -xzf PHATT_kyojinx_integrado.tar.gz -C source
+          mkdir -p source/ThreeOneOSFive/PreloadedProjects
           PROJECT=source/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Keep only Home and Patches tabs
@@ -61,4 +66,6 @@ jobs:
         with:
           name: nubank-api-home-patches
           path: dist
+
+
 
