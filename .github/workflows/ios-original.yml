@@ -144,6 +144,46 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
+      - name: Apply supplied app background
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          cp IMG_2316.JPG "$APP_DIR/PreloadedPatches/app_background.jpg"
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          if 'struct AppBackgroundView: View' not in t:
+              definition='''struct AppBackgroundView: View {
+    var body: some View {
+        ZStack {
+            if let url = Bundle.main.url(forResource: "app_background", withExtension: "jpg", subdirectory: "PreloadedPatches"), let image = UIImage(contentsOfFile: url.path) {
+                Image(uiImage: image).resizable().scaledToFill().opacity(0.26)
+            }
+            Color.black.opacity(0.32)
+        }.ignoresSafeArea()
+    }
+}
+
+'''
+              t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
+          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(AppBackgroundView())\n            .tint(AppTheme.accent)', 1)
+          p.write_text(t)
+          PY
+          PATCH_SWIFT="$APP_DIR/views/PatchProjectsView.swift"
+          python3 - "$PATCH_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1])
+          if p.exists():
+              t=p.read_text()
+              t=t.replace('.background(Color(.systemGroupedBackground))', '.background(AppBackgroundView())')
+              t=t.replace('.listStyle(.insetGrouped)', '.listStyle(.insetGrouped).scrollContentBackground(.hidden).background(AppBackgroundView())')
+              p.write_text(t)
+          PY
+
       - name: Build original archive and IPA
         shell: bash
         run: |
