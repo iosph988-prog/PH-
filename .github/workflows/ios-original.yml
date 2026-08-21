@@ -51,47 +51,18 @@ jobs:
           p.write_text(updated)
           PY
 
-      - name: Add custom Início and Injector icons
+      - name: Set Início and Injector navigation labels
         shell: bash
         run: |
           set -euo pipefail
-          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          cp IMG_2313.PNG "$APP_DIR/PreloadedPatches/home_tab.png"
-          cp IMG_2312.PNG "$APP_DIR/PreloadedPatches/injector_tab.png"
-          cp IMG_2315.PNG "$APP_DIR/PreloadedPatches/injector_cube.png"
-          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           python3 - "$CONTENT_SWIFT" <<'PY'
           from pathlib import Path
-          import re, sys
-          p=Path(sys.argv[1]); t=p.read_text()
-          t=t.replace("title: language.text(section.titleKey),\n                            systemImage: section.systemImage", "title: section.displayTitle,\n                            systemImage: section.systemImage,\n                            assetName: section.assetName", 1)
-          t=t.replace("Label(language.text(section.titleKey), systemImage: section.systemImage)", "NavigationTabLabel(title: section.displayTitle, systemImage: section.systemImage, assetName: section.assetName)", 1)
-          start=t.index("private struct CompactTabLabel: View {"); end=t.index("private extension AppSection {", start)
-          new="""private struct CompactTabLabel: View {
-    let title: String
-    let systemImage: String
-    let assetName: String?
-    @ViewBuilder var body: some View {
-        if let assetName, let url=Bundle.main.url(forResource: assetName, withExtension: "png", subdirectory: "PreloadedPatches"), let image=UIImage(contentsOfFile: url.path) {
-            Image(uiImage: image).resizable().scaledToFit().frame(width: 22, height: 22)
-        } else { Image(systemName: systemImage).font(.system(size: 17, weight: .medium)) }
-        Text(title)
-    }
-}
-private struct NavigationTabLabel: View {
-    let title: String
-    let systemImage: String
-    let assetName: String?
-    var body: some View { HStack(spacing: 10) {
-        if let assetName, let url=Bundle.main.url(forResource: assetName, withExtension: "png", subdirectory: "PreloadedPatches"), let image=UIImage(contentsOfFile: url.path) { Image(uiImage: image).resizable().scaledToFit().frame(width: 22, height: 22) } else { Image(systemName: systemImage).frame(width: 22) }
-        Text(title)
-    } }
-}
-"""
-          t=t[:start]+new+t[end:]
-          anchor="private extension AppSection {\n"
-          add="    var displayTitle: String { switch self { case .home: return "Início"; case .files: return "Arquivos"; case .patches: return "Injector"; case .cleaner: return "Cleaner"; case .wallpapers: return "Wallpapers" } }\n    var assetName: String? { switch self { case .home: return "home_tab"; case .patches: return "injector_tab"; default: return nil } }\n"
-          t=t.replace(anchor, anchor+add, 1)
+          import sys
+          p=Path(sys.argv[1])
+          t=p.read_text()
+          t=t.replace('title: language.text(section.titleKey)', 'title: section == .home ? "Início" : "Injector"', 1)
+          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "shippingrocket.fill"', 1)
           p.write_text(t)
           PY
 
