@@ -14,6 +14,12 @@ jobs:
           tar -xzf 3105-1.1.1-original.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+      - name: Normalize original project resource paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source/3105-1.1.1/ThreeOneOSFive/PreloadedProjects
+          mkdir -p source/3105-1.1.1/ThreeOneOSFive/SDK
       - name: Apply app startup and navigation changes
         shell: bash
         run: |
