@@ -184,7 +184,7 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          cp IMG_2316.JPG "$APP_DIR/PreloadedPatches/app_background.jpg"
+          cp d7b99bea-9619-4beb-b826-932bc6610ac3.jpg "$APP_DIR/PreloadedPatches/app_background.jpg"
           CONTENT_SWIFT="$APP_DIR/ContentView.swift"
           PATCH_SWIFT="$APP_DIR/views/PatchProjectsView.swift"
           python3 - "$CONTENT_SWIFT" "$PATCH_SWIFT" "c3RydWN0IEFwcEJhY2tncm91bmRWaWV3OiBWaWV3IHsKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIGlmIGxldCB1cmwgPSBCdW5kbGUubWFpbi51cmwoZm9yUmVzb3VyY2U6ICJhcHBfYmFja2dyb3VuZCIsIHdpdGhFeHRlbnNpb246ICJqcGciLCBzdWJkaXJlY3Rvcnk6ICJQcmVsb2FkZWRQYXRjaGVzIiksIGxldCBpbWFnZSA9IFVJSW1hZ2UoY29udGVudHNPZkZpbGU6IHVybC5wYXRoKSB7CiAgICAgICAgICAgICAgICBJbWFnZSh1aUltYWdlOiBpbWFnZSkucmVzaXphYmxlKCkuc2NhbGVkVG9GaWxsKCkub3BhY2l0eSgwLjU4KQogICAgICAgICAgICB9CiAgICAgICAgICAgIENvbG9yLmJsYWNrLm9wYWNpdHkoMC4xMCkKICAgICAgICB9Lmlnbm9yZXNTYWZlQXJlYSgpCiAgICB9Cn0KCg==" <<'PY'
