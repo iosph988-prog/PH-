@@ -280,7 +280,7 @@ jobs:
           test -n "$PROJECT"
           echo "Using project: $PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           mkdir -p build/Payload
