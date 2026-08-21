@@ -22,6 +22,8 @@ jobs:
           cp -R source/3105-1.1.1/ThreeOneOSFive source/ThreeOneOSFive
           mkdir -p source/ThreeOneOSFive/PreloadedProjects source/ThreeOneOSFive/SDK
           touch source/ThreeOneOSFive/PreloadedProjects/.keep
+          PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
+          sed -i '/PreloadedProjects/d' "$PBX"
       - name: Apply app startup and navigation changes
         shell: bash
         run: |
