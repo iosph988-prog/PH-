@@ -1,73 +1,82 @@
-name: 3105 - Nubank API Build
-
-
+name: 3105 - Original Build Test
 on:
   workflow_dispatch:
-
-
 jobs:
   build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Extract integrated API project
+      - name: Extract original project
         shell: bash
         run: |
           set -euo pipefail
           rm -rf source build dist
           mkdir -p source build dist
-          tar -xzf PHATT_kyojinx_integrado.tar.gz -C source
-          mkdir -p source/ThreeOneOSFive/PreloadedProjects
-          PROJECT=source/ThreeOneOSFive.xcodeproj
+          tar -xzf 3105-1.1.1-original.tar.gz -C source
+          PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+      - name: Disable first-launch onboarding
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_SWIFT=source/3105-1.1.1/ThreeOneOSFive/App.swift
+          python3 - "$APP_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          path = Path(sys.argv[1])
+          text = path.read_text()
+          old = "@State private var showOnboarding = OnboardingStore.shouldShow()"
+          new = "@State private var showOnboarding = false"
+          if old not in text:
+              raise SystemExit("onboarding state declaration not found")
+          path.write_text(text.replace(old, new, 1))
+          PY
       - name: Keep only Home and Patches tabs
         shell: bash
         run: |
           set -euo pipefail
-          NAV_SWIFT=source/ThreeOneOSFive/helpers/AppTabNavigationState.swift
+          NAV_SWIFT=source/3105-1.1.1/ThreeOneOSFive/helpers/AppTabNavigationState.swift
           python3 - "$NAV_SWIFT" <<'PY'
           from pathlib import Path
           import sys
           path = Path(sys.argv[1])
           text = path.read_text()
-          old = "[.home, .patches, .files]"
-          new = "[.home, .patches]"
+          old = "AppSection.allCases.filter(isVisible)"
+          new = "return [.home, .patches].filter(isVisible)"
           if old not in text:
-              raise SystemExit("navigation list not found")
+              raise SystemExit("visibleSections declaration not found")
           path.write_text(text.replace(old, new, 1))
           PY
-          grep -Fq '[.home, .patches]' "$NAV_SWIFT"
       - name: Remove Cleaner and Wallpapers feature section
         shell: bash
         run: |
           set -euo pipefail
-          CONTENT_SWIFT=source/ThreeOneOSFive/ContentView.swift
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           python3 - "$CONTENT_SWIFT" <<'PY'
           from pathlib import Path
+          import re
           import sys
           path = Path(sys.argv[1])
           text = path.read_text()
-          old = None
-          import re
-          matches = re.findall(r"^\s*featuresSection\s*$", text, flags=re.MULTILINE)
-          if not matches:
+          text2 = re.sub(r"^\s*featuresSection\s*$\n?", "", text, count=1, flags=re.MULTILINE)
+          if text2 == text:
               raise SystemExit("featuresSection call not found")
-          text = re.sub(r"^\s*featuresSection\s*$\n?", "", text, count=1, flags=re.MULTILINE)
-          path.write_text(text)
+          path.write_text(text2)
           PY
-      - name: Verify API SDK and token integration
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -s source/ThreeOneOSFive/SDK/APIClient.h
-          test -s source/ThreeOneOSFive/SDK/libKyojinxSDK.a
-          grep -q 'bundledToken' source/ThreeOneOSFive/helpers/LicenseManager.swift
-          grep -q 'LicenseManager.swift' "$PROJECT/project.pbxproj"
-      - name: Build integrated archive and IPA
+      - name: Build original archive and IPA
         shell: bash
         run: |
           set -euo pipefail
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-api.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          APP=$(find build/nubank-api.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-features-removed.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          APP=$(find build/nubank-features-removed.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
+          mkdir -p build/Payload
+          cp -R "$APP" build/Payload/
+          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-features-removed.ipa" Payload)
+          cp -R build/nubank-features-removed.xcarchive dist/
+          test -s dist/nubank-features-removed.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nubank-features-removed-home-patches
+          path: dist
