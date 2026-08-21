@@ -1,7 +1,13 @@
 name: 3105 - Original Build Test
 
+
+
+
 on:
   workflow_dispatch:
+
+
+
 
 jobs:
   build:
@@ -44,13 +50,13 @@ jobs:
           import sys
           path = Path(sys.argv[1])
           text = path.read_text()
-          old = "return AppSection.allCases.filter(isVisible)"
+          old = "AppSection.allCases.filter(isVisible)"
           new = "return [.home, .patches].filter(isVisible)"
           if old not in text:
               raise SystemExit("visibleSections declaration not found")
           path.write_text(text.replace(old, new, 1))
           PY
-          grep -q 'return \[.home, .patches\].filter(isVisible)' "$NAV_SWIFT"
+          grep -Fq 'return [.home, .patches].filter(isVisible)' "$NAV_SWIFT"
       - name: Build original archive and IPA
         shell: bash
         run: |
@@ -66,5 +72,3 @@ jobs:
           test -s dist/3105-original.ipa
       - uses: actions/upload-artifact@v4
         with:
-          name: 3105-original-build-home-patches
-          path: dist
