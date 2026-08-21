@@ -162,6 +162,24 @@ jobs:
           p.write_text(t)
           PY
 
+      - name: Use orange Injector icon and text colors
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          cp injector_icon_orange.png "$APP_DIR/PreloadedPatches/injector_icon_orange.png"
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1])
+          t=p.read_text()
+          t=t.replace('.tint(AppTheme.accent)', '.tint(Color.orange)\n        .foregroundStyle(Color.orange)', 1)
+          t=t.replace('init() {', 'init() {\n        UITabBar.appearance().tintColor = UIColor.orange\n        UITabBar.appearance().unselectedItemTintColor = UIColor.orange', 1)
+          t=t.replace('if let image = UIImage(', 'if title == "Injector", let url = Bundle.main.url(forResource: "injector_icon_orange", withExtension: "png", subdirectory: "PreloadedPatches"), let icon = UIImage(contentsOfFile: url.path) {\n            Image(uiImage: icon).resizable().renderingMode(.original).scaledToFit().frame(width: 24, height: 24)\n        } else if let image = UIImage(', 1)
+          p.write_text(t)
+          PY
+
       - name: Apply supplied app background
         shell: bash
         run: |
