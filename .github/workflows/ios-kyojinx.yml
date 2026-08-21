@@ -1,7 +1,5 @@
-name: 3105 - Original Build Test
+name: 3105 - Kyojinx Integrated Build
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 jobs:
   build:
