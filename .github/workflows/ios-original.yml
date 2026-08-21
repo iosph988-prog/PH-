@@ -1,7 +1,9 @@
 name: 3105 - Nubank API Build
 
+
 on:
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -45,10 +47,13 @@ jobs:
           import sys
           path = Path(sys.argv[1])
           text = path.read_text()
-          old = "                featuresSection\n"
-          if old not in text:
+          old = None
+          import re
+          matches = re.findall(r"^\s*featuresSection\s*$", text, flags=re.MULTILINE)
+          if not matches:
               raise SystemExit("featuresSection call not found")
-          path.write_text(text.replace(old, "", 1))
+          text = re.sub(r"^\s*featuresSection\s*$\n?", "", text, count=1, flags=re.MULTILINE)
+          path.write_text(text)
           PY
       - name: Verify API SDK and token integration
         shell: bash
@@ -66,12 +71,3 @@ jobs:
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-api.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
           APP=$(find build/nubank-api.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
-          mkdir -p build/Payload
-          cp -R "$APP" build/Payload/
-          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-api.ipa" Payload)
-          cp -R build/nubank-api.xcarchive dist/
-          test -s dist/nubank-api.ipa
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nubank-api-home-patches
-          path: dist
