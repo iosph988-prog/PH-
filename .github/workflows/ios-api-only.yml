@@ -1,7 +1,9 @@
 name: 3105 - Nubank API Only
 
+
 on:
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -20,9 +22,7 @@ jobs:
           cp api-source/ThreeOneOSFive/SDK/APIClient.h source/ThreeOneOSFive/SDK/
           cp api-source/ThreeOneOSFive/SDK/libKyojinxSDK.a source/ThreeOneOSFive/SDK/
           cp api-source/ThreeOneOSFive/helpers/LicenseManager.swift source/ThreeOneOSFive/helpers/
-          grep -q '#import "SDK/APIClient.h"' source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h || printf '
-#import "SDK/APIClient.h"
-' >> source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h
+          grep -q '#import "SDK/APIClient.h"' source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h || printf '\n#import "SDK/APIClient.h"\n' >> source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h
           python3 - source/ThreeOneOSFive.xcodeproj/project.pbxproj <<'PY'
           from pathlib import Path
           import sys
@@ -54,3 +54,4 @@ jobs:
         with:
           name: nubank-api-only-original-project
           path: dist
+
