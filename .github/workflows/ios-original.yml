@@ -1,7 +1,9 @@
 name: 3105 - Nubank API Build
 
+
 on:
   workflow_dispatch:
+
 
 jobs:
   build:
@@ -27,13 +29,13 @@ jobs:
           import sys
           path = Path(sys.argv[1])
           text = path.read_text()
-          old = "AppSection.allCases.filter(isVisible)"
-          new = "return [.home, .patches].filter(isVisible)"
+          old = "[.home, .patches, .files]"
+          new = "[.home, .patches]"
           if old not in text:
-              raise SystemExit("visibleSections declaration not found")
+              raise SystemExit("navigation list not found")
           path.write_text(text.replace(old, new, 1))
           PY
-          grep -Fq 'return [.home, .patches].filter(isVisible)' "$NAV_SWIFT"
+          grep -Fq '[.home, .patches]' "$NAV_SWIFT"
       - name: Verify API SDK and token integration
         shell: bash
         run: |
@@ -59,3 +61,4 @@ jobs:
         with:
           name: nubank-api-home-patches
           path: dist
+
