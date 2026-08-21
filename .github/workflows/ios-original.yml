@@ -1,21 +1,7 @@
 name: 3105 - Nubank API Build
 
-
-
-
-
-
-
-
 on:
   workflow_dispatch:
-
-
-
-
-
-
-
 
 jobs:
   build:
@@ -50,21 +36,21 @@ jobs:
           PY
           grep -Fq '[.home, .patches]' "$NAV_SWIFT"
       - name: Remove Cleaner and Wallpapers feature section
-  shell: bash
-  run: |
-    set -euo pipefail
-    CONTENT_SWIFT=source/ThreeOneOSFive/ContentView.swift
-    python3 - "$CONTENT_SWIFT" <<'PY'
-    from pathlib import Path
-    import sys
-    path = Path(sys.argv[1])
-    text = path.read_text()
-    old = "                featuresSection\n"
-    if old not in text:
-        raise SystemExit("featuresSection call not found")
-    path.write_text(text.replace(old, "", 1))
-    PY
-- name: Verify API SDK and token integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTENT_SWIFT=source/ThreeOneOSFive/ContentView.swift
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          path = Path(sys.argv[1])
+          text = path.read_text()
+          old = "                featuresSection\n"
+          if old not in text:
+              raise SystemExit("featuresSection call not found")
+          path.write_text(text.replace(old, "", 1))
+          PY
+      - name: Verify API SDK and token integration
         shell: bash
         run: |
           set -euo pipefail
@@ -87,3 +73,5 @@ jobs:
           test -s dist/nubank-api.ipa
       - uses: actions/upload-artifact@v4
         with:
+          name: nubank-api-home-patches
+          path: dist
