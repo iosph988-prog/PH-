@@ -1,83 +1,56 @@
 name: 3105 - Nubank API Only
 
-
-
-
-
-
 on:
-
-
   workflow_dispatch:
-  
-
-
-
 
 jobs:
-
-
   build:
-  
     runs-on: macos-latest
-    
     steps:
-    
       - uses: actions/checkout@v4
-      
-
-
-
-
-      - name: Extract original target and API source
-      
+      - name: Prepare original project and API
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
           rm -rf source api-source build dist
-          
           mkdir -p source api-source build dist
-          
           tar -xzf 3105-1.1.1-original.tar.gz -C source --strip-components=1
-          
           tar -xzf PHATT_kyojinx_integrado.tar.gz -C api-source
-          
-          test -f source/ThreeOneOSFive.xcodeproj/project.pbxproj
-          
-          test -s api-source/ThreeOneOSFive/SDK/APIClient.h
-          
-          test -s api-source/ThreeOneOSFive/SDK/libKyojinxSDK.a
-          
-
-
-
-
-      - name: Copy only API files into the original project
-      
-        shell: bash
-        
-        run: |
-        
-          set -euo pipefail
-          
           mkdir -p source/ThreeOneOSFive/SDK
-          
-          cp api-source/ThreeOneOSFive/SDK/APIClient.h source/ThreeOneOSFive/SDK/APIClient.h
-          
-          cp api-source/ThreeOneOSFive/SDK/libKyojinxSDK.a source/ThreeOneOSFive/SDK/libKyojinxSDK.a
-          
-          cp api-source/ThreeOneOSFive/helpers/LicenseManager.swift source/ThreeOneOSFive/helpers/LicenseManager.swift
-          
-          if ! grep -q '#import "SDK/APIClient.h"' source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h; then
-            printf '\n#import "SDK/APIClient.h"\n' >> source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h
-          fi
-          
-
-
-
-
-      - name: Register only API files in the original Xcode project
-      
+          cp api-source/ThreeOneOSFive/SDK/APIClient.h source/ThreeOneOSFive/SDK/
+          cp api-source/ThreeOneOSFive/SDK/libKyojinxSDK.a source/ThreeOneOSFive/SDK/
+          cp api-source/ThreeOneOSFive/helpers/LicenseManager.swift source/ThreeOneOSFive/helpers/
+          grep -q '#import "SDK/APIClient.h"' source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h || printf '
+#import "SDK/APIClient.h"
+' >> source/ThreeOneOSFive/ThreeOneOSFive-Bridging-Header.h
+          python3 - source/ThreeOneOSFive.xcodeproj/project.pbxproj <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]);t=p.read_text()
+          t=t.replace('/* End PBXBuildFile section */','\t\t3105Z200 /* LicenseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3105Z100; };\n\t\t3105Z201 /* libKyojinxSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3105Z102; };\n/* End PBXBuildFile section */',1)
+          t=t.replace('/* End PBXFileReference section */','\t\t3105Z100 /* LicenseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseManager.swift; sourceTree = "<group>"; };\n\t\t3105Z101 /* APIClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APIClient.h; sourceTree = "<group>"; };\n\t\t3105Z102 /* libKyojinxSDK.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libKyojinxSDK.a; sourceTree = "<group>"; };\n/* End PBXFileReference section */',1)
+          t=t.replace('\t\t\tfiles = (\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;','\t\t\tfiles = (\n\t\t\t\t3105Z201,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;',1)
+          t=t.replace('\t\t\t\t3105A031 /* Assets.xcassets */,\n\t\t\t);','\t\t\t\t3105A031 /* Assets.xcassets */,\n\t\t\t\t3105Z103 /* SDK */,\n\t\t\t);',1)
+          t=t.replace('\t\t\t\t3105A099 /* Localization.swift */,\n','\t\t\t\t3105A099 /* Localization.swift */,\n\t\t\t\t3105Z100 /* LicenseManager.swift */,\n',1)
+          t=t.replace('\t\t3105A406 /* kexploit */ = {','\t\t3105Z103 /* SDK */ = {isa = PBXGroup; children = (3105Z101 /* APIClient.h */,3105Z102 /* libKyojinxSDK.a */,); path = SDK; sourceTree = "<group>"; };\n\t\t3105A406 /* kexploit */ = {',1)
+          t=t.replace('\t\t\t\t3105I201,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;','\t\t\t\t3105I201,\n\t\t\t\t3105Z200,\n\t\t\t);\n\t\t\trunOnlyForDeploymentPostprocessing = 0;',1)
+          t=t.replace('\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (','\t\t\t\tLIBRARY_SEARCH_PATHS = ("$(inherited)","$(PROJECT_DIR)/ThreeOneOSFive/SDK",);\n\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (',2)
+          t=t.replace('OTHER_LDFLAGS = "-lz";','OTHER_LDFLAGS = ("-lz","-ObjC","-lc++");')
+          p.write_text(t)
+          PY
+      - name: Build and package IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          P=source/ThreeOneOSFive.xcodeproj
+          S=$(xcodebuild -list -json -project "$P" | python3 -c 'import json,sys;print(json.load(sys.stdin)["project"]["schemes"][0])')
+          xcodebuild -project "$P" -scheme "$S" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-api-only.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          A=$(find build/nubank-api-only.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          mkdir -p build/Payload dist
+          cp -R "$A" build/Payload/
+          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-api-only.ipa" Payload)
+          cp -R build/nubank-api-only.xcarchive dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nubank-api-only-original-project
+          path: dist
