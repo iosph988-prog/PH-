@@ -340,49 +340,18 @@ jobs:
           p.write_text(t)
           PY
 
-      - name: Use orange Injector icon and text colors
+      - name: Preserve native Injector icon and neutral colors
         shell: bash
         run: |
           set -euo pipefail
-          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          cp injector_icon_orange.png "$APP_DIR/PreloadedPatches/injector_icon_orange.png"
-          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
-          python3 - "$CONTENT_SWIFT" <<'PY'
-          from pathlib import Path
-          import sys
-          p=Path(sys.argv[1])
-          t=p.read_text()
-          t=t.replace('.tint(AppTheme.accent)', '.tint(Color.orange)\n        .foregroundStyle(Color.orange)', 1)
-          t=t.replace('init() {', 'init() {\n        UITabBar.appearance().tintColor = UIColor.orange\n        UITabBar.appearance().unselectedItemTintColor = UIColor.orange', 1)
-          t=t.replace('if let image = UIImage(', 'if title == "Injector", let url = Bundle.main.url(forResource: "injector_icon_orange", withExtension: "png", subdirectory: "PreloadedPatches"), let icon = UIImage(contentsOfFile: url.path) {\n            Image(uiImage: icon).resizable().renderingMode(.original).scaledToFit().frame(width: 24, height: 24)\n        } else if let image = UIImage(', 1)
-          p.write_text(t)
-          PY
+          # The native SF Symbol and final SwiftUI colors are applied in the finalization step.
+          :
 
-      - name: Apply supplied app background
+      - name: Keep per-screen backgrounds
         shell: bash
         run: |
           set -euo pipefail
-          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          cp 56F68B12-F4DC-4C3A-844E-65ADEE4CEA9E.png "$APP_DIR/PreloadedPatches/app_background.jpg"
-          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
-          PATCH_SWIFT="$APP_DIR/views/PatchProjectsView.swift"
-          python3 - "$CONTENT_SWIFT" "$PATCH_SWIFT" "c3RydWN0IEFwcEJhY2tncm91bmRWaWV3OiBWaWV3IHsKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIGlmIGxldCB1cmwgPSBCdW5kbGUubWFpbi51cmwoZm9yUmVzb3VyY2U6ICJhcHBfYmFja2dyb3VuZCIsIHdpdGhFeHRlbnNpb246ICJqcGciLCBzdWJkaXJlY3Rvcnk6ICJQcmVsb2FkZWRQYXRjaGVzIiksIGxldCBpbWFnZSA9IFVJSW1hZ2UoY29udGVudHNPZkZpbGU6IHVybC5wYXRoKSB7CiAgICAgICAgICAgICAgICBJbWFnZSh1aUltYWdlOiBpbWFnZSkucmVzaXphYmxlKCkuc2NhbGVkVG9GaWxsKCkub3BhY2l0eSgwLjU4KQogICAgICAgICAgICB9CiAgICAgICAgICAgIENvbG9yLmJsYWNrLm9wYWNpdHkoMC4xMCkKICAgICAgICB9Lmlnbm9yZXNTYWZlQXJlYSgpCiAgICB9Cn0KCg==" <<'PY'
-          import base64
-          import sys
-          from pathlib import Path
-          content=Path(sys.argv[1]); patch=Path(sys.argv[2]); t=content.read_text()
-          definition=base64.b64decode(sys.argv[3]).decode()
-          definition=definition.replace(".opacity(0.58)", ".opacity(1.0)").replace("Color.black.opacity(0.10)", "Color.clear")
-          if 'struct AppBackgroundView: View' not in t:
-              t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
-          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(Color(.systemGroupedBackground))\n            .tint(AppTheme.accent)', 1)
-          content.write_text(t)
-          if patch.exists():
-              p=patch.read_text()
-              p=p.replace('.background(Color(.systemGroupedBackground))', '.background(AppBackgroundView())')
-              p=p.replace('.listStyle(.insetGrouped)', '.listStyle(.insetGrouped).scrollContentBackground(.hidden).background(AppBackgroundView())')
-              patch.write_text(p)
-          PY
+          :
 
       - name: Use native SwiftUI Injector icon
         shell: bash
@@ -400,6 +369,29 @@ jobs:
           if start < 0 or end < 0: raise SystemExit("CompactTabLabel boundaries not found")
           content.write_text(text[:start] + definition + "\n\n" + text[end:])
           PY
+      - name: Finalize Injector reference layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          PATCH_TEMPLATE="$APP_DIR/views/PatchProjectsView.swift"
+          # Ensure the replacement reaches the actual case/path referenced by the Xcode project.
+          while IFS= read -r f; do
+            [ "$f" = "$PATCH_TEMPLATE" ] || cp "$PATCH_TEMPLATE" "$f"
+          done < <(find source -type f -iname 'PatchProjectsView.swift')
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import re, sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          # Remove any legacy orange asset branch if present.
+          t=re.sub(r'if title == "Injector", let url = Bundle\.main\.url\(forResource: "injector_icon_orange".*?\n\s*\} else if let image = UIImage\(', 'if title == "Injector" { Image(systemName: "gamecontroller.fill").font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.blue) } else if let image = UIImage(', t, count=1, flags=re.S)
+          t=t.replace('Color.orange', 'Color.blue')
+          # Keep the tab bar neutral/blue rather than orange.
+          t=t.replace('UIColor.orange', 'UIColor.systemBlue')
+          p.write_text(t)
+          PY
+
       - name: Integrar API Kyojinx funcional
         shell: bash
         run: |
