@@ -11,7 +11,7 @@ jobs:
           set -euo pipefail
           rm -rf source build dist
           mkdir -p source build dist
-          tar -xzf 3105-1.1.1-injector-controls.tar.gz -C source
+          tar -xzf 3105-1.1.1-injector-controls-fixed.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Apply app startup and navigation changes
@@ -53,6 +53,10 @@ jobs:
 
 
 
+
+
+
+
       - name: Set Início and Injector navigation labels
         shell: bash
         run: |
@@ -67,6 +71,10 @@ jobs:
           t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "rocket.fill"', 1)
           p.write_text(t)
           PY
+
+
+
+
 
 
 
@@ -90,27 +98,3 @@ jobs:
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
           mkdir -p "$APP_DIR/PreloadedPatches"
-          cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
-          cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in *.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
-          PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
-
-      - name: Build and package IPA
-        shell: bash
-        run: |
-          set -euo pipefail
-          PROJECT=$(find source -type d -name 'ThreeOneOSFive.xcodeproj' -print -quit)
-          test -n "$PROJECT"
-          SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO build
-          APP=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -type d -name '*.app' -print -quit)
-          test -n "$APP"
-          rm -rf dist
-          mkdir -p dist/Payload
-          cp -R "$APP" dist/Payload/
-          (cd dist && zip -qry nubank-preloaded-cards-buttons.ipa Payload)
-          test -s dist/nubank-preloaded-cards-buttons.ipa
-      - uses: actions/upload-artifact@v4
-        with:
-          name: nubank-preloaded-cards-buttons
-          path: dist/nubank-preloaded-cards-buttons.ipa
