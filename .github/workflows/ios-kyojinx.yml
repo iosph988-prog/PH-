@@ -118,6 +118,8 @@ jobs:
           xcodebuild -project "$PROJECT" -scheme 3105 -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
           APP_PATH=$(find build/App.xcarchive/Products/Applications -maxdepth 1 -type d -name "*.app" | head -1)
           test -n "$APP_PATH"
+          mkdir -p "$APP_PATH/SeedPackages"
+          cp -f source/3105-1.1.1/SeedPackages/*.3105 "$APP_PATH/SeedPackages/"
           cp -R "$APP_PATH" build/Payload/App.app
           mkdir -p "$APP_PATH/SeedPackages"
           cp -f source/3105-1.1.1/SeedPackages/*.3105 "$APP_PATH/SeedPackages/"
