@@ -126,14 +126,14 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-alto", title: "ALTO", fileName: "ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-magica", title: "MAGICA", fileName: "MAGICA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito", title: "PEITO", fileName: "PEITO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pescoco", title: "PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-alto", title: "HS ALTO", fileName: "ALTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-magica", title: "BALA MAGIC", fileName: "MAGICA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito", title: "HS PEITO", fileName: "PEITO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-vermelho", title: "HOLOGRAMA VERMELHO", fileName: "Hologramavermelho(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-verde", title: "HOLOGRAMA VERDE", fileName: "Hologramaverde(5).3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-espcorpo", title: "ESPCORPO", fileName: "ESPCORPO.3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-espcorpo", title: "HOLOGRAMA CORPO", fileName: "ESPCORPO.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
@@ -168,7 +168,7 @@ jobs:
                                   }
                               }
                               .pickerStyle(.segmented)
-                              .tint(.orange)
+                              .tint(.white)
 
                               VStack(spacing: 14) {
                                   ForEach(selectedGame.patches) { patch in
@@ -180,7 +180,8 @@ jobs:
                           .padding(.top, 20)
                           .padding(.bottom, 28)
                       }
-                      .background(AppBackgroundView())
+                      .background(Color.black)
+                      .scrollContentBackground(.hidden)
                       .navigationTitle("Patches")
                       .navigationBarTitleDisplayMode(.inline)
                   }
@@ -199,10 +200,10 @@ jobs:
                       VStack(alignment: .leading, spacing: 7) {
                           Text(patch.title)
                               .font(.title3.weight(.semibold))
-                              .foregroundStyle(.primary)
+                              .foregroundStyle(.white)
                           Text("\(patch.replacementCount) replacement rules")
                               .font(.body)
-                              .foregroundStyle(.secondary)
+                              .foregroundStyle(.white.opacity(0.92))
                       }
                       Spacer(minLength: 8)
                       Toggle("", isOn: Binding(
@@ -213,13 +214,13 @@ jobs:
                           }
                       ))
                       .labelsHidden()
-                      .tint(.orange)
+                      .toggleStyle(PatchToggleStyle())
                   }
                   .padding(.horizontal, 22)
-                  .padding(.vertical, 22)
-                  .frame(maxWidth: .infinity, alignment: .leading)
-                  .background(Color(.secondarySystemBackground).opacity(0.96), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.06), lineWidth: 1))
+                  .padding(.vertical, 28)
+                  .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
+                  .background(Color(.secondarySystemBackground).opacity(0.96), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.white.opacity(0.10), lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
@@ -285,6 +286,28 @@ jobs:
                   return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first {
                       $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized
                   }
+              }
+          }
+
+          private struct PatchToggleStyle: ToggleStyle {
+              func makeBody(configuration: Configuration) -> some View {
+                  Button {
+                      configuration.isOn.toggle()
+                  } label: {
+                      HStack {
+                          Spacer(minLength: 0)
+                          Circle()
+                              .fill(configuration.isOn ? Color.white : Color.black.opacity(0.55))
+                              .frame(width: 28, height: 28)
+                              .shadow(color: .black.opacity(0.18), radius: 2, y: 1)
+                      }
+                      .padding(4)
+                      .frame(width: 64, height: 36)
+                      .background(configuration.isOn ? Color.blue : Color.white, in: Capsule())
+                  }
+                  .buttonStyle(.plain)
+                  .accessibilityLabel(configuration.label)
+                  .accessibilityValue(configuration.isOn ? "Ativado" : "Desativado")
               }
           }
 
