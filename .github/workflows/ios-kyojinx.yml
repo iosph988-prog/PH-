@@ -111,7 +111,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/Payload
-          xcodebuild -project "$PROJECT" -scheme ThreeOneOSFive -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
+          xcodebuild -project "$PROJECT" -target 3105 -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
           APP_PATH=$(find build/DerivedData/Build/Products -maxdepth 2 -type d -name "*.app" | head -1)
           test -n "$APP_PATH"
           cp -R "$APP_PATH" build/Payload/App.app
