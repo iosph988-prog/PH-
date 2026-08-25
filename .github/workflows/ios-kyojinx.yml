@@ -121,8 +121,8 @@ jobs:
           mkdir -p "$APP_PATH/SeedPackages"
           cp -f source/3105-1.1.1/SeedPackages/*.3105 "$APP_PATH/SeedPackages/"
           cp -R "$APP_PATH" build/Payload/App.app
-          mkdir -p "$APP_PATH/SeedPackages"
-          cp -f source/3105-1.1.1/SeedPackages/*.3105 "$APP_PATH/SeedPackages/"
+          mkdir -p build/Payload/App.app/SeedPackages
+          cp -f source/3105-1.1.1/SeedPackages/*.3105 build/Payload/App.app/SeedPackages/
           /usr/bin/zip -qry build/nubank-preloaded-cards-buttons.ipa build/Payload
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
