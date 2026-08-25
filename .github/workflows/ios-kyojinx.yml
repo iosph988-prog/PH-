@@ -110,8 +110,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p build/Payload
-          xcodebuild -project "$PROJECT" -target 3105 -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
+          mkdir -p build/Payload source/3105-1.1.1/ThreeOneOSFive.xcodeproj/xcshareddata/xcschemes
+          cat > source/3105-1.1.1/ThreeOneOSFive.xcodeproj/xcshareddata/xcschemes/3105.xcscheme <<'SCHEME'
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme LastUpgradeVersion="2660" version="1.3">
+  <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+    <BuildActionEntries>
+      <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
+        <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="3105A500" BuildableName="3105.app" BlueprintName="3105" ReferencedContainer="container:ThreeOneOSFive.xcodeproj"/>
+      </BuildActionEntry>
+    </BuildActionEntries>
+  </BuildAction>
+  <ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
+</Scheme>
+SCHEME
+
+          xcodebuild -project "$PROJECT" -scheme 3105 -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
           APP_PATH=$(find build/DerivedData/Build/Products -maxdepth 2 -type d -name "*.app" | head -1)
           test -n "$APP_PATH"
           cp -R "$APP_PATH" build/Payload/App.app
