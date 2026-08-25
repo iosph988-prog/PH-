@@ -57,6 +57,14 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Set Início and Injector navigation labels
         shell: bash
         run: |
@@ -79,6 +87,14 @@ jobs:
 
 
 
+
+
+
+
+
+
+
+
       - name: Remove Cleaner and Wallpapers feature section
         shell: bash
         run: |
@@ -90,11 +106,19 @@ jobs:
           p=Path(sys.argv[1]); text=p.read_text()
           text2=re.sub(r'^\s*featuresSection\s*$\n?', '', text, count=1, flags=re.MULTILINE)
           if text2 == text: raise SystemExit('featuresSection call not found')
-          p.write_text(text2)
-          PY
-      - name: Add preloaded game cards and resources
+      - name: Build and package IPA
         shell: bash
         run: |
           set -euo pipefail
-          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          mkdir -p "$APP_DIR/PreloadedPatches"
+          mkdir -p build/Payload
+          xcodebuild -project "$PROJECT" -scheme ThreeOneOSFive -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
+          APP_PATH=$(find build/DerivedData/Build/Products -maxdepth 2 -type d -name "*.app" | head -1)
+          test -n "$APP_PATH"
+          cp -R "$APP_PATH" build/Payload/App.app
+          /usr/bin/zip -qry build/nubank-preloaded-cards-buttons.ipa build/Payload
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nubank-preloaded-cards-buttons
+          path: build/nubank-preloaded-cards-buttons.ipa
+          if-no-files-found: error
