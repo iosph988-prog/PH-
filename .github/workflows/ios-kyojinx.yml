@@ -168,6 +168,7 @@ jobs:
                                   }
                               }
                               .pickerStyle(.segmented)
+                              .frame(height: 54)
                               .tint(.white)
 
                               VStack(spacing: 14) {
@@ -297,13 +298,13 @@ jobs:
                       HStack {
                           Spacer(minLength: 0)
                           Circle()
-                              .fill(configuration.isOn ? Color.white : Color.black.opacity(0.55))
-                              .frame(width: 28, height: 28)
+                              .fill(Color.white)
+                              .frame(width: 24, height: 24)
                               .shadow(color: .black.opacity(0.18), radius: 2, y: 1)
                       }
                       .padding(4)
-                      .frame(width: 64, height: 36)
-                      .background(configuration.isOn ? Color.blue : Color.white, in: Capsule())
+                      .frame(width: 58, height: 32)
+                      .background(configuration.isOn ? Color.blue : Color.gray.opacity(0.65), in: Capsule())
                   }
                   .buttonStyle(.plain)
                   .accessibilityValue(configuration.isOn ? "Ativado" : "Desativado")
@@ -374,7 +375,7 @@ jobs:
           definition=definition.replace(".opacity(0.58)", ".opacity(1.0)").replace("Color.black.opacity(0.10)", "Color.clear")
           if 'struct AppBackgroundView: View' not in t:
               t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
-          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(AppBackgroundView())\n            .tint(AppTheme.accent)', 1)
+          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(Color.black)\n            .tint(AppTheme.accent)', 1)
           content.write_text(t)
           if patch.exists():
               p=patch.read_text()
