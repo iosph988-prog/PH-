@@ -169,7 +169,7 @@ jobs:
                               }
                               .pickerStyle(.segmented)
                               .frame(height: 54)
-                              .tint(.white)
+                              .tint(.black)
 
                               VStack(spacing: 14) {
                                   ForEach(selectedGame.patches) { patch in
@@ -181,7 +181,7 @@ jobs:
                           .padding(.top, 20)
                           .padding(.bottom, 28)
                       }
-                      .background(Color.black)
+                      .background(Color(.systemGroupedBackground))
                       .scrollContentBackground(.hidden)
                       .navigationTitle("Patches")
                       .navigationBarTitleDisplayMode(.inline)
@@ -201,10 +201,10 @@ jobs:
                       VStack(alignment: .leading, spacing: 7) {
                           Text(patch.title)
                               .font(.title3.weight(.semibold))
-                              .foregroundStyle(.white)
+                              .foregroundStyle(.primary)
                           Text("\(patch.replacementCount) replacement rules")
                               .font(.body)
-                              .foregroundStyle(.white.opacity(0.92))
+                              .foregroundStyle(.secondary)
                       }
                       Spacer(minLength: 8)
                       Toggle("", isOn: Binding(
@@ -220,8 +220,8 @@ jobs:
                   .padding(.horizontal, 22)
                   .padding(.vertical, 28)
                   .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
-                  .background(Color(.secondarySystemBackground).opacity(0.96), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.white.opacity(0.10), lineWidth: 1))
+                  .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
@@ -304,7 +304,7 @@ jobs:
                       }
                       .padding(4)
                       .frame(width: 58, height: 32)
-                      .background(configuration.isOn ? Color.blue : Color.gray.opacity(0.65), in: Capsule())
+                      .background(configuration.isOn ? Color.green : Color.gray.opacity(0.65), in: Capsule())
                   }
                   .buttonStyle(.plain)
                   .accessibilityValue(configuration.isOn ? "Ativado" : "Desativado")
@@ -327,7 +327,7 @@ jobs:
         run: |
           set -euo pipefail
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgSW5qZWN0b3JUYWJJY29uOiBWaWV3IHsKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIENpcmNsZSgpLnN0cm9rZShDb2xvci5wdXJwbGUsIGxpbmVXaWR0aDogMi4yKS5mcmFtZSh3aWR0aDogMTksIGhlaWdodDogMTkpCiAgICAgICAgICAgIENhcHN1bGUoKS5maWxsKENvbG9yLnB1cnBsZSkuZnJhbWUod2lkdGg6IDUsIGhlaWdodDogMTMpLnJvdGF0aW9uRWZmZWN0KC5kZWdyZWVzKC0zOCkpCiAgICAgICAgICAgIENpcmNsZSgpLmZpbGwoQ29sb3Iud2hpdGUpLmZyYW1lKHdpZHRoOiAzLCBoZWlnaHQ6IDMpCiAgICAgICAgfS5mcmFtZSh3aWR0aDogMjIsIGhlaWdodDogMjIpCiAgICB9Cn0KCg==" <<'PY'
+          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgQ29tcGFjdFRhYkxhYmVsOiBWaWV3IHsKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgc3lzdGVtSW1hZ2U6IFN0cmluZwoKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIExhYmVsIHsKICAgICAgICAgICAgVGV4dCh0aXRsZSkKICAgICAgICB9IGljb246IHsKICAgICAgICAgICAgSW1hZ2Uoc3lzdGVtTmFtZTogdGl0bGUgPT0gIkluamVjdG9yIiA/ICJnYW1lY29udHJvbGxlci5maWxsIiA6IHN5c3RlbUltYWdlKQogICAgICAgICAgICAgICAgLmZvbnQoLnN5c3RlbShzaXplOiAxOCwgd2VpZ2h0OiAuc2VtaWJvbGQpKQogICAgICAgICAgICAgICAgLnN5bWJvbFJlbmRlcmluZ01vZGUoLm1vbm9jaHJvbWUpCiAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKHRpdGxlID09ICJJbmplY3RvciIgPyBDb2xvci5ibHVlIDogQ29sb3IucHJpbWFyeSkKICAgICAgICAgICAgICAgIC5mcmFtZSh3aWR0aDogMjQsIGhlaWdodDogMjQpCiAgICAgICAgfQogICAgfQp9Cgpwcml2YXRlIGV4dGVuc2lvbiBBcHBTZWN0aW9uIHsK" <<'PY'
           import base64
           import sys
           from pathlib import Path
@@ -375,7 +375,7 @@ jobs:
           definition=definition.replace(".opacity(0.58)", ".opacity(1.0)").replace("Color.black.opacity(0.10)", "Color.clear")
           if 'struct AppBackgroundView: View' not in t:
               t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
-          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(Color.black)\n            .tint(AppTheme.accent)', 1)
+          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(Color(.systemGroupedBackground))\n            .tint(AppTheme.accent)', 1)
           content.write_text(t)
           if patch.exists():
               p=patch.read_text()
