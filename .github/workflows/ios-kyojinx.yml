@@ -1,4 +1,4 @@
-name: 3105 - Nubank Build Without API
+fname: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs:
   build:
@@ -86,7 +86,7 @@ jobs:
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in Hologramarosa\(2\).3105 Hsalto+antena\(2\).3105 Hspeito100%cache\(2\).3105 Magiccache\(2\).3105 Hsaltocache\(2\).3105 Hologramaverde\(5\).3105 Hspeitoavatar\(2\).3105 120FPS\(2\).3105 Hspescoçocache\(2\).3105 Hologramavermelho\(2\).3105 Hologramaverde\(4\).3105 Hologramazul\(2\).3105 Hspeito+antenaavatar\(1\).3105 Magicavatar\(2\).3105 Pescoço+antenaavatar\(2\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in Hologramarosa\(2\).3105 HSALTO.3105 Hspeito100%cache\(2\).3105 Magiccache\(2\).3105 Hsaltocache\(2\).3105 Hologramaverde\(5\).3105 Hspeitoavatar\(2\).3105 120FPS\(2\).3105 Hspescoçocache\(2\).3105 Hologramavermelho\(2\).3105 Hologramaverde\(4\).3105 Hologramazul\(2\).3105 Hspeito+antenaavatar\(1\).3105 Magicavatar\(2\).3105 Pescoço+antenaavatar\(2\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
