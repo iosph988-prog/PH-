@@ -86,7 +86,7 @@ jobs:
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in Hologramarosa\(2\).3105 Hsalto+antena\(2\).3105 Hspeito100%cache\(2\).3105 Magiccache\(2\).3105 Hsaltocache\(2\).3105 Hologramaverde\(5\).3105 Hspeitoavatar\(2\).3105 120FPS\(2\).3105 Hspescoçocache\(2\).3105 Hologramavermelho\(2\).3105 Hologramaverde\(4\).3105 Hologramazul\(2\).3105 Hspeito+antenaavatar\(1\).3105 Magicavatar\(2\).3105 Pescoço+antenaavatar\(2\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in Hologramarosa\(2\).3105 ESPCORPO.3105 HSALTO.3105 Pescoço\+antenaavatar\(2\).3105 Hologramaverde\(5\).3105 Hologramavermelho\(2\).3105 BALAMAGIC.3105 120FPS\(2\).3105 HSPEITO.3105 Magicavatar\(2\).3105 Hologramazul\(2\).3105 Magiccache\(2\).3105 HSPESÇOCO.3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -126,14 +126,14 @@ jobs:
                   bundleID: "com.dts.freefireth",
                   patches: [
                       PreloadedPatch(id: "normal-rosa", title: "Hologramarosa", fileName: "Hologramarosa(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-salto-antena", title: "Hsalto + antena", fileName: "Hsalto+antena(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-peito-cache", title: "Hspeito 100% cache", fileName: "Hspeito100%cache(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "normal-salto-antena", title: "Hsalto + antena", fileName: "HSALTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "normal-peito-cache", title: "ESPCORPO", fileName: "ESPCORPO.3105", replacementCount: 1),
                       PreloadedPatch(id: "normal-magic-cache", title: "Magic cache", fileName: "Magiccache(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-salto-cache", title: "Hsalto cache", fileName: "Hsaltocache(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "normal-salto-cache", title: "Hsalto cache", fileName: "BALAMAGIC.3105", replacementCount: 1),
                       PreloadedPatch(id: "normal-verde", title: "Holograma verde", fileName: "Hologramaverde(5).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-peito-avatar", title: "Hspeito avatar", fileName: "Hspeitoavatar(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "normal-peito-avatar", title: "HSPEITO", fileName: "HSPEITO.3105", replacementCount: 1),
                       PreloadedPatch(id: "normal-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-pescoco-cache", title: "Hspescoco cache", fileName: "Hspescoçocache(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "normal-pescoco-cache", title: "HSPESCOCO", fileName: "HSPESÇOCO.3105", replacementCount: 1),
                       PreloadedPatch(id: "normal-vermelho", title: "Holograma vermelho", fileName: "Hologramavermelho(2).3105", replacementCount: 1)
                   ]
               ),
@@ -144,7 +144,7 @@ jobs:
                   patches: [
                       PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-peito-antena", title: "Hspeito + antena avatar", fileName: "Hspeito+antenaavatar(1).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-peito-antena", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-magic", title: "Magic avatar", fileName: "Magicavatar(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-pescoco", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105", replacementCount: 1)
                   ]
