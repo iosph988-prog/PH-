@@ -83,10 +83,11 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          rm -rf "$APP_DIR/PreloadedPatches"
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in Hologramarosa\(2\).3105 ESPCORPO.3105 HSALTO.3105 Pescoço\+antenaavatar\(2\).3105 Hologramaverde\(5\).3105 Hologramavermelho\(2\).3105 BALAMAGIC.3105 120FPS\(2\).3105 HSPEITO.3105 Magicavatar\(2\).3105 Hologramazul\(2\).3105 Magiccache\(2\).3105 HSPESÇOCO.3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramaverde\(5\).3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Magicavatar\(2\).3105 Hologramazul\(2\).3105 Pescoço\+antenaavatar\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -125,16 +126,10 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "normal-rosa", title: "Hologramarosa", fileName: "Hologramarosa(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-salto-antena", title: "Hsalto + antena", fileName: "HSALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-peito-cache", title: "ESPCORPO", fileName: "ESPCORPO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-magic-cache", title: "Magic cache", fileName: "Magiccache(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-salto-cache", title: "Hsalto cache", fileName: "BALAMAGIC.3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-verde", title: "Holograma verde", fileName: "Hologramaverde(5).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-peito-avatar", title: "HSPEITO", fileName: "HSPEITO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-pescoco-cache", title: "HSPESCOCO", fileName: "HSPESÇOCO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "normal-vermelho", title: "Holograma vermelho", fileName: "Hologramavermelho(2).3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-alto", title: "ALTO", fileName: "ALTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-magica", title: "MAGICA", fileName: "MAGICA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito", title: "PEITO", fileName: "PEITO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco", title: "PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
