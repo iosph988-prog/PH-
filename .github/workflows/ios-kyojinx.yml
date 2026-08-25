@@ -11,7 +11,9 @@ jobs:
           set -euo pipefail
           rm -rf source build dist
           mkdir -p source build dist
-          tar -xzf 3105-1.1.1-injector-controls-fixed.tar.gz -C source
+          tar -xzf 3105-1.1.1-injector-controls-with-imports-small.tar.gz -C source
+          mkdir -p source/3105-1.1.1/SeedPackages
+          find . -maxdepth 1 -type f -name "*.3105" -exec cp -f {} source/3105-1.1.1/SeedPackages/ \;
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Apply app startup and navigation changes
@@ -117,6 +119,8 @@ jobs:
           APP_PATH=$(find build/App.xcarchive/Products/Applications -maxdepth 1 -type d -name "*.app" | head -1)
           test -n "$APP_PATH"
           cp -R "$APP_PATH" build/Payload/App.app
+          mkdir -p "$APP_PATH/SeedPackages"
+          cp -f source/3105-1.1.1/SeedPackages/*.3105 "$APP_PATH/SeedPackages/"
           /usr/bin/zip -qry build/nubank-preloaded-cards-buttons.ipa build/Payload
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
