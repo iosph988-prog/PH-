@@ -306,7 +306,6 @@ jobs:
                       .background(configuration.isOn ? Color.blue : Color.white, in: Capsule())
                   }
                   .buttonStyle(.plain)
-                  .accessibilityLabel(configuration.label)
                   .accessibilityValue(configuration.isOn ? "Ativado" : "Desativado")
               }
           }
