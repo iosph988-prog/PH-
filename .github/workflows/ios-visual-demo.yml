@@ -1,0 +1,36 @@
+name: PH MODS Visual Demo
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare visual overlay
+        run: |
+          set -euo pipefail
+          rm -rf source build dist
+          mkdir -p source build dist
+          tar -xzf 3105-1.1.1-original.tar.gz -C source
+          APP=source/3105-1.1.1/ThreeOneOSFive
+          cp HSALTO.3105 BALAMAGIC.3105 HSPEITO.3105 ESPCORPO.3105 HSPESC*.3105 "$APP/"
+          cat > "$APP/views/PatchProjectsView.swift" <<'SWIFT'
+          import SwiftUI
+          struct PatchProjectsView: View {
+              let items = [("HSALTO","HSALTO.3105"),("BALAMAGIC","BALAMAGIC.3105"),("HSPESCOCO","HSPESÇOCO.3105"),("HSPEITO","HSPEITO.3105"),("ESPCORPO","ESPCORPO.3105")]
+              var body: some View { NavigationStack { List { Section { Label("Catálogo visual", systemImage: "eye.slash.fill").foregroundStyle(.orange); Text("Itens demonstrativos desativados").foregroundStyle(.secondary) } ; Section("Free Fire normal") { ForEach(items, id: \.0) { item in HStack { Image(systemName: "shippingbox").foregroundStyle(.secondary); VStack(alignment: .leading) { Text(item.0).font(.headline); Text(item.1).font(.caption.monospaced()).foregroundStyle(.secondary); Text("Desativado — demonstração visual").font(.caption).foregroundStyle(.orange) }; Spacer(); Image(systemName: "lock.fill").foregroundStyle(.secondary) } } } }.navigationTitle("Patches") } }
+          }
+          SWIFT
+      - name: Build unsigned IPA
+        run: |
+          set -euo pipefail
+          PROJECT=$(find source -name ThreeOneOSFive.xcodeproj -type d -print -quit)
+          SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination generic/platform=iOS -archivePath "$PWD/build/demo.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          APP=$(find build/demo.xcarchive/Products/Applications -name '*.app' -type d -print -quit)
+          mkdir -p build/Payload; cp -R "$APP" build/Payload
+          (cd build && zip -qry "$GITHUB_WORKSPACE/dist/ph-mods-visual-demo.ipa" Payload)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ph-mods-visual-demo-ipa
+          path: dist/ph-mods-visual-demo.ipa
