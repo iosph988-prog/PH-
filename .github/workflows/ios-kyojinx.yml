@@ -169,7 +169,7 @@ jobs:
                               }
                               .pickerStyle(.segmented)
                               .frame(height: 54)
-                              .tint(.black)
+                              .tint(.green)
 
                               VStack(spacing: 14) {
                                   ForEach(selectedGame.patches) { patch in
@@ -185,6 +185,7 @@ jobs:
                       .scrollContentBackground(.hidden)
                       .navigationTitle("Patches")
                       .navigationBarTitleDisplayMode(.inline)
+                          .preferredColorScheme(.light)
                   }
               }
           }
@@ -201,10 +202,10 @@ jobs:
                       VStack(alignment: .leading, spacing: 7) {
                           Text(patch.title)
                               .font(.title3.weight(.semibold))
-                              .foregroundStyle(.primary)
+                              .foregroundStyle(Color.black)
                           Text("\(patch.replacementCount) replacement rules")
                               .font(.body)
-                              .foregroundStyle(.secondary)
+                              .foregroundStyle(Color.gray)
                       }
                       Spacer(minLength: 8)
                       Toggle("", isOn: Binding(
@@ -220,7 +221,7 @@ jobs:
                   .padding(.horizontal, 22)
                   .padding(.vertical, 28)
                   .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
-                  .background(Color(.systemBackground), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+                  .background(Color.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
                   .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
@@ -358,7 +359,7 @@ jobs:
         run: |
           set -euo pipefail
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgQ29tcGFjdFRhYkxhYmVsOiBWaWV3IHsKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgc3lzdGVtSW1hZ2U6IFN0cmluZwoKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIExhYmVsIHsKICAgICAgICAgICAgVGV4dCh0aXRsZSkKICAgICAgICB9IGljb246IHsKICAgICAgICAgICAgSW1hZ2Uoc3lzdGVtTmFtZTogdGl0bGUgPT0gIkluamVjdG9yIiA/ICJzeXJpbmdlLmZpbGwiIDogc3lzdGVtSW1hZ2UpCiAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDE4LCB3ZWlnaHQ6IC5zZW1pYm9sZCkpCiAgICAgICAgICAgICAgICAuc3ltYm9sUmVuZGVyaW5nTW9kZSgubW9ub2Nocm9tZSkKICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUodGl0bGUgPT0gIkluamVjdG9yIiA/IENvbG9yLm9yYW5nZSA6IENvbG9yLnByaW1hcnkpCiAgICAgICAgICAgICAgICAuZnJhbWUod2lkdGg6IDI0LCBoZWlnaHQ6IDI0KQogICAgICAgIH0KICAgIH0KfQ==" <<'PY'
+          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgQ29tcGFjdFRhYkxhYmVsOiBWaWV3IHsKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgc3lzdGVtSW1hZ2U6IFN0cmluZwogICAgdmFyIGJvZHk6IHNvbWUgVmlldyB7CiAgICAgICAgTGFiZWwgewogICAgICAgICAgICBUZXh0KHRpdGxlKQogICAgICAgIH0gaWNvbjogewogICAgICAgICAgICBJbWFnZShzeXN0ZW1OYW1lOiB0aXRsZSA9PSAiSW5qZWN0b3IiID8gImdhbWVjb250cm9sbGVyLmZpbGwiIDogc3lzdGVtSW1hZ2UpCiAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDE4LCB3ZWlnaHQ6IC5zZW1pYm9sZCkpCiAgICAgICAgICAgICAgICAuc3ltYm9sUmVuZGVyaW5nTW9kZSgubW9ub2Nocm9tZSkKICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUodGl0bGUgPT0gIkluamVjdG9yIiA/IENvbG9yLmJsdWUgOiBDb2xvci5wcmltYXJ5KQogICAgICAgICAgICAgICAgLmZyYW1lKHdpZHRoOiAyNCwgaGVpZ2h0OiAyNCkKICAgICAgICB9CiAgICB9Cn0=" <<'PY'
           import base64, sys
           from pathlib import Path
           content = Path(sys.argv[1])
