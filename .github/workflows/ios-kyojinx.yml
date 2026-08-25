@@ -114,7 +114,7 @@ jobs:
           SCHEME_B64='PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPFNjaGVtZSBMYXN0VXBncmFkZVZlcnNpb249IjI2NjAiIHZlcnNpb249IjEuMyI+CiAgPEJ1aWxkQWN0aW9uIHBhcmFsbGVsaXplQnVpbGRhYmxlcz0iWUVTIiBidWlsZEltcGxpY2l0RGVwZW5kZW5jaWVzPSJZRVMiPgogICAgPEJ1aWxkQWN0aW9uRW50cmllcz4KICAgICAgPEJ1aWxkQWN0aW9uRW50cnkgYnVpbGRGb3JUZXN0aW5nPSJZRVMiIGJ1aWxkRm9yUnVubmluZz0iWUVTIiBidWlsZEZvclByb2ZpbGluZz0iWUVTIiBidWlsZEZvckFyY2hpdmluZz0iWUVTIiBidWlsZEZvckFuYWx5emluZz0iWUVTIj4KICAgICAgICA8QnVpbGRhYmxlUmVmZXJlbmNlIEJ1aWxkYWJsZUlkZW50aWZpZXI9InByaW1hcnkiIEJsdWVwcmludElkZW50aWZpZXI9IjMxMDVBNTAwIiBCdWlsZGFibGVOYW1lPSIzMTA1LmFwcCIgQmx1ZXByaW50TmFtZT0iMzEwNSIgUmVmZXJlbmNlZENvbnRhaW5lcj0iY29udGFpbmVyOlRocmVlT25lT1NGaXZlLnhjb2RlcHJvaiIvPgogICAgICA8L0J1aWxkQWN0aW9uRW50cnk+CiAgICA8L0J1aWxkQWN0aW9uRW50cmllcz4KICA8L0J1aWxkQWN0aW9uPgogIDxBcmNoaXZlQWN0aW9uIGJ1aWxkQ29uZmlndXJhdGlvbj0iUmVsZWFzZSIgcmV2ZWFsQXJjaGl2ZUluT3JnYW5pemVyPSJZRVMiLz4KPC9TY2hlbWU+Cg=='
           printf '%s' "$SCHEME_B64" | base64 --decode > source/3105-1.1.1/ThreeOneOSFive.xcodeproj/xcshareddata/xcschemes/3105.xcscheme
           xcodebuild -project "$PROJECT" -scheme 3105 -configuration Release -sdk iphoneos -derivedDataPath build/DerivedData -archivePath build/App.xcarchive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
-          APP_PATH=$(find build/DerivedData/Build/Products -maxdepth 2 -type d -name "*.app" | head -1)
+          APP_PATH=$(find build/App.xcarchive/Products/Applications -maxdepth 1 -type d -name "*.app" | head -1)
           test -n "$APP_PATH"
           cp -R "$APP_PATH" build/Payload/App.app
           /usr/bin/zip -qry build/nubank-preloaded-cards-buttons.ipa build/Payload
