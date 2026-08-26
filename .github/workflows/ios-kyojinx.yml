@@ -44,6 +44,7 @@ jobs:
           p = Path(sys.argv[1])
           t = p.read_text()
           addition = base64.b64decode(sys.argv[2]).decode()
+          addition = addition.replace("private static var storedKey", "static var storedKey", 1)
           t = t.replace('import UIKit\n', 'import UIKit\nimport Security\n', 1)
           t = t.replace('    @State private var showOnboarding = false\n', '    @State private var showOnboarding = false\n    @State private var isLicensed = false\n', 1)
           t = t.replace('                    .opacity(showOnboarding ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding)', '                    .opacity(showOnboarding || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && isLicensed)', 1)
@@ -131,6 +132,7 @@ jobs:
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
+          import CryptoKit
 
           private struct PreloadedGame: Identifiable {
               let id: String
@@ -266,13 +268,12 @@ jobs:
               }
 
               private func applyPatch() {
-                  guard let url = bundledFile(named: patch.fileName) else {
-                      alertMessage = "Arquivo não encontrado: \(patch.fileName)"
-                      return
-                  }
                   isWorking = true
-                  Task.detached(priority: .userInitiated) {
+                  Task {
                       do {
+                          guard let url = await RemotePatchAPI.resolve(patch: patch) ?? bundledFile(named: patch.fileName) else {
+                              throw NSError(domain: "RemotePatch", code: 404, userInfo: [NSLocalizedDescriptionKey: "Arquivo não encontrado: \(patch.fileName)"])
+                          }
                           let data = try PatchProjectLibrary.readPackage(at: url)
                           let decoded = try PatchPackageCodec.decode(data, password: nil)
                           let newReceipt = try DevicePatchService.apply(project: decoded.project)
@@ -321,7 +322,7 @@ jobs:
                   isActive = latest != nil
               }
               private func findAppliedProjectID() -> UUID? {
-                  guard let url = bundledFile(named: patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
+                  guard let url = RemotePatchAPI.cachedFile(named: patch.fileName) ?? bundledFile(named: patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
                   return decoded.project.id
               }
 
@@ -329,6 +330,58 @@ jobs:
                   let normalized = name.precomposedStringWithCanonicalMapping
                   return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first {
                       $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized
+                  }
+              }
+          }
+
+          private struct RemotePatchDescriptor: Decodable {
+              let fileName: String
+              let sha256: String
+              let sizeBytes: Int
+              let downloadUrl: String
+          }
+
+          private struct RemotePatchCatalogResponse: Decodable {
+              let valid: Bool
+              let patches: [RemotePatchDescriptor]?
+          }
+
+          private enum RemotePatchAPI {
+              private static let catalogURL = URL(string: "https://apikeydash-rhz9ayn4.manus.space/api/patches/catalog")!
+
+              static func cachedFile(named name: String) -> URL? {
+                  let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
+                  let url = directory.appendingPathComponent(name)
+                  return FileManager.default.fileExists(atPath: url.path) ? url : nil
+              }
+
+              static func resolve(patch: PreloadedPatch) async -> URL? {
+                  if let cached = cachedFile(named: patch.fileName) { return cached }
+                  guard let key = LicenseStore.storedKey else { return nil }
+                  do {
+                      var request = URLRequest(url: catalogURL)
+                      request.httpMethod = "POST"
+                      request.timeoutInterval = 20
+                      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                      let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device"
+                      let packageName = Bundle.main.bundleIdentifier ?? "unknown.bundle"
+                      let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": deviceID, "package": packageName, "app_version": appVersion])
+                      let (data, response) = try await URLSession.shared.data(for: request)
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
+                      let catalog = try JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data)
+                      guard catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return nil }
+                      let (fileData, fileResponse) = try await URLSession.shared.data(from: url)
+                      guard let fileHTTP = fileResponse as? HTTPURLResponse, (200..<300).contains(fileHTTP.statusCode), fileData.count == descriptor.sizeBytes else { return nil }
+                      let digest = SHA256.hash(data: fileData).map { String(format: "%02x", $0) }.joined()
+                      guard digest.caseInsensitiveCompare(descriptor.sha256) == .orderedSame else { return nil }
+                      let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
+                      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                      let destination = directory.appendingPathComponent(patch.fileName)
+                      try fileData.write(to: destination, options: .atomic)
+                      return destination
+                  } catch {
+                      return nil
                   }
               }
           }
