@@ -179,10 +179,17 @@ jobs:
               @StateObject private var store = PatchProjectStore()
               @State private var selectedGameID = "free-fire"
 
-              private var selectedGame: PreloadedGame {
+                            private var selectedGame: PreloadedGame {
                   preloadedGames.first(where: { $0.id == selectedGameID }) ?? preloadedGames[0]
               }
-
+              private var displayedPatches: [PreloadedPatch] {
+                  if selectedGameID == "free-fire-max" {
+                      return selectedGame.patches + [
+                          PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESCOCO(3).3105", replacementCount: 1)
+                      ]
+                  }
+                  return selectedGame.patches
+              }
               var body: some View {
                   NavigationStack {
                       ScrollView {
@@ -197,14 +204,8 @@ jobs:
                               .tint(.green)
 
                               VStack(spacing: 14) {
-                                  ForEach(selectedGame.patches) { patch in
+                                  ForEach(displayedPatches) { patch in
                                       PreloadedPatchCard(patch: patch, store: store)
-                                  }
-                                  if selectedGameID == "free-fire-max" {
-                                      PreloadedPatchCard(
-                                          patch: PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESCOCO(3).3105", replacementCount: 1),
-                                          store: store
-                                      )
                                   }
                               }
                           }
