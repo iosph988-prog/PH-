@@ -226,6 +226,7 @@ jobs:
               let patch: PreloadedPatch
               @ObservedObject var store: PatchProjectStore
               @State private var isActive = false
+              @State private var activeReceipt: PatchTransactionReceipt?
               @State private var isWorking = false
               @State private var alertMessage: String?
 
@@ -256,6 +257,7 @@ jobs:
                   .background(Color.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
                   .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
+                  .onAppear { synchronizeAppliedState() }
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
                   } message: {
@@ -273,8 +275,9 @@ jobs:
                       do {
                           let data = try PatchProjectLibrary.readPackage(at: url)
                           let decoded = try PatchPackageCodec.decode(data, password: nil)
-                          _ = try DevicePatchService.apply(project: decoded.project)
+                          let newReceipt = try DevicePatchService.apply(project: decoded.project)
                           await MainActor.run {
+                              activeReceipt = newReceipt
                               isActive = true
                               isWorking = false
                           }
@@ -288,16 +291,17 @@ jobs:
               }
 
               private func restorePatch() {
-                  guard let projectID = findAppliedProjectID(),
-                        let receipt = DevicePatchService.latestReceipt(projectID: projectID) else {
+                  let currentReceipt = activeReceipt ?? findAppliedProjectID().flatMap { DevicePatchService.latestReceipt(projectID: $0) }
+                  guard let currentReceipt else {
                       isActive = false
                       return
                   }
                   isWorking = true
                   Task.detached(priority: .userInitiated) {
                       do {
-                          try DevicePatchService.restore(receipt: receipt)
+                          try DevicePatchService.restore(receipt: currentReceipt)
                           await MainActor.run {
+                              activeReceipt = nil
                               isActive = false
                               isWorking = false
                           }
@@ -310,6 +314,12 @@ jobs:
                   }
               }
 
+              private func synchronizeAppliedState() {
+                  guard let projectID = findAppliedProjectID() else { return }
+                  let latest = DevicePatchService.latestReceipt(projectID: projectID)
+                  activeReceipt = latest
+                  isActive = latest != nil
+              }
               private func findAppliedProjectID() -> UUID? {
                   guard let url = bundledFile(named: patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
                   return decoded.project.id
