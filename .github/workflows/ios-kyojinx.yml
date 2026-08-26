@@ -484,9 +484,7 @@ jobs:
               anchors = ["            List {\n                deviceSection\n", "            List {\n            deviceSection\n"]
               for old in anchors:
                   if old in t:
-                      t = t.replace(old, old.replace('deviceSection', 'LicenseProfileView()
-                    .environmentObject(appState)
-                deviceSection'), 1)
+                      t = t.replace(old, old.replace('deviceSection', 'LicenseProfileView()\n                    .environmentObject(appState)\n                deviceSection'), 1)
                       break
               else:
                   raise SystemExit('âncora List/deviceSection não encontrada')
