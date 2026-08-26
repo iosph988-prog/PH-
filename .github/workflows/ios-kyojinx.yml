@@ -481,11 +481,7 @@ jobs:
           p = Path(sys.argv[1])
           t = p.read_text()
           if 'LicenseProfileView()' not in t:
-              anchors = ['            List {
-                deviceSection
-', '            List {
-            deviceSection
-']
+              anchors = ["            List {\n                deviceSection\n", "            List {\n            deviceSection\n"]
               for old in anchors:
                   if old in t:
                       t = t.replace(old, old.replace('deviceSection', 'LicenseProfileView()
