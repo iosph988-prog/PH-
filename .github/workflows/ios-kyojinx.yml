@@ -171,7 +171,6 @@ jobs:
                       PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESCOCO(3).3105", replacementCount: 1),
                   ]
               )
           ]
@@ -200,6 +199,12 @@ jobs:
                               VStack(spacing: 14) {
                                   ForEach(selectedGame.patches) { patch in
                                       PreloadedPatchCard(patch: patch, store: store)
+                                  }
+                                  if selectedGameID == "free-fire-max" {
+                                      PreloadedPatchCard(
+                                          patch: PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESCOCO(3).3105", replacementCount: 1),
+                                          store: store
+                                      )
                                   }
                               }
                           }
