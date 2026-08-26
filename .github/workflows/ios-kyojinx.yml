@@ -388,6 +388,8 @@ jobs:
           # Remove any legacy orange asset branch if present.
           t=re.sub(r'if title == "Injector", let url = Bundle\.main\.url\(forResource: "injector_icon_orange".*?\n\s*\} else if let image = UIImage\(', 'if title == "Injector" { Image(systemName: "gamecontroller.fill").font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.blue) } else if let image = UIImage(', t, count=1, flags=re.S)
           t=t.replace('Color.orange', 'Color.blue')
+          t=t.replace('shippingbox.fill', 'gamecontroller.fill')
+          t=t.replace('syringe.fill', 'gamecontroller.fill')
           # Keep the tab bar neutral/blue rather than orange.
           t=t.replace('UIColor.orange', 'UIColor.systemBlue')
           p.write_text(t)
