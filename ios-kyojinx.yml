@@ -33,6 +33,31 @@ jobs:
           if old not in n: raise SystemExit("visibleSections declaration not found")
           nav.write_text(n.replace(old, "return [.home, .patches].filter(isVisible)", 1))
           PY
+      - name: Add API login gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_SWIFT=source/3105-1.1.1/ThreeOneOSFive/App.swift
+          python3 - "$APP_SWIFT" "aW1wb3J0IEZvdW5kYXRpb24KaW1wb3J0IFN3aWZ0VUkKaW1wb3J0IFVJS2l0CmltcG9ydCBTZWN1cml0eQoKc3RydWN0IExpY2Vuc2VSZXNwb25zZTogQ29kYWJsZSB7CiAgICBsZXQgdmFsaWQ6IEJvb2wKICAgIGxldCBjb2RlOiBTdHJpbmc/CiAgICBsZXQgbWVzc2FnZTogU3RyaW5nCiAgICBsZXQga2V5OiBTdHJpbmc/CiAgICBsZXQgZXhwaXJlc0F0OiBTdHJpbmc/CiAgICBsZXQgcmVtYWluaW5nVXNlczogSW50PwogICAgbGV0IGRldmljZUlEOiBTdHJpbmc/CiAgICBsZXQgcGFja2FnZTogU3RyaW5nPwogICAgbGV0IGR1cmF0aW9uRGF5czogSW50PwogICAgbGV0IGFjdGl2YXRlZEF0OiBTdHJpbmc/CgogICAgZW51bSBDb2RpbmdLZXlzOiBTdHJpbmcsIENvZGluZ0tleSB7CiAgICAgICAgY2FzZSB2YWxpZCwgY29kZSwgbWVzc2FnZSwga2V5LCBwYWNrYWdlCiAgICAgICAgY2FzZSBleHBpcmVzQXQgPSAiZXhwaXJlc0F0IgogICAgICAgIGNhc2UgcmVtYWluaW5nVXNlcyA9ICJyZW1haW5pbmdVc2VzIgogICAgICAgIGNhc2UgZGV2aWNlSUQgPSAiZGV2aWNlSWQiCiAgICAgICAgY2FzZSBkdXJhdGlvbkRheXMgPSAiZHVyYXRpb25EYXlzIgogICAgICAgIGNhc2UgYWN0aXZhdGVkQXQgPSAiYWN0aXZhdGVkQXQiCiAgICB9Cn0KCmVudW0gTGljZW5zZUFQSSB7CiAgICBzdGF0aWMgbGV0IGFwaVVSTCA9IFVSTChzdHJpbmc6ICJodHRwczovL2FwaWtleWRhc2gtcmh6OWF5bjQubWFudXMuc3BhY2UvYXBpL2xpY2Vuc2UvdmFsaWRhdGUiKSEKCiAgICBzdGF0aWMgZnVuYyB2YWxpZGF0ZShrZXk6IFN0cmluZykgYXN5bmMgdGhyb3dzIC0+IExpY2Vuc2VSZXNwb25zZSB7CiAgICAgICAgdmFyIHJlcXVlc3QgPSBVUkxSZXF1ZXN0KHVybDogYXBpVVJMKQogICAgICAgIHJlcXVlc3QuaHR0cE1ldGhvZCA9ICJQT1NUIgogICAgICAgIHJlcXVlc3QudGltZW91dEludGVydmFsID0gMjAKICAgICAgICByZXF1ZXN0LnNldFZhbHVlKCJhcHBsaWNhdGlvbi9qc29uIiwgZm9ySFRUUEhlYWRlckZpZWxkOiAiQ29udGVudC1UeXBlIikKICAgICAgICByZXF1ZXN0LnNldFZhbHVlKCJhcHBsaWNhdGlvbi9qc29uIiwgZm9ySFRUUEhlYWRlckZpZWxkOiAiQWNjZXB0IikKICAgICAgICBsZXQgZGV2aWNlSUQgPSBVSURldmljZS5jdXJyZW50LmlkZW50aWZpZXJGb3JWZW5kb3I/LnV1aWRTdHJpbmcgPz8gInVua25vd24tZGV2aWNlIgogICAgICAgIGxldCBidW5kbGVJRCA9IEJ1bmRsZS5tYWluLmJ1bmRsZUlkZW50aWZpZXIgPz8gInVua25vd24uYnVuZGxlIgogICAgICAgIGxldCB2ZXJzaW9uID0gQnVuZGxlLm1haW4uaW5mb0RpY3Rpb25hcnk/WyJDRkJ1bmRsZVNob3J0VmVyc2lvblN0cmluZyJdIGFzPyBTdHJpbmcgPz8gIjEuMCIKICAgICAgICByZXF1ZXN0Lmh0dHBCb2R5ID0gdHJ5IEpTT05TZXJpYWxpemF0aW9uLmRhdGEod2l0aEpTT05PYmplY3Q6IFsKICAgICAgICAgICAgImtleSI6IGtleS50cmltbWluZ0NoYXJhY3RlcnMoaW46IC53aGl0ZXNwYWNlc0FuZE5ld2xpbmVzKS51cHBlcmNhc2VkKCksCiAgICAgICAgICAgICJkZXZpY2VfaWQiOiBkZXZpY2VJRCwKICAgICAgICAgICAgInBhY2thZ2UiOiBidW5kbGVJRCwKICAgICAgICAgICAgImFwcF92ZXJzaW9uIjogdmVyc2lvbgogICAgICAgIF0pCiAgICAgICAgbGV0IChkYXRhLCByZXNwb25zZSkgPSB0cnkgYXdhaXQgVVJMU2Vzc2lvbi5zaGFyZWQuZGF0YShmb3I6IHJlcXVlc3QpCiAgICAgICAgZ3VhcmQgbGV0IGh0dHAgPSByZXNwb25zZSBhcz8gSFRUUFVSTFJlc3BvbnNlLCAoMjAwLi48MzAwKS5jb250YWlucyhodHRwLnN0YXR1c0NvZGUpIGVsc2UgewogICAgICAgICAgICB0aHJvdyBVUkxFcnJvciguYmFkU2VydmVyUmVzcG9uc2UpCiAgICAgICAgfQogICAgICAgIHJldHVybiB0cnkgSlNPTkRlY29kZXIoKS5kZWNvZGUoTGljZW5zZVJlc3BvbnNlLnNlbGYsIGZyb206IGRhdGEpCiAgICB9Cn0KCmZpbmFsIGNsYXNzIExpY2Vuc2VTdG9yZSB7CiAgICBwcml2YXRlIHN0YXRpYyBsZXQgc2VydmljZSA9ICJjb20udGhyZWVvbmVvc2ZpdmUubGljZW5zZSIKICAgIHByaXZhdGUgc3RhdGljIGxldCBhY2NvdW50ID0gImFjdGl2YXRpb24ta2V5IgoKICAgIHN0YXRpYyB2YXIgc3RvcmVkS2V5OiBTdHJpbmc/IHsKICAgICAgICBsZXQgcXVlcnk6IFtTdHJpbmc6IEFueV0gPSBbCiAgICAgICAgICAgIGtTZWNDbGFzcyBhcyBTdHJpbmc6IGtTZWNDbGFzc0dlbmVyaWNQYXNzd29yZCwKICAgICAgICAgICAga1NlY0F0dHJTZXJ2aWNlIGFzIFN0cmluZzogc2VydmljZSwKICAgICAgICAgICAga1NlY0F0dHJBY2NvdW50IGFzIFN0cmluZzogYWNjb3VudCwKICAgICAgICAgICAga1NlY1JldHVybkRhdGEgYXMgU3RyaW5nOiB0cnVlLAogICAgICAgICAgICBrU2VjTWF0Y2hMaW1pdCBhcyBTdHJpbmc6IGtTZWNNYXRjaExpbWl0T25lCiAgICAgICAgXQogICAgICAgIHZhciByZXN1bHQ6IEFueU9iamVjdD8KICAgICAgICBndWFyZCBTZWNJdGVtQ29weU1hdGNoaW5nKHF1ZXJ5IGFzIENGRGljdGlvbmFyeSwgJnJlc3VsdCkgPT0gZXJyU2VjU3VjY2VzcywKICAgICAgICAgICAgICBsZXQgZGF0YSA9IHJlc3VsdCBhcz8gRGF0YSwKICAgICAgICAgICAgICBsZXQgdmFsdWUgPSBTdHJpbmcoZGF0YTogZGF0YSwgZW5jb2Rpbmc6IC51dGY4KSwKICAgICAgICAgICAgICAhdmFsdWUuaXNFbXB0eSBlbHNlIHsgcmV0dXJuIG5pbCB9CiAgICAgICAgcmV0dXJuIHZhbHVlCiAgICB9CgogICAgc3RhdGljIGZ1bmMgc2F2ZShfIGtleTogU3RyaW5nKSB7CiAgICAgICAgbGV0IHF1ZXJ5OiBbU3RyaW5nOiBBbnldID0gWwogICAgICAgICAgICBrU2VjQ2xhc3MgYXMgU3RyaW5nOiBrU2VjQ2xhc3NHZW5lcmljUGFzc3dvcmQsCiAgICAgICAgICAgIGtTZWNBdHRyU2VydmljZSBhcyBTdHJpbmc6IHNlcnZpY2UsCiAgICAgICAgICAgIGtTZWNBdHRyQWNjb3VudCBhcyBTdHJpbmc6IGFjY291bnQKICAgICAgICBdCiAgICAgICAgU2VjSXRlbURlbGV0ZShxdWVyeSBhcyBDRkRpY3Rpb25hcnkpCiAgICAgICAgdmFyIGl0ZW0gPSBxdWVyeQogICAgICAgIGl0ZW1ba1NlY1ZhbHVlRGF0YSBhcyBTdHJpbmddID0gRGF0YShrZXkudXRmOCkKICAgICAgICBTZWNJdGVtQWRkKGl0ZW0gYXMgQ0ZEaWN0aW9uYXJ5LCBuaWwpCiAgICB9Cn0KCnN0cnVjdCBMaWNlbnNlUHJvZmlsZVNuYXBzaG90OiBDb2RhYmxlIHsKICAgIGxldCBwcm9kdWN0OiBTdHJpbmcKICAgIGxldCBzdGF0dXM6IFN0cmluZwogICAgbGV0IGV4cGlyZXNBdDogU3RyaW5nPwogICAgbGV0IGRldmljZUlEOiBTdHJpbmc/CiAgICBsZXQgcGFja2FnZTogU3RyaW5nPwogICAgbGV0IGR1cmF0aW9uRGF5czogSW50PwogICAgbGV0IGFjdGl2YXRlZEF0OiBTdHJpbmc/Cn0KCmV4dGVuc2lvbiBMaWNlbnNlU3RvcmUgewogICAgcHJpdmF0ZSBzdGF0aWMgbGV0IHByb2ZpbGVLZXkgPSAibGljZW5zZS1wcm9maWxlLXNuYXBzaG90IgoKICAgIHN0YXRpYyB2YXIgcHJvZmlsZVNuYXBzaG90OiBMaWNlbnNlUHJvZmlsZVNuYXBzaG90PyB7CiAgICAgICAgZ3VhcmQgbGV0IGRhdGEgPSBVc2VyRGVmYXVsdHMuc3RhbmRhcmQuZGF0YShmb3JLZXk6IHByb2ZpbGVLZXkpIGVsc2UgeyByZXR1cm4gbmlsIH0KICAgICAgICByZXR1cm4gdHJ5PyBKU09ORGVjb2RlcigpLmRlY29kZShMaWNlbnNlUHJvZmlsZVNuYXBzaG90LnNlbGYsIGZyb206IGRhdGEpCiAgICB9CgogICAgc3RhdGljIGZ1bmMgc2F2ZShfIGtleTogU3RyaW5nLCByZXNwb25zZTogTGljZW5zZVJlc3BvbnNlKSB7CiAgICAgICAgc2F2ZShrZXkpCiAgICAgICAgbGV0IHNuYXBzaG90ID0gTGljZW5zZVByb2ZpbGVTbmFwc2hvdCgKICAgICAgICAgICAgcHJvZHVjdDogIkVYVEVSTkFMIiwKICAgICAgICAgICAgc3RhdHVzOiByZXNwb25zZS52YWxpZCA/ICJWSVAgQVRJVk8iIDogIklOQVRJVkEiLAogICAgICAgICAgICBleHBpcmVzQXQ6IHJlc3BvbnNlLmV4cGlyZXNBdCwKICAgICAgICAgICAgZGV2aWNlSUQ6IHJlc3BvbnNlLmRldmljZUlELAogICAgICAgICAgICBwYWNrYWdlOiByZXNwb25zZS5wYWNrYWdlLAogICAgICAgICAgICBkdXJhdGlvbkRheXM6IHJlc3BvbnNlLmR1cmF0aW9uRGF5cywKICAgICAgICAgICAgYWN0aXZhdGVkQXQ6IHJlc3BvbnNlLmFjdGl2YXRlZEF0CiAgICAgICAgKQogICAgICAgIGlmIGxldCBkYXRhID0gdHJ5PyBKU09ORW5jb2RlcigpLmVuY29kZShzbmFwc2hvdCkgewogICAgICAgICAgICBVc2VyRGVmYXVsdHMuc3RhbmRhcmQuc2V0KGRhdGEsIGZvcktleTogcHJvZmlsZUtleSkKICAgICAgICB9CiAgICB9Cn0KCnN0cnVjdCBMaWNlbnNlUHJvZmlsZVZpZXc6IFZpZXcgewogICAgQEVudmlyb25tZW50T2JqZWN0IHByaXZhdGUgdmFyIGFwcFN0YXRlOiBBcHBTdGF0ZQoKICAgIHByaXZhdGUgdmFyIHNuYXBzaG90OiBMaWNlbnNlUHJvZmlsZVNuYXBzaG90PyB7CiAgICAgICAgTGljZW5zZVN0b3JlLnByb2ZpbGVTbmFwc2hvdAogICAgfQoKICAgIHByaXZhdGUgdmFyIGRldmljZUlEOiBTdHJpbmcgewogICAgICAgIGxldCB2YWx1ZSA9IHNuYXBzaG90Py5kZXZpY2VJRCA/PyBVSURldmljZS5jdXJyZW50LmlkZW50aWZpZXJGb3JWZW5kb3I/LnV1aWRTdHJpbmcgPz8gIkluZGlzcG9uw612ZWwiCiAgICAgICAgcmV0dXJuIHZhbHVlLmNvdW50ID4gMTggPyBTdHJpbmcodmFsdWUucHJlZml4KDE4KSkgKyAi4oCmIiA6IHZhbHVlCiAgICB9CgogICAgcHJpdmF0ZSB2YXIgZXhwaXJhdGlvbjogU3RyaW5nIHsKICAgICAgICBndWFyZCBsZXQgcmF3ID0gc25hcHNob3Q/LmV4cGlyZXNBdCwgbGV0IGRhdGUgPSBMaWNlbnNlUHJvZmlsZVZpZXcucGFyc2VEYXRlKHJhdykgZWxzZSB7CiAgICAgICAgICAgIHJldHVybiAiQWd1YXJkYW5kbyBhdGl2YcOnw6NvIgogICAgICAgIH0KICAgICAgICByZXR1cm4gZGF0ZS5mb3JtYXR0ZWQoZGF0ZTogLm51bWVyaWMsIHRpbWU6IC5zaG9ydGVuZWQpCiAgICB9CgogICAgcHJpdmF0ZSB2YXIga2V5RHVyYXRpb246IFN0cmluZyB7CiAgICAgICAgZ3VhcmQgbGV0IGRheXMgPSBzbmFwc2hvdD8uZHVyYXRpb25EYXlzLCBkYXlzID4gMCBlbHNlIHsgcmV0dXJuICJJbmRpc3BvbsOtdmVsIiB9CiAgICAgICAgcmV0dXJuIGRheXMgPT0gMSA/ICIxIGRpYSIgOiAiXChkYXlzKSBkaWFzIgogICAgfQoKICAgIHByaXZhdGUgZnVuYyByZW1haW5pbmcoYXQgbm93OiBEYXRlKSAtPiBTdHJpbmcgewogICAgICAgIGd1YXJkIGxldCByYXcgPSBzbmFwc2hvdD8uZXhwaXJlc0F0LCBsZXQgZGF0ZSA9IExpY2Vuc2VQcm9maWxlVmlldy5wYXJzZURhdGUocmF3KSBlbHNlIHsKICAgICAgICAgICAgcmV0dXJuIGtleUR1cmF0aW9uCiAgICAgICAgfQogICAgICAgIGxldCBzZWNvbmRzID0gbWF4KDAsIGRhdGUudGltZUludGVydmFsU2luY2Uobm93KSkKICAgICAgICBsZXQgZGF5cyA9IEludChzZWNvbmRzIC8gODZfNDAwKQogICAgICAgIGxldCBob3VycyA9IEludChzZWNvbmRzIC8gM182MDApICUgMjQKICAgICAgICBpZiBkYXlzID4gMCB7IHJldHVybiAiXChrZXlEdXJhdGlvbikg4oCiIFwoZGF5cylkIHJlc3RhbnRlcyIgfQogICAgICAgIHJldHVybiAiXChrZXlEdXJhdGlvbikg4oCiIFwoaG91cnMpaCByZXN0YW50ZXMiCiAgICB9CgogICAgcHJpdmF0ZSBzdGF0aWMgZnVuYyBwYXJzZURhdGUoXyByYXc6IFN0cmluZykgLT4gRGF0ZT8gewogICAgICAgIGxldCBmb3JtYXR0ZXIgPSBJU084NjAxRGF0ZUZvcm1hdHRlcigpCiAgICAgICAgcmV0dXJuIGZvcm1hdHRlci5kYXRlKGZyb206IHJhdykKICAgIH0KCiAgICB2YXIgYm9keTogc29tZSBWaWV3IHsKICAgICAgICBTZWN0aW9uIHsKICAgICAgICAgICAgTGFiZWxlZENvbnRlbnQoIlByb2R1dG8iKSB7CiAgICAgICAgICAgICAgICBUZXh0KHNuYXBzaG90Py5wcm9kdWN0ID8/ICJFWFRFUk5BTCIpCiAgICAgICAgICAgICAgICAgICAgLmZvbnQoLmJvZHkubW9ub3NwYWNlZCgpKQogICAgICAgICAgICB9CiAgICAgICAgICAgIExhYmVsZWRDb250ZW50KCJTdGF0dXMgZGEgS2V5IikgewogICAgICAgICAgICAgICAgVGV4dChzbmFwc2hvdD8uc3RhdHVzID8/ICJWSVAgQVRJVk8iKQogICAgICAgICAgICAgICAgICAgIC5mb250V2VpZ2h0KC5zZW1pYm9sZCkKICAgICAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKC5ncmVlbikKICAgICAgICAgICAgfQogICAgICAgICAgICBMYWJlbGVkQ29udGVudCgiVGVtcG8gZGEgS2V5IikgewogICAgICAgICAgICAgICAgVGltZWxpbmVWaWV3KC5wZXJpb2RpYyhmcm9tOiAubm93LCBieTogNjApKSB7IGNvbnRleHQgaW4KICAgICAgICAgICAgICAgICAgICBUZXh0KHJlbWFpbmluZyhhdDogY29udGV4dC5kYXRlKSkKICAgICAgICAgICAgICAgICAgICAgICAgLmZvbnQoLmZvb3Rub3RlLm1vbm9zcGFjZWQoKSkKICAgICAgICAgICAgICAgICAgICAgICAgLm11bHRpbGluZVRleHRBbGlnbm1lbnQoLnRyYWlsaW5nKQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgICAgIExhYmVsZWRDb250ZW50KCJFeHBpcmHDp8OjbyIpIHsKICAgICAgICAgICAgICAgIFRleHQoZXhwaXJhdGlvbikKICAgICAgICAgICAgICAgICAgICAuZm9udCguZm9vdG5vdGUubW9ub3NwYWNlZCgpKQogICAgICAgICAgICAgICAgICAgIC5tdWx0aWxpbmVUZXh0QWxpZ25tZW50KC50cmFpbGluZykKICAgICAgICAgICAgfQogICAgICAgICAgICBMYWJlbGVkQ29udGVudCgiSUQgZG8gRGlzcG9zaXRpdm8iKSB7CiAgICAgICAgICAgICAgICBUZXh0KGRldmljZUlEKQogICAgICAgICAgICAgICAgICAgIC5mb250KC5mb290bm90ZS5tb25vc3BhY2VkKCkpCiAgICAgICAgICAgICAgICAgICAgLnRleHRTZWxlY3Rpb24oLmVuYWJsZWQpCiAgICAgICAgICAgIH0KICAgICAgICB9IGhlYWRlcjogewogICAgICAgICAgICBUZXh0KCJJTkZPUk1Bw4fDlUVTIERBIExJQ0VOw4dBIikKICAgICAgICB9CgogICAgICAgIFNlY3Rpb24gewogICAgICAgICAgICBMYWJlbGVkQ29udGVudCgiTW9kZWxvIikgewogICAgICAgICAgICAgICAgVGV4dChBcHBJbmZvLmRpc3BsYXlNYWNoaW5lTmFtZSkKICAgICAgICAgICAgICAgICAgICAuZm9udCguYm9keS5tb25vc3BhY2VkKCkpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgTGFiZWxlZENvbnRlbnQoIlZlcnPDo28gaU9TIikgewogICAgICAgICAgICAgICAgVGV4dCgiXChBcHBJbmZvLm9zVmVyc2lvbikgKFwoQXBwSW5mby5vc0J1aWxkKSkiKQogICAgICAgICAgICAgICAgICAgIC5mb250KC5mb290bm90ZS5tb25vc3BhY2VkKCkpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgTGFiZWxlZENvbnRlbnQoIkNvbXBhdGliaWxpZGFkZSBSb290L1BNQVAiKSB7CiAgICAgICAgICAgICAgICBUZXh0KGFwcFN0YXRlLmlzU3VwcG9ydGVkID8gIkNPTVBBVMONVkVMIChTSU0pIiA6ICJJTkNPTVBBVMONVkVMIikKICAgICAgICAgICAgICAgICAgICAuZm9udFdlaWdodCguc2VtaWJvbGQpCiAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShhcHBTdGF0ZS5pc1N1cHBvcnRlZCA/IC5ncmVlbiA6IC5yZWQpCiAgICAgICAgICAgIH0KICAgICAgICB9IGhlYWRlcjogewogICAgICAgICAgICBUZXh0KCJESVNQT1NJVElWTyAmIENPTVBBVElCSUxJREFERSIpCiAgICAgICAgfQoKICAgICAgICBTZWN0aW9uIHsKICAgICAgICAgICAgTGFiZWxlZENvbnRlbnQoIlByb3Rlw6fDo28gQW50aS1EZWJ1Z2dpbmciKSB7CiAgICAgICAgICAgICAgICBUZXh0KCJOw4NPIFZFUklGSUNBREEiKQogICAgICAgICAgICAgICAgICAgIC5mb250V2VpZ2h0KC5zZW1pYm9sZCkKICAgICAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKC5zZWNvbmRhcnkpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgTGFiZWxlZENvbnRlbnQoIkNyaXB0b2dyYWZpYSBLZXljaGFpbiIpIHsKICAgICAgICAgICAgICAgIFRleHQoIkFUSVZBIikKICAgICAgICAgICAgICAgICAgICAuZm9udFdlaWdodCguc2VtaWJvbGQpCiAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZSguZ3JlZW4pCiAgICAgICAgICAgIH0KICAgICAgICB9IGhlYWRlcjogewogICAgICAgICAgICBUZXh0KCJTRUdVUkFOw4dBICYgQU5USUNSQUNLIikKICAgICAgICB9IGZvb3RlcjogewogICAgICAgICAgICBUZXh0KCJBIGtleSDDqSBhcm1hemVuYWRhIG5vIEtleWNoYWluOyBhIHByb3Rlw6fDo28gYW50aS1kZWJ1Z2dpbmcgbsOjbyDDqSBkZWNsYXJhZGEgY29tbyBhdGl2YSBzZW0gdW1hIHZlcmlmaWNhw6fDo28gbmF0aXZhIGNvcnJlc3BvbmRlbnRlLiIpCiAgICAgICAgfQogICAgfQp9CgpzdHJ1Y3QgTGljZW5zZUxvZ2luVmlldzogVmlldyB7CiAgICBsZXQgb25TdWNjZXNzOiAoKSAtPiBWb2lkCiAgICBAU3RhdGUgcHJpdmF0ZSB2YXIga2V5ID0gIiIKICAgIEBTdGF0ZSBwcml2YXRlIHZhciBpc0xvYWRpbmcgPSBmYWxzZQogICAgQFN0YXRlIHByaXZhdGUgdmFyIGVycm9yTWVzc2FnZTogU3RyaW5nPwoKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIENvbG9yLndoaXRlLmlnbm9yZXNTYWZlQXJlYSgpCiAgICAgICAgICAgIFZTdGFjayhzcGFjaW5nOiAyMikgewogICAgICAgICAgICAgICAgU3BhY2VyKCkKICAgICAgICAgICAgICAgIEltYWdlKHN5c3RlbU5hbWU6ICJsb2NrLnNoaWVsZC5maWxsIikKICAgICAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDU0LCB3ZWlnaHQ6IC5zZW1pYm9sZCkpCiAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShDb2xvci5ncmVlbikKICAgICAgICAgICAgICAgIFRleHQoIkFjZXNzbyBhbyBhcGxpY2F0aXZvIikKICAgICAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDI3LCB3ZWlnaHQ6IC5ib2xkKSkKICAgICAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKENvbG9yLmJsYWNrKQogICAgICAgICAgICAgICAgVGV4dCgiRGlnaXRlIHN1YSBjaGF2ZSBwYXJhIGNvbnRpbnVhciIpCiAgICAgICAgICAgICAgICAgICAgLmZvbnQoLnN5c3RlbShzaXplOiAxNikpCiAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShDb2xvci5ncmF5KQogICAgICAgICAgICAgICAgVlN0YWNrKGFsaWdubWVudDogLmxlYWRpbmcsIHNwYWNpbmc6IDgpIHsKICAgICAgICAgICAgICAgICAgICBUZXh0KCJDSEFWRSBERSBBQ0VTU08iKQogICAgICAgICAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDEyLCB3ZWlnaHQ6IC5ib2xkKSkKICAgICAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShDb2xvci5ncmF5KQogICAgICAgICAgICAgICAgICAgIFNlY3VyZUZpZWxkKCJDb2xlIHN1YSBjaGF2ZSIsIHRleHQ6ICRrZXkpCiAgICAgICAgICAgICAgICAgICAgICAgIC50ZXh0SW5wdXRBdXRvY2FwaXRhbGl6YXRpb24oLmNoYXJhY3RlcnMpCiAgICAgICAgICAgICAgICAgICAgICAgIC5hdXRvY29ycmVjdGlvbkRpc2FibGVkKCkKICAgICAgICAgICAgICAgICAgICAgICAgLnBhZGRpbmcoLmhvcml6b250YWwsIDE2KQogICAgICAgICAgICAgICAgICAgICAgICAuZnJhbWUoaGVpZ2h0OiA1MikKICAgICAgICAgICAgICAgICAgICAgICAgLmJhY2tncm91bmQoQ29sb3IoLnN5c3RlbUdyYXk2KSkKICAgICAgICAgICAgICAgICAgICAgICAgLmNsaXBTaGFwZShSb3VuZGVkUmVjdGFuZ2xlKGNvcm5lclJhZGl1czogMTQsIHN0eWxlOiAuY29udGludW91cykpCiAgICAgICAgICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUoQ29sb3IuYmxhY2spCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBpZiBsZXQgZXJyb3JNZXNzYWdlIHsKICAgICAgICAgICAgICAgICAgICBUZXh0KGVycm9yTWVzc2FnZSkKICAgICAgICAgICAgICAgICAgICAgICAgLmZvbnQoLnN5c3RlbShzaXplOiAxNCwgd2VpZ2h0OiAubWVkaXVtKSkKICAgICAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShDb2xvci5yZWQpCiAgICAgICAgICAgICAgICAgICAgICAgIC5tdWx0aWxpbmVUZXh0QWxpZ25tZW50KC5jZW50ZXIpCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBCdXR0b24oYWN0aW9uOiB2YWxpZGF0ZSkgewogICAgICAgICAgICAgICAgICAgIEdyb3VwIHsKICAgICAgICAgICAgICAgICAgICAgICAgaWYgaXNMb2FkaW5nIHsgUHJvZ3Jlc3NWaWV3KCkudGludCgud2hpdGUpIH0KICAgICAgICAgICAgICAgICAgICAgICAgZWxzZSB7IFRleHQoIkVOVFJBUiIpLmZvbnQoLnN5c3RlbShzaXplOiAxNywgd2VpZ2h0OiAuYm9sZCkpIH0KICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgLmZyYW1lKG1heFdpZHRoOiAuaW5maW5pdHkpCiAgICAgICAgICAgICAgICAgICAgLmZyYW1lKGhlaWdodDogNTIpCiAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShDb2xvci53aGl0ZSkKICAgICAgICAgICAgICAgICAgICAuYmFja2dyb3VuZChDb2xvci5ncmVlbikKICAgICAgICAgICAgICAgICAgICAuY2xpcFNoYXBlKFJvdW5kZWRSZWN0YW5nbGUoY29ybmVyUmFkaXVzOiAxNCwgc3R5bGU6IC5jb250aW51b3VzKSkKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIC5kaXNhYmxlZChpc0xvYWRpbmcgfHwga2V5LnRyaW1taW5nQ2hhcmFjdGVycyhpbjogLndoaXRlc3BhY2VzQW5kTmV3bGluZXMpLmlzRW1wdHkpCiAgICAgICAgICAgICAgICBTcGFjZXIoKQogICAgICAgICAgICAgICAgVGV4dCgiU3VhIGNoYXZlIMOpIHByb3RlZ2lkYSBubyBkaXNwb3NpdGl2by4iKQogICAgICAgICAgICAgICAgICAgIC5mb250KC5zeXN0ZW0oc2l6ZTogMTIpKQogICAgICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUoQ29sb3IuZ3JheSkKICAgICAgICAgICAgICAgICAgICAucGFkZGluZyguYm90dG9tLCAxMikKICAgICAgICAgICAgfQogICAgICAgICAgICAucGFkZGluZyguaG9yaXpvbnRhbCwgMjgpCiAgICAgICAgICAgIC5mcmFtZShtYXhXaWR0aDogNTIwKQogICAgICAgIH0KICAgICAgICAucHJlZmVycmVkQ29sb3JTY2hlbWUoLmxpZ2h0KQogICAgICAgIC50YXNrIHsgYXdhaXQgdmFsaWRhdGVTdG9yZWRLZXkoKSB9CiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIHZhbGlkYXRlU3RvcmVkS2V5KCkgYXN5bmMgewogICAgICAgIGd1YXJkIGxldCBzdG9yZWQgPSBMaWNlbnNlU3RvcmUuc3RvcmVkS2V5IGVsc2UgeyByZXR1cm4gfQogICAgICAgIGtleSA9IHN0b3JlZAogICAgICAgIGF3YWl0IHZhbGlkYXRlQ3VycmVudEtleSgpCiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIHZhbGlkYXRlKCkgeyBUYXNrIHsgYXdhaXQgdmFsaWRhdGVDdXJyZW50S2V5KCkgfSB9CgogICAgcHJpdmF0ZSBmdW5jIHZhbGlkYXRlQ3VycmVudEtleSgpIGFzeW5jIHsKICAgICAgICBsZXQgY2FuZGlkYXRlID0ga2V5LnRyaW1taW5nQ2hhcmFjdGVycyhpbjogLndoaXRlc3BhY2VzQW5kTmV3bGluZXMpLnVwcGVyY2FzZWQoKQogICAgICAgIGd1YXJkICFjYW5kaWRhdGUuaXNFbXB0eSBlbHNlIHsgcmV0dXJuIH0KICAgICAgICBhd2FpdCBNYWluQWN0b3IucnVuIHsgaXNMb2FkaW5nID0gdHJ1ZTsgZXJyb3JNZXNzYWdlID0gbmlsIH0KICAgICAgICBkbyB7CiAgICAgICAgICAgIGxldCByZXN1bHQgPSB0cnkgYXdhaXQgTGljZW5zZUFQSS52YWxpZGF0ZShrZXk6IGNhbmRpZGF0ZSkKICAgICAgICAgICAgYXdhaXQgTWFpbkFjdG9yLnJ1biB7CiAgICAgICAgICAgICAgICBpc0xvYWRpbmcgPSBmYWxzZQogICAgICAgICAgICAgICAgZ3VhcmQgcmVzdWx0LnZhbGlkIGVsc2UgeyBlcnJvck1lc3NhZ2UgPSByZXN1bHQubWVzc2FnZTsgcmV0dXJuIH0KICAgICAgICAgICAgICAgIExpY2Vuc2VTdG9yZS5zYXZlKGNhbmRpZGF0ZSwgcmVzcG9uc2U6IHJlc3VsdCkKICAgICAgICAgICAgICAgIG9uU3VjY2VzcygpCiAgICAgICAgICAgIH0KICAgICAgICB9IGNhdGNoIHsKICAgICAgICAgICAgYXdhaXQgTWFpbkFjdG9yLnJ1biB7CiAgICAgICAgICAgICAgICBpc0xvYWRpbmcgPSBmYWxzZQogICAgICAgICAgICAgICAgZXJyb3JNZXNzYWdlID0gIk7Do28gZm9pIHBvc3PDrXZlbCB2YWxpZGFyIGEgY2hhdmUuIFZlcmlmaXF1ZSBzdWEgY29uZXjDo28gZSB0ZW50ZSBub3ZhbWVudGUuIgogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9Cg==" <<'PY'
+          import base64, sys
+          from pathlib import Path
+          p = Path(sys.argv[1])
+          t = p.read_text()
+          addition = base64.b64decode(sys.argv[2]).decode()
+          t = t.replace('import UIKit\n', 'import UIKit\nimport Security\n', 1)
+          t = t.replace('    @State private var showOnboarding = false\n', '    @State private var showOnboarding = false\n    @State private var isLicensed = false\n', 1)
+          t = t.replace('                    .opacity(showOnboarding ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding)', '                    .opacity(showOnboarding || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && isLicensed)', 1)
+          anchor = '                    .zIndex(1)\n                }\n'
+          replacement = anchor + '\n                if !showOnboarding && !isLicensed {\n                    LicenseLoginView {\n                        withAnimation(.easeInOut(duration: 0.25)) { isLicensed = true }\n                        appState.detectSupport()\n                        checkForUpdate()\n                    }\n                    .environment(\\.appLanguage, language)\n                    .environment(\\.locale, language.locale)\n                    .zIndex(2)\n                }\n'
+          if anchor not in t:
+              raise SystemExit('overlay anchor not found')
+          t = t.replace(anchor, replacement, 1)
+          t = t.replace('            .onAppear {\n                if !showOnboarding {', '            .onAppear {\n                if !showOnboarding && isLicensed {', 1)
+          t = t.replace('                guard phase == .active, !showOnboarding else { return }', '                guard phase == .active, !showOnboarding, isLicensed else { return }', 1)
+          t += addition
+          p.write_text(t)
+          PY
+
       - name: Remove terminal and settings toolbar buttons
         shell: bash
         run: |
@@ -61,7 +86,7 @@ jobs:
           p=Path(sys.argv[1])
           t=p.read_text()
           t=t.replace('title: language.text(section.titleKey)', 'title: section == .home ? "Início" : "Injector"', 1)
-          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "rocket.fill"', 1)
+          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "gamecontroller.fill"', 1)
           p.write_text(t)
           PY
 
@@ -83,10 +108,11 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          rm -rf "$APP_DIR/PreloadedPatches"
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramaverde\(5\).3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Magicavatar\(2\).3105 Hologramazul\(2\).3105 Pescoço\+antenaavatar\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 ALTO\(2\).3105 PEITO\(2\).3105 PESÇOCO\(2\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -125,10 +151,14 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-alto", title: "ALTO", fileName: "ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-magica", title: "MAGICA", fileName: "MAGICA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito", title: "PEITO", fileName: "PEITO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pescoco", title: "PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-alto", title: "HS ALTO", fileName: "ALTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-magica", title: "BALA MAGIC", fileName: "MAGICA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito", title: "HS PEITO", fileName: "PEITO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-vermelho", title: "HOLOGRAMA VERMELHO", fileName: "Hologramavermelho(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-verde", title: "HOLOGRAMA VERDE", fileName: "Hologramaverde(5).3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-espcorpo", title: "HOLOGRAMA CORPO", fileName: "ESPCORPO.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
@@ -138,9 +168,9 @@ jobs:
                   patches: [
                       PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-peito-antena", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-magic", title: "Magic avatar", fileName: "Magicavatar(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-pescoco", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105", replacementCount: 1)
+                      PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO(2).3105", replacementCount: 1),
                   ]
               )
           ]
@@ -163,7 +193,8 @@ jobs:
                                   }
                               }
                               .pickerStyle(.segmented)
-                              .tint(.orange)
+                              .frame(height: 54)
+                              .tint(.green)
 
                               VStack(spacing: 14) {
                                   ForEach(selectedGame.patches) { patch in
@@ -175,9 +206,11 @@ jobs:
                           .padding(.top, 20)
                           .padding(.bottom, 28)
                       }
-                      .background(AppBackgroundView())
+                      .background(Color(.systemGroupedBackground))
+                      .scrollContentBackground(.hidden)
                       .navigationTitle("Patches")
                       .navigationBarTitleDisplayMode(.inline)
+                          .preferredColorScheme(.light)
                   }
               }
           }
@@ -194,10 +227,10 @@ jobs:
                       VStack(alignment: .leading, spacing: 7) {
                           Text(patch.title)
                               .font(.title3.weight(.semibold))
-                              .foregroundStyle(.primary)
+                              .foregroundStyle(Color.black)
                           Text("\(patch.replacementCount) replacement rules")
                               .font(.body)
-                              .foregroundStyle(.secondary)
+                              .foregroundStyle(Color.gray)
                       }
                       Spacer(minLength: 8)
                       Toggle("", isOn: Binding(
@@ -208,13 +241,13 @@ jobs:
                           }
                       ))
                       .labelsHidden()
-                      .tint(.orange)
+                      .toggleStyle(PatchToggleStyle())
                   }
                   .padding(.horizontal, 22)
-                  .padding(.vertical, 22)
-                  .frame(maxWidth: .infinity, alignment: .leading)
-                  .background(Color(.secondarySystemBackground).opacity(0.96), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.06), lineWidth: 1))
+                  .padding(.vertical, 28)
+                  .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
+                  .background(Color.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
@@ -283,6 +316,27 @@ jobs:
               }
           }
 
+          private struct PatchToggleStyle: ToggleStyle {
+              func makeBody(configuration: Configuration) -> some View {
+                  Button {
+                      configuration.isOn.toggle()
+                  } label: {
+                      HStack {
+                          Spacer(minLength: 0)
+                          Circle()
+                              .fill(Color.white)
+                              .frame(width: 24, height: 24)
+                              .shadow(color: .black.opacity(0.18), radius: 2, y: 1)
+                      }
+                      .padding(4)
+                      .frame(width: 58, height: 32)
+                      .background(configuration.isOn ? Color.green : Color.gray.opacity(0.65), in: Capsule())
+                  }
+                  .buttonStyle(.plain)
+                  .accessibilityValue(configuration.isOn ? "Ativado" : "Desativado")
+              }
+          }
+
           private extension Color {
               static var patchCardBackground: Color { Color(.secondarySystemBackground) }
           }
@@ -299,7 +353,7 @@ jobs:
         run: |
           set -euo pipefail
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgSW5qZWN0b3JUYWJJY29uOiBWaWV3IHsKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIENpcmNsZSgpLnN0cm9rZShDb2xvci5wdXJwbGUsIGxpbmVXaWR0aDogMi4yKS5mcmFtZSh3aWR0aDogMTksIGhlaWdodDogMTkpCiAgICAgICAgICAgIENhcHN1bGUoKS5maWxsKENvbG9yLnB1cnBsZSkuZnJhbWUod2lkdGg6IDUsIGhlaWdodDogMTMpLnJvdGF0aW9uRWZmZWN0KC5kZWdyZWVzKC0zOCkpCiAgICAgICAgICAgIENpcmNsZSgpLmZpbGwoQ29sb3Iud2hpdGUpLmZyYW1lKHdpZHRoOiAzLCBoZWlnaHQ6IDMpCiAgICAgICAgfS5mcmFtZSh3aWR0aDogMjIsIGhlaWdodDogMjIpCiAgICB9Cn0KCg==" <<'PY'
+          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgQ29tcGFjdFRhYkxhYmVsOiBWaWV3IHsKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgc3lzdGVtSW1hZ2U6IFN0cmluZwoKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIExhYmVsIHsKICAgICAgICAgICAgVGV4dCh0aXRsZSkKICAgICAgICB9IGljb246IHsKICAgICAgICAgICAgSW1hZ2Uoc3lzdGVtTmFtZTogdGl0bGUgPT0gIkluamVjdG9yIiA/ICJnYW1lY29udHJvbGxlci5maWxsIiA6IHN5c3RlbUltYWdlKQogICAgICAgICAgICAgICAgLmZvbnQoLnN5c3RlbShzaXplOiAxOCwgd2VpZ2h0OiAuc2VtaWJvbGQpKQogICAgICAgICAgICAgICAgLnN5bWJvbFJlbmRlcmluZ01vZGUoLm1vbm9jaHJvbWUpCiAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKHRpdGxlID09ICJJbmplY3RvciIgPyBDb2xvci5ibHVlIDogQ29sb3IucHJpbWFyeSkKICAgICAgICAgICAgICAgIC5mcmFtZSh3aWR0aDogMjQsIGhlaWdodDogMjQpCiAgICAgICAgfQogICAgfQp9Cgo=" <<'PY'
           import base64
           import sys
           from pathlib import Path
@@ -312,56 +366,25 @@ jobs:
           p.write_text(t)
           PY
 
-      - name: Use orange Injector icon and text colors
+      - name: Preserve native Injector icon and neutral colors
         shell: bash
         run: |
           set -euo pipefail
-          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          cp injector_icon_orange.png "$APP_DIR/PreloadedPatches/injector_icon_orange.png"
-          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
-          python3 - "$CONTENT_SWIFT" <<'PY'
-          from pathlib import Path
-          import sys
-          p=Path(sys.argv[1])
-          t=p.read_text()
-          t=t.replace('.tint(AppTheme.accent)', '.tint(Color.orange)\n        .foregroundStyle(Color.orange)', 1)
-          t=t.replace('init() {', 'init() {\n        UITabBar.appearance().tintColor = UIColor.orange\n        UITabBar.appearance().unselectedItemTintColor = UIColor.orange', 1)
-          t=t.replace('if let image = UIImage(', 'if title == "Injector", let url = Bundle.main.url(forResource: "injector_icon_orange", withExtension: "png", subdirectory: "PreloadedPatches"), let icon = UIImage(contentsOfFile: url.path) {\n            Image(uiImage: icon).resizable().renderingMode(.original).scaledToFit().frame(width: 24, height: 24)\n        } else if let image = UIImage(', 1)
-          p.write_text(t)
-          PY
+          # The native SF Symbol and final SwiftUI colors are applied in the finalization step.
+          :
 
-      - name: Apply supplied app background
+      - name: Keep per-screen backgrounds
         shell: bash
         run: |
           set -euo pipefail
-          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          cp 56F68B12-F4DC-4C3A-844E-65ADEE4CEA9E.png "$APP_DIR/PreloadedPatches/app_background.jpg"
-          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
-          PATCH_SWIFT="$APP_DIR/views/PatchProjectsView.swift"
-          python3 - "$CONTENT_SWIFT" "$PATCH_SWIFT" "c3RydWN0IEFwcEJhY2tncm91bmRWaWV3OiBWaWV3IHsKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIFpTdGFjayB7CiAgICAgICAgICAgIGlmIGxldCB1cmwgPSBCdW5kbGUubWFpbi51cmwoZm9yUmVzb3VyY2U6ICJhcHBfYmFja2dyb3VuZCIsIHdpdGhFeHRlbnNpb246ICJqcGciLCBzdWJkaXJlY3Rvcnk6ICJQcmVsb2FkZWRQYXRjaGVzIiksIGxldCBpbWFnZSA9IFVJSW1hZ2UoY29udGVudHNPZkZpbGU6IHVybC5wYXRoKSB7CiAgICAgICAgICAgICAgICBJbWFnZSh1aUltYWdlOiBpbWFnZSkucmVzaXphYmxlKCkuc2NhbGVkVG9GaWxsKCkub3BhY2l0eSgwLjU4KQogICAgICAgICAgICB9CiAgICAgICAgICAgIENvbG9yLmJsYWNrLm9wYWNpdHkoMC4xMCkKICAgICAgICB9Lmlnbm9yZXNTYWZlQXJlYSgpCiAgICB9Cn0KCg==" <<'PY'
-          import base64
-          import sys
-          from pathlib import Path
-          content=Path(sys.argv[1]); patch=Path(sys.argv[2]); t=content.read_text()
-          definition=base64.b64decode(sys.argv[3]).decode()
-          definition=definition.replace(".opacity(0.58)", ".opacity(1.0)").replace("Color.black.opacity(0.10)", "Color.clear")
-          if 'struct AppBackgroundView: View' not in t:
-              t=t.replace('private struct CompactTabLabel: View {', definition+'private struct CompactTabLabel: View {', 1)
-          t=t.replace('.navigationBarTitleDisplayMode(.inline)\n            .tint(AppTheme.accent)', '.navigationBarTitleDisplayMode(.inline)\n            .scrollContentBackground(.hidden)\n            .background(AppBackgroundView())\n            .tint(AppTheme.accent)', 1)
-          content.write_text(t)
-          if patch.exists():
-              p=patch.read_text()
-              p=p.replace('.background(Color(.systemGroupedBackground))', '.background(AppBackgroundView())')
-              p=p.replace('.listStyle(.insetGrouped)', '.listStyle(.insetGrouped).scrollContentBackground(.hidden).background(AppBackgroundView())')
-              patch.write_text(p)
-          PY
+          :
 
       - name: Use native SwiftUI Injector icon
         shell: bash
         run: |
           set -euo pipefail
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgQ29tcGFjdFRhYkxhYmVsOiBWaWV3IHsKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgc3lzdGVtSW1hZ2U6IFN0cmluZwoKICAgIHZhciBib2R5OiBzb21lIFZpZXcgewogICAgICAgIExhYmVsIHsKICAgICAgICAgICAgVGV4dCh0aXRsZSkKICAgICAgICB9IGljb246IHsKICAgICAgICAgICAgSW1hZ2Uoc3lzdGVtTmFtZTogdGl0bGUgPT0gIkluamVjdG9yIiA/ICJzeXJpbmdlLmZpbGwiIDogc3lzdGVtSW1hZ2UpCiAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDE4LCB3ZWlnaHQ6IC5zZW1pYm9sZCkpCiAgICAgICAgICAgICAgICAuc3ltYm9sUmVuZGVyaW5nTW9kZSgubW9ub2Nocm9tZSkKICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUodGl0bGUgPT0gIkluamVjdG9yIiA/IENvbG9yLm9yYW5nZSA6IENvbG9yLnByaW1hcnkpCiAgICAgICAgICAgICAgICAuZnJhbWUod2lkdGg6IDI0LCBoZWlnaHQ6IDI0KQogICAgICAgIH0KICAgIH0KfQ==" <<'PY'
+          python3 - "$CONTENT_SWIFT" "cHJpdmF0ZSBzdHJ1Y3QgQ29tcGFjdFRhYkxhYmVsOiBWaWV3IHsKICAgIGxldCB0aXRsZTogU3RyaW5nCiAgICBsZXQgc3lzdGVtSW1hZ2U6IFN0cmluZwogICAgdmFyIGJvZHk6IHNvbWUgVmlldyB7CiAgICAgICAgTGFiZWwgewogICAgICAgICAgICBUZXh0KHRpdGxlKQogICAgICAgIH0gaWNvbjogewogICAgICAgICAgICBJbWFnZShzeXN0ZW1OYW1lOiB0aXRsZSA9PSAiSW5qZWN0b3IiID8gImdhbWVjb250cm9sbGVyLmZpbGwiIDogc3lzdGVtSW1hZ2UpCiAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDE4LCB3ZWlnaHQ6IC5zZW1pYm9sZCkpCiAgICAgICAgICAgICAgICAuc3ltYm9sUmVuZGVyaW5nTW9kZSgubW9ub2Nocm9tZSkKICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUodGl0bGUgPT0gIkluamVjdG9yIiA/IENvbG9yLmJsdWUgOiBDb2xvci5wcmltYXJ5KQogICAgICAgICAgICAgICAgLmZyYW1lKHdpZHRoOiAyNCwgaGVpZ2h0OiAyNCkKICAgICAgICB9CiAgICB9Cn0=" <<'PY'
           import base64, sys
           from pathlib import Path
           content = Path(sys.argv[1])
@@ -372,6 +395,31 @@ jobs:
           if start < 0 or end < 0: raise SystemExit("CompactTabLabel boundaries not found")
           content.write_text(text[:start] + definition + "\n\n" + text[end:])
           PY
+      - name: Finalize Injector reference layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          PATCH_TEMPLATE="$APP_DIR/views/PatchProjectsView.swift"
+          # Ensure the replacement reaches the actual case/path referenced by the Xcode project.
+          while IFS= read -r f; do
+            [ "$f" = "$PATCH_TEMPLATE" ] || cp "$PATCH_TEMPLATE" "$f"
+          done < <(find source -type f -iname 'PatchProjectsView.swift')
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import re, sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          # Remove any legacy orange asset branch if present.
+          t=re.sub(r'if title == "Injector", let url = Bundle\.main\.url\(forResource: "injector_icon_orange".*?\n\s*\} else if let image = UIImage\(', 'if title == "Injector" { Image(systemName: "gamecontroller.fill").font(.system(size: 20, weight: .semibold)).foregroundStyle(Color.blue) } else if let image = UIImage(', t, count=1, flags=re.S)
+          t=t.replace('Color.orange', 'Color.blue')
+          t=t.replace('shippingbox.fill', 'gamecontroller.fill')
+          t=t.replace('syringe.fill', 'gamecontroller.fill')
+          # Keep the tab bar neutral/blue rather than orange.
+          t=t.replace('UIColor.orange', 'UIColor.systemBlue')
+          p.write_text(t)
+          PY
+
       - name: Integrar API Kyojinx funcional
         shell: bash
         run: |
@@ -420,6 +468,26 @@ jobs:
           p = Path(sys.argv[1]); t = p.read_text()
           nl = chr(10)
           # API e tela de licença removidas; o app inicia diretamente.
+          p.write_text(t)
+          PY
+      - name: Add Meu Perfil to dashboard
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          t = p.read_text()
+          if 'LicenseProfileView()' not in t:
+              anchors = ["            List {\n                deviceSection\n", "            List {\n            deviceSection\n"]
+              for old in anchors:
+                  if old in t:
+                      t = t.replace(old, old.replace('deviceSection', 'LicenseProfileView()\n                    .environmentObject(appState)'), 1)
+                      break
+              else:
+                  raise SystemExit('âncora List/deviceSection não encontrada')
           p.write_text(t)
           PY
       - name: Build original archive and IPA
