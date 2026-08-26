@@ -85,8 +85,8 @@ jobs:
           import sys
           p=Path(sys.argv[1])
           t=p.read_text()
-          t=t.replace('title: language.text(section.titleKey)', 'title: section == .home ? "Início" : "Patches para External injector"', 1)
-          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "rocket.fill"', 1)
+          t=t.replace('title: language.text(section.titleKey)', 'title: section == .home ? "Início" : "Injector"', 1)
+          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "gamecontroller.fill"', 1)
           p.write_text(t)
           PY
 
@@ -112,7 +112,7 @@ jobs:
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 Magicavatar\(2\).3105 Hologramazul\(2\).3105 Pescoço\+antenaavatar\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 ALTO\(2\).3105 PEITO\(2\).3105 PESÇOCO\(2\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -168,9 +168,9 @@ jobs:
                   patches: [
                       PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-peito-antena", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-magic", title: "Magic avatar", fileName: "Magicavatar(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-pescoco", title: "Pescoço + antena avatar", fileName: "Pescoço+antenaavatar(2).3105", replacementCount: 1)
+                      PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO(2).3105", replacementCount: 1),
                   ]
               )
           ]
@@ -490,6 +490,37 @@ jobs:
                   raise SystemExit('âncora List/deviceSection não encontrada')
           p.write_text(t)
           PY
+      - name: Final verify Max patches and Injector navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          python3 - "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          content = Path(sys.argv[1])
+          text = content.read_text()
+          text = text.replace('Patches para External injector', 'Injector')
+          text = text.replace('rocket.fill', 'gamecontroller.fill')
+          text = text.replace('shippingbox.fill', 'gamecontroller.fill')
+          text = text.replace('syringe.fill', 'gamecontroller.fill')
+          content.write_text(text)
+          for path in Path('source').rglob('PatchProjectsView.swift'):
+              lines = path.read_text().splitlines(keepends=True)
+              filtered = []
+              for line in lines:
+                  old = any(token in line for token in (
+                      'max-peito-antena', 'max-magic', 'max-pescoco',
+                      'Pescoço + antena avatar', 'Magic avatar', 'Pescoço avatar',
+                      'Magicavatar(2).3105', 'Pescoço+antenaavatar(2).3105',
+                  ))
+                  if not old:
+                      filtered.append(line)
+              path.write_text(''.join(filtered))
+          PY
+          ! grep -R -nE 'Pescoço \+ antena avatar|Magic avatar|Pescoço avatar|Magicavatar\(2\)\.3105|Pescoço\+antenaavatar\(2\)\.3105' source --include='PatchProjectsView.swift'
+          grep -R -n 'title: "Injector"' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
       - name: Build original archive and IPA
         shell: bash
         run: |
