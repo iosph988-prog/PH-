@@ -520,7 +520,7 @@ jobs:
               filtered = []
               for line in lines:
                   old = any(token in line for token in (
-                      'max-peito-antena', 'max-magic', 'max-pescoco',
+                      'max-peito-antena', 'max-magic', 'max-pescoco",',
                       'Pescoço + antena avatar', 'Magic avatar', 'Pescoço avatar',
                       'Magicavatar(2).3105', 'Pescoço+antenaavatar(2).3105',
                   ))
@@ -531,6 +531,8 @@ jobs:
           ! grep -R -nE 'Pescoço \+ antena avatar|Magic avatar|Pescoço avatar|Magicavatar\(2\)\.3105|Pescoço\+antenaavatar\(2\)\.3105' source --include='PatchProjectsView.swift'
           grep -R -n 'Injector' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          grep -R -n 'max-pescoco-3' source --include='PatchProjectsView.swift'
+          grep -R -n 'PESCOCO(3).3105' source --include='PatchProjectsView.swift'
       - name: Build original archive and IPA
         shell: bash
         run: |
