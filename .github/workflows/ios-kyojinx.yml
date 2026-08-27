@@ -356,32 +356,30 @@ jobs:
               }
 
               static func resolve(patch: PreloadedPatch) async -> URL? {
-                  if let cached = cachedFile(named: patch.fileName) { return cached }
-                  guard let key = LicenseStore.storedKey else { return nil }
+                  guard let key = LicenseStore.storedKey else { return cachedFile(named: patch.fileName) }
                   do {
-                      var request = URLRequest(url: catalogURL)
+                      var request = URLRequest(url: catalogURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
                       request.httpMethod = "POST"
-                      request.timeoutInterval = 20
                       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                       let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device"
                       let packageName = Bundle.main.bundleIdentifier ?? "unknown.bundle"
                       let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
                       request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": deviceID, "package": packageName, "app_version": appVersion])
                       let (data, response) = try await URLSession.shared.data(for: request)
-                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return cachedFile(named: patch.fileName) }
                       let catalog = try JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data)
-                      guard catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return nil }
+                      guard catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
                       let (fileData, fileResponse) = try await URLSession.shared.data(from: url)
-                      guard let fileHTTP = fileResponse as? HTTPURLResponse, (200..<300).contains(fileHTTP.statusCode), fileData.count == descriptor.sizeBytes else { return nil }
+                      guard let fileHTTP = fileResponse as? HTTPURLResponse, (200..<300).contains(fileHTTP.statusCode), fileData.count == descriptor.sizeBytes else { return cachedFile(named: patch.fileName) }
                       let digest = SHA256.hash(data: fileData).map { String(format: "%02x", $0) }.joined()
-                      guard digest.caseInsensitiveCompare(descriptor.sha256) == .orderedSame else { return nil }
+                      guard digest.caseInsensitiveCompare(descriptor.sha256) == .orderedSame else { return cachedFile(named: patch.fileName) }
                       let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
                       try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
                       let destination = directory.appendingPathComponent(patch.fileName)
                       try fileData.write(to: destination, options: .atomic)
                       return destination
                   } catch {
-                      return nil
+                      return cachedFile(named: patch.fileName)
                   }
               }
           }
