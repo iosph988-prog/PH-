@@ -114,7 +114,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -161,7 +161,9 @@ jobs:
                       PreloadedPatch(id: "free-vermelho", title: "HOLOGRAMA VERMELHO", fileName: "Hologramavermelho(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-verde", title: "HOLOGRAMA VERDE", fileName: "Hologramaverde(5).3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-espcorpo", title: "HOLOGRAMA CORPO", fileName: "ESPCORPO.3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-espcorpo", title: "HOLOGRAMA CORPO", fileName: "ESPCORPO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-cabeca-antena", title: "CABEÇA ANTENA", fileName: "CABEÇA-ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito-antena", title: "PEITO ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
@@ -262,12 +264,26 @@ jobs:
                   .opacity(isWorking ? 0.65 : 1)
                   .onAppear {
                       synchronizeAppliedState()
-                      Task { remoteTitle = await RemotePatchAPI.title(for: patch) }
+                      loadRemoteTitle()
+                  }
+                  .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                      loadRemoteTitle()
                   }
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
                   } message: {
                       Text(alertMessage ?? "")
+                  }
+              }
+
+              private func loadRemoteTitle() {
+                  Task {
+                      let title = await RemotePatchAPI.title(for: patch)
+                      await MainActor.run {
+                          if let title, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                              remoteTitle = title
+                          }
+                      }
                   }
               }
 
@@ -433,7 +449,7 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105'; do
+          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
             test -s "$APP_DIR/PreloadedPatches/$f"
           done
       - name: Force visible Injector icon
