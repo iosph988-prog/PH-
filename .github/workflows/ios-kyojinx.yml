@@ -162,8 +162,8 @@ jobs:
                       PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-verde", title: "HOLOGRAMA VERDE", fileName: "Hologramaverde(5).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-espcorpo", title: "HOLOGRAMA CORPO", fileName: "ESPCORPO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-cabeca-antena", title: "CABEÇA ANTENA", fileName: "CABEÇA-ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito-antena", title: "PEITO ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-cabeca-antena", title: "HS CABEÇA + ANTENA", fileName: "CABEÇA-ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
