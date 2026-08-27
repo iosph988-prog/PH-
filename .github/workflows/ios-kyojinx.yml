@@ -228,6 +228,7 @@ jobs:
               let patch: PreloadedPatch
               @ObservedObject var store: PatchProjectStore
               @State private var isActive = false
+              @State private var remoteTitle: String?
               @State private var activeReceipt: PatchTransactionReceipt?
               @State private var isWorking = false
               @State private var alertMessage: String?
@@ -235,7 +236,7 @@ jobs:
               var body: some View {
                   HStack(spacing: 14) {
                       VStack(alignment: .leading, spacing: 7) {
-                          Text(patch.title)
+                          Text(remoteTitle ?? patch.title)
                               .font(.title3.weight(.semibold))
                               .foregroundStyle(Color.black)
                           Text("\(patch.replacementCount) replacement rules")
@@ -259,7 +260,10 @@ jobs:
                   .background(Color.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
                   .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
-                  .onAppear { synchronizeAppliedState() }
+                  .onAppear {
+                      synchronizeAppliedState()
+                      Task { remoteTitle = await RemotePatchAPI.title(for: patch) }
+                  }
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
                   } message: {
@@ -335,6 +339,7 @@ jobs:
           }
 
           private struct RemotePatchDescriptor: Decodable {
+              let title: String?
               let fileName: String
               let sha256: String
               let sizeBytes: Int
@@ -355,8 +360,12 @@ jobs:
                   return FileManager.default.fileExists(atPath: url.path) ? url : nil
               }
 
-              static func resolve(patch: PreloadedPatch) async -> URL? {
-                  guard let key = LicenseStore.storedKey else { return cachedFile(named: patch.fileName) }
+              static func title(for patch: PreloadedPatch) async -> String? {
+                  await descriptor(for: patch)?.title
+              }
+
+              private static func descriptor(for patch: PreloadedPatch) async -> RemotePatchDescriptor? {
+                  guard let key = LicenseStore.storedKey else { return nil }
                   do {
                       var request = URLRequest(url: catalogURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
                       request.httpMethod = "POST"
@@ -366,9 +375,17 @@ jobs:
                       let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
                       request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": deviceID, "package": packageName, "app_version": appVersion])
                       let (data, response) = try await URLSession.shared.data(for: request)
-                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return cachedFile(named: patch.fileName) }
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
                       let catalog = try JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data)
-                      guard catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
+                      return catalog.valid ? catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }) : nil
+                  } catch {
+                      return nil
+                  }
+              }
+
+              static func resolve(patch: PreloadedPatch) async -> URL? {
+                  do {
+                      guard let descriptor = await descriptor(for: patch), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
                       let (fileData, fileResponse) = try await URLSession.shared.data(from: url)
                       guard let fileHTTP = fileResponse as? HTTPURLResponse, (200..<300).contains(fileHTTP.statusCode), fileData.count == descriptor.sizeBytes else { return cachedFile(named: patch.fileName) }
                       let digest = SHA256.hash(data: fileData).map { String(format: "%02x", $0) }.joined()
