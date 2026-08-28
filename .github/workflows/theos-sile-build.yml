@@ -20,6 +20,7 @@ jobs:
           git clone --depth 1 https://github.com/theos/theos.git "$HOME/theos"
           rm -rf "$HOME/theos/sdks"
           git clone --depth 1 https://github.com/theos/sdks.git "$HOME/theos/sdks"
+          "$HOME/theos/bin/update-theos"
       - name: Extract project
         shell: bash
         run: |
