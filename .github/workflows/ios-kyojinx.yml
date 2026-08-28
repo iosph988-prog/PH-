@@ -114,7 +114,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in ALTO.3105 MAGICA.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 Hologramavermelho\(2\).3105 120FPS\(2\).3105 Hologramaverde\(5\).3105 ESPCORPO.3105 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 SACI.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -155,7 +155,6 @@ jobs:
                   bundleID: "com.dts.freefireth",
                   patches: [
                       PreloadedPatch(id: "free-alto", title: "HS ALTO", fileName: "ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-magica", title: "BALA MAGIC", fileName: "MAGICA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-peito", title: "HS PEITO", fileName: "PEITO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-vermelho", title: "HOLOGRAMA VERMELHO", fileName: "Hologramavermelho(2).3105", replacementCount: 1),
@@ -163,7 +162,11 @@ jobs:
                       PreloadedPatch(id: "free-verde", title: "HOLOGRAMA VERDE", fileName: "Hologramaverde(5).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-espcorpo", title: "HOLOGRAMA CORPO", fileName: "ESPCORPO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-cabeca-antena", title: "HS CABEÇA + ANTENA", fileName: "CABEÇA-ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-saci-antena", title: "HS SACI + ANTENA", fileName: "SACI.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-holograma-3d", title: "HOLOGRAMA 3D", fileName: "HOLOGRAMA3D.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-magic", title: "MAGIC", fileName: "MAGIC.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
