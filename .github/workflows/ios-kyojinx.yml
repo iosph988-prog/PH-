@@ -28,7 +28,7 @@ jobs:
           old = "@State private var showOnboarding = OnboardingStore.shouldShow()"
           if old not in a: raise SystemExit("onboarding state declaration not found")
           app.write_text(a.replace(old, "@State private var showOnboarding = false", 1))
-          n = nav.read_text()
+          n = nav.read_text()A
           old = "AppSection.allCases.filter(isVisible)"
           if old not in n: raise SystemExit("visibleSections declaration not found")
           nav.write_text(n.replace(old, "return [.home, .patches].filter(isVisible)", 1))
