@@ -1,11 +1,13 @@
 name: Build Theos Sile
 
+
 "on":
   workflow_dispatch:
   push:
     paths:
       - 'variosidiomasemalplamenu.zip'
       - '.github/workflows/theos-sile-build.yml'
+
 
 jobs:
   build:
@@ -44,3 +46,4 @@ jobs:
           name: theos-sile-build
           path: dist
           if-no-files-found: error
+
