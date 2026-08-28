@@ -1,1 +1,127 @@
+name: Build Theos Sile
+
+
+
+"on":
+
+  workflow_dispatch:
+  
+  push:
+  
+    paths:
+    
+      - 'variosidiomasemalplamenu.zip'
+      
+      - '.github/workflows/theos-sile-build.yml'
+      
+
+
+jobs:
+
+  build:
+  
+    runs-on: macos-latest
+    
+    steps:
+    
+      - name: Checkout
+      
+        uses: actions/checkout@v4
+        
+      - name: Setup Theos and SDKs
+      
+        shell: bash
+        
+        run: |
+        
+          set -euo pipefail
+          
+          git clone --depth 1 https://github.com/theos/theos.git "$HOME/theos"
+          
+          git clone --depth 1 https://github.com/theos/sdks.git "$HOME/theos/sdks"
+          
+      - name: Extract project
+      
+        shell: bash
+        
+        run: |
+        
+          set -euo pipefail
+          
+          rm -rf work dist
+          
+          mkdir -p work dist
+          
+          unzip -q variosidiomasemalplamenu.zip -d work
+          
+      - name: Build with Theos
+      
+        shell: bash
+        
+        run: |
+        
+          set -euo pipefail
+          
+          cd work/Sile
+          
+          export THEOS="$HOME/theos"
+          
+          export THEOS_MAKE_PATH="$THEOS/makefiles"
+          
+          make -e clean
+          
+          make -e
+          
+          find . -type f \( -name '*.dylib' -o -name '*.deb' \) -exec cp --parents {} "$GITHUB_WORKSPACE/dist/" \;
+          
+      - name: Upload build artifacts
+      
+        uses: actions/upload-artifact@v4
+        
+        with:
+        
+          name: theos-sile-build
+          
+          path: dist
+          
+          if-no-files-found: error
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
