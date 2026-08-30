@@ -2,7 +2,7 @@ name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-latest 
     steps:
       - uses: actions/checkout@v4
       - name: Extract original project
