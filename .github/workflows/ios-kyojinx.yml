@@ -124,16 +124,16 @@ jobs:
           while IFS= read -r src; do
             cp "$src" "$APP_DIR/PreloadedPatches/dimitri_skin_$(printf '%02d' "$i").3105"
             i=$((i + 1))
-          done < <(find /tmp/freefire-skins/dimitri -type f -name '*.3105' | sort)
+          done < <(find /tmp/freefire-skins/dimitri -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
           i=1
           while IFS= read -r src; do
             cp "$src" "$APP_DIR/PreloadedPatches/alok_skin_$(printf '%02d' "$i").3105"
             i=$((i + 1))
-          done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' | sort)
+          done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
           test "$(find "$APP_DIR/PreloadedPatches" -name 'dimitri_skin_*.3105' | wc -l | tr -d ' ')" = 8
           test "$(find "$APP_DIR/PreloadedPatches" -name 'alok_skin_*.3105' | wc -l | tr -d ' ')" = 8
-          dimitri_logo=$(find /tmp/freefire-skins/dimitri -type f -iname '*.png' | sort | head -n 1)
-          alok_logo=$(find /tmp/freefire-skins/alok -type f -iname '*.png' | sort | head -n 1)
+          dimitri_logo=$(find /tmp/freefire-skins/dimitri -type f -iname '*.png' ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
+          alok_logo=$(find /tmp/freefire-skins/alok -type f -iname '*.png' ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
           test -n "$dimitri_logo" && test -n "$alok_logo"
           cp "$dimitri_logo" "$APP_DIR/PreloadedPatches/dimitri_logo.png"
           cp "$alok_logo" "$APP_DIR/PreloadedPatches/alok_logo.png"
