@@ -142,11 +142,11 @@ jobs:
           done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
           test "$(find "$APP_DIR/PreloadedPatches" -name 'dimitri_skin_*.3105' | wc -l | tr -d ' ')" = 8
           test "$(find "$APP_DIR/PreloadedPatches" -name 'alok_skin_*.3105' | wc -l | tr -d ' ')" = 8
-          dimitri_logo=$(find /tmp/freefire-skins/dimitri -type f -iname '*.png' ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
-          alok_logo=$(find /tmp/freefire-skins/alok -type f -iname '*.png' ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
-          test -n "$dimitri_logo" && test -n "$alok_logo"
-          cp "$dimitri_logo" "$APP_DIR/PreloadedPatches/dimitri_logo.png"
-          cp "$alok_logo" "$APP_DIR/PreloadedPatches/alok_logo.png"
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/dimitri_portrait.png 'https://download1523.mediafire.com/uz6wo380pdsgWEVEylZV2TeQ-6xprH7d9edlVnUpgI3e-jRupavC9w94goA0Ks__ZivyZiz5GZTpzoqMU0dXgOuRLTgsuBg21SaYMbvfaze83zS9NHxp_Cv6IpsuPmUBT8ZAjPWbN_GepPvYEkDw0e0ZjpL-uHuk1fw-Xdf6k25MkpI/ep3c75wxzoqxcag/IMG_2807.png'
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/alok_portrait.jpeg 'https://download2289.mediafire.com/syg18nvomeqgHRBh3ZC6GVX0a8QYT3rlXV9bToxUAGv7xZ7WyT4D8VJS_P7NmM6fz2erFLgonfhhikyHfyzixqLQtRDHGWVTt-1TWLDt3Df6ioS1L1mLtTJtKJogJEwSoA0UcNoU3zx0pRUxVlj4SpzM5za4rLbJDXfj408SJMmSgQ/uu6p0bek0dp9mu2/IMG_2806.jpeg'
+          sips -s format png /tmp/alok_portrait.jpeg --out /tmp/alok_portrait.png >/dev/null
+          cp /tmp/dimitri_portrait.png "$APP_DIR/PreloadedPatches/dimitri_logo.png"
+          cp /tmp/alok_portrait.png "$APP_DIR/PreloadedPatches/alok_logo.png"
           for group in dimitri alok; do
             for n in $(seq 1 8); do
               nn=$(printf '%02d' "$n")
