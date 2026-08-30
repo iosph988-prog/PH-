@@ -132,8 +132,11 @@ jobs:
           done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' | sort)
           test "$(find "$APP_DIR/PreloadedPatches" -name 'dimitri_skin_*.3105' | wc -l | tr -d ' ')" = 8
           test "$(find "$APP_DIR/PreloadedPatches" -name 'alok_skin_*.3105' | wc -l | tr -d ' ')" = 8
-          cp /tmp/freefire-skins/dimitri/DIMITRI_SKINS/Skin_01/IMG_0092.PNG "$APP_DIR/PreloadedPatches/dimitri_logo.png"
-          cp /tmp/freefire-skins/alok/ALOK_SKINS/Skin_01/IMG_0068.PNG "$APP_DIR/PreloadedPatches/alok_logo.png"
+          dimitri_logo=$(find /tmp/freefire-skins/dimitri -type f -iname '*.png' | sort | head -n 1)
+          alok_logo=$(find /tmp/freefire-skins/alok -type f -iname '*.png' | sort | head -n 1)
+          test -n "$dimitri_logo" && test -n "$alok_logo"
+          cp "$dimitri_logo" "$APP_DIR/PreloadedPatches/dimitri_logo.png"
+          cp "$alok_logo" "$APP_DIR/PreloadedPatches/alok_logo.png"
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
