@@ -180,6 +180,7 @@ jobs:
           struct PatchProjectsView: View {
               @StateObject private var store = PatchProjectStore()
               @State private var selectedGameID = "free-fire"
+              @AppStorage("patchTheme") private var themeChoice = "dark"
 
                             private var selectedGame: PreloadedGame {
                   preloadedGames.first(where: { $0.id == selectedGameID }) ?? preloadedGames[0]
@@ -215,11 +216,26 @@ jobs:
                           .padding(.top, 20)
                           .padding(.bottom, 28)
                       }
-                      .background(Color(.systemGroupedBackground))
+                      .background(Color.patchScreenBackground.ignoresSafeArea())
                       .scrollContentBackground(.hidden)
                       .navigationTitle("Patches")
                       .navigationBarTitleDisplayMode(.inline)
-                          .preferredColorScheme(.light)
+                      .toolbar {
+                          ToolbarItem(placement: .navigationBarTrailing) {
+                              Menu {
+                                  Button { themeChoice = "dark" } label: {
+                                      Label("Tema preto", systemImage: "moon.fill")
+                                  }
+                                  Button { themeChoice = "light" } label: {
+                                      Label("Tema branco", systemImage: "sun.max.fill")
+                                  }
+                              } label: {
+                                  Image(systemName: themeChoice == "dark" ? "moon.fill" : "sun.max.fill")
+                              }
+                              .accessibilityLabel("Escolher tema")
+                          }
+                      }
+                      .preferredColorScheme(themeChoice == "light" ? .light : .dark)
                   }
               }
           }
@@ -232,16 +248,39 @@ jobs:
               @State private var activeReceipt: PatchTransactionReceipt?
               @State private var isWorking = false
               @State private var alertMessage: String?
+              private var iconName: String {
+                  let title = (remoteTitle ?? patch.title).uppercased()
+                  if title.contains("HOLOGRAMA") || title.contains("MAGIC") { return "sparkles" }
+                  if title.contains("120") || title.contains("FPS") { return "speedometer" }
+                  if title.contains("ANTENA") || title.contains("WIFI") { return "dot.radiowaves.left.and.right" }
+                  return "scope"
+              }
+
+              private var description: String {
+                  let title = (remoteTitle ?? patch.title).uppercased()
+                  if title.contains("ALTO") { return "HS acima da cabeça do inimigo." }
+                  if title.contains("PESCOÇO") { return "HS apenas no pescoço do inimigo." }
+                  if title.contains("PEITO") { return "HS no peito do inimigo." }
+                  if title.contains("HOLOGRAMA") { return "Usar gráfico no padrão para funcionar." }
+                  if title.contains("MAGIC") { return "Efeito visual mágico para o jogo." }
+                  if title.contains("FPS") { return "Ajuste de desempenho e fluidez." }
+                  return "Recurso disponível para ativação."
+              }
 
               var body: some View {
                   HStack(spacing: 14) {
-                      VStack(alignment: .leading, spacing: 7) {
+                      Image(systemName: iconName)
+                          .font(.system(size: 25, weight: .medium))
+                          .foregroundStyle(Color.patchIcon)
+                          .frame(width: 34)
+                      VStack(alignment: .leading, spacing: 5) {
                           Text(remoteTitle ?? patch.title)
-                              .font(.title3.weight(.semibold))
-                              .foregroundStyle(Color.black)
-                          Text("\(patch.replacementCount) replacement rules")
-                              .font(.body)
-                              .foregroundStyle(Color.gray)
+                              .font(.title3.weight(.bold))
+                              .foregroundStyle(Color.patchPrimaryText)
+                          Text(description)
+                              .font(.subheadline)
+                              .foregroundStyle(Color.patchSecondaryText)
+                              .lineLimit(2)
                       }
                       Spacer(minLength: 8)
                       Toggle("", isOn: Binding(
@@ -254,11 +293,11 @@ jobs:
                       .labelsHidden()
                       .toggleStyle(PatchToggleStyle())
                   }
-                  .padding(.horizontal, 22)
-                  .padding(.vertical, 28)
-                  .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
-                  .background(Color.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
+                  .padding(.horizontal, 18)
+                  .padding(.vertical, 22)
+                  .frame(maxWidth: .infinity, minHeight: 104, alignment: .leading)
+                  .background(Color.patchCardBackground, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
                   .onAppear {
                       synchronizeAppliedState()
@@ -437,7 +476,12 @@ jobs:
           }
 
           private extension Color {
-              static var patchCardBackground: Color { Color(.secondarySystemBackground) }
+              static var patchScreenBackground: Color { Color(uiColor: .systemBackground) }
+              static var patchCardBackground: Color { Color(uiColor: .secondarySystemBackground) }
+              static var patchPrimaryText: Color { Color.primary }
+              static var patchSecondaryText: Color { Color.secondary }
+              static var patchIcon: Color { Color.primary.opacity(0.72) }
+              static var patchBorder: Color { Color.primary.opacity(0.16) }
           }
 
           private extension PatchProjectStore {
