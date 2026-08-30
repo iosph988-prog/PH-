@@ -328,6 +328,18 @@ jobs:
                   }
                   return selectedGame.patches
               }
+              private var aimbotPatches: [PreloadedPatch] {
+                  displayedPatches.filter { patch in
+                      let title = patch.title.uppercased()
+                      return !title.contains("HOLOGRAMA")
+                  }
+              }
+              private var hologramPatches: [PreloadedPatch] {
+                  displayedPatches.filter { patch in
+                      let title = patch.title.uppercased()
+                      return title.contains("HOLOGRAMA")
+                  }
+              }
               var body: some View {
                   NavigationStack {
                       ScrollView {
@@ -347,9 +359,10 @@ jobs:
                               .frame(maxWidth: .infinity)
                               .padding(.vertical, 2)
 
-                              VStack(spacing: 14) {
-                                  ForEach(displayedPatches) { patch in
-                                      PreloadedPatchCard(patch: patch, store: store)
+                              VStack(spacing: 18) {
+                                  PatchCategorySection(title: "FUNÇÕES DE AIMBOT", subtitle: "Recursos de precisão e desempenho", patches: aimbotPatches, store: store)
+                                  if !hologramPatches.isEmpty {
+                                      PatchCategorySection(title: "FUNÇÕES DE HOLOGRAMA", subtitle: "Efeitos visuais para o jogo", patches: hologramPatches, store: store)
                                   }
                                   if selectedGameID == "free-fire" {
                                       FreeFireSkinsCard(store: store)
@@ -380,6 +393,32 @@ jobs:
                           }
                       }
                       .preferredColorScheme(themeChoice == "light" ? .light : .dark)
+                  }
+              }
+          }
+
+          private struct PatchCategorySection: View {
+              let title: String
+              let subtitle: String
+              let patches: [PreloadedPatch]
+              @ObservedObject var store: PatchProjectStore
+              var body: some View {
+                  VStack(alignment: .leading, spacing: 9) {
+                      Text(title)
+                          .font(.system(size: 17, weight: .heavy, design: .rounded))
+                          .tracking(0.4)
+                          .foregroundStyle(Color.patchPrimaryText)
+                      Text(subtitle)
+                          .font(.system(size: 12, weight: .semibold, design: .rounded))
+                          .foregroundStyle(Color.patchSecondaryText)
+                          .padding(.bottom, 2)
+                      VStack(spacing: 0) {
+                          ForEach(patches) { patch in
+                              PreloadedPatchCard(patch: patch, store: store)
+                          }
+                      }
+                      .background(Color.patchCardBackground, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                      .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
                   }
               }
           }
