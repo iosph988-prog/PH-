@@ -116,6 +116,7 @@ jobs:
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
           for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105" 'https://download1583.mediafire.com/o9kpqqpzojbg9XVNv9DjiXFfKcb6kGzc44EtwN_DByODmW_2c01yMYmkWN-oUy0sbJqpKo_d3UyHvJBZxfbPTakqiwCaJig2_QZZCs2SFmrMbWWUtTEkbFn-0byIoDbqZpIEjCV1UiXPLo56JXXBpqhBz0bV4U06y91JAY1ZgZtMhOQ/sjvuh00nh70hdj8/HOLOGRAMA+VERMELHO+3D.3105'
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -212,7 +213,8 @@ jobs:
                       PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-3d", title: "HOLOGRAMA 3D", fileName: "HOLOGRAMA3D.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-magic", title: "MAGIC", fileName: "MAGIC.3105", replacementCount: 1)
+                      PreloadedPatch(id: "free-magic", title: "MAGIC", fileName: "MAGIC.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-holograma-vermelho-3d", title: "HOLOGRAMA VERMELHO 3D", fileName: "HOLOGRAMA VERMELHO 3D.3105", replacementCount: 1)
                   ]
               ),
               PreloadedGame(
@@ -617,6 +619,7 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
+          test -s "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105"
           for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
             test -s "$APP_DIR/PreloadedPatches/$f"
           done
