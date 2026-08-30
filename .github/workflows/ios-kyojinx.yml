@@ -326,22 +326,29 @@ jobs:
                   NavigationStack {
                       ScrollView {
                           VStack(alignment: .leading, spacing: 22) {
-                              Picker("Jogo", selection: $selectedGameID) {
-                                  ForEach(preloadedGames) { game in
-                                      Text(game.title).tag(game.id)
-                                  }
-                              }
-                              .pickerStyle(.segmented)
-                              .frame(height: 54)
-                              .tint(.green)
-
-                              if selectedGameID == "free-fire-skins" {
-                                  FreeFireSkinsCard(store: store)
-                              } else {
-                                  VStack(spacing: 14) {
-                                      ForEach(displayedPatches) { patch in
-                                          PreloadedPatchCard(patch: patch, store: store)
+                              Text("SELECIONE O JOGO")
+                                  .font(.system(size: 17, weight: .heavy, design: .rounded))
+                                  .tracking(0.8)
+                                  .foregroundStyle(Color.patchPrimaryText)
+                                  .frame(maxWidth: .infinity, alignment: .leading)
+                              ScrollView(.horizontal, showsIndicators: false) {
+                                  HStack(spacing: 14) {
+                                      ForEach(preloadedGames.prefix(2)) { game in
+                                          GameSelectionCard(game: game, selected: selectedGameID == game.id) {
+                                              withAnimation(.easeInOut(duration: 0.2)) { selectedGameID = game.id }
+                                          }
                                       }
+                                  }
+                                  .padding(.horizontal, 2)
+                                  .padding(.vertical, 2)
+                              }
+
+                              VStack(spacing: 14) {
+                                  ForEach(displayedPatches) { patch in
+                                      PreloadedPatchCard(patch: patch, store: store)
+                                  }
+                                  if selectedGameID == "free-fire" {
+                                      FreeFireSkinsCard(store: store)
                                   }
                               }
                           }
@@ -370,6 +377,41 @@ jobs:
                       }
                       .preferredColorScheme(themeChoice == "light" ? .light : .dark)
                   }
+              }
+          }
+
+          private struct GameSelectionCard: View {
+              let game: PreloadedGame
+              let selected: Bool
+              let action: () -> Void
+              var body: some View {
+                  Button(action: action) {
+                      HStack(spacing: 15) {
+                          let imageName = game.id == "free-fire" ? "free_fire_card" : "free_fire_max_card"
+                          if let imageURL = EmbeddedPatchStore.url(for: "\(imageName).png"), let uiImage = UIImage(contentsOfFile: imageURL.path) {
+                              Image(uiImage: uiImage)
+                                  .resizable().scaledToFill()
+                                  .frame(width: 76, height: 76)
+                                  .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                          }
+                          VStack(alignment: .leading, spacing: 6) {
+                              Text(game.title.uppercased())
+                                  .font(.system(size: 18, weight: .heavy, design: .rounded))
+                                  .foregroundStyle(Color.patchPrimaryText)
+                                  .lineLimit(1)
+                              Text(selected ? "Selecionado" : "Toque para selecionar")
+                                  .font(.system(size: 15, weight: .semibold, design: .rounded))
+                                  .foregroundStyle(selected ? Color.patchPrimaryText : Color.patchSecondaryText)
+                          }
+                          Spacer(minLength: 4)
+                      }
+                      .padding(.horizontal, 16)
+                      .padding(.vertical, 15)
+                      .frame(width: 330, height: 112, alignment: .leading)
+                      .background(Color.patchCardBackground, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+                      .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(selected ? Color.patchPrimaryText : Color.patchBorder, lineWidth: selected ? 2 : 1))
+                  }
+                  .buttonStyle(.plain)
               }
           }
 
