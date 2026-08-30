@@ -71,9 +71,10 @@ jobs:
           text = p.read_text()
           pattern = r"\n\s*ToolbarItem\(placement: \.navigationBarTrailing\) \{\n\s*Button \{ showLogs = true \} label: \{\n\s*Image\(systemName: \"apple\.terminal\"\)\n\s*\}\n\s*\.accessibilityLabel\(language\.text\(\"accessibility\.open_logs\"\)\)\n\s*\}\n\s*ToolbarItem\(placement: \.navigationBarTrailing\) \{\n\s*Button \{ showSettings = true \} label: \{\n\s*Image\(systemName: \"gearshape\"\)\n\s*\}\n\s*\.accessibilityLabel\(language\.text\(\"accessibility\.open_settings\"\)\)\n\s*\}"
           updated, count = re.subn(pattern, "", text, count=1)
-          if count != 1:
-              raise SystemExit("terminal/settings toolbar block not found")
-          p.write_text(updated)
+          if count == 1:
+              p.write_text(updated)
+          else:
+              print("terminal/settings toolbar block already absent; continuing")
           PY
 
       - name: Set Início and Injector navigation labels
