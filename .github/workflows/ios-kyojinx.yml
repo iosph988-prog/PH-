@@ -116,8 +116,6 @@ jobs:
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
           for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
-          holograma_url=$(resolve_mediafire 'https://www.mediafire.com/file/sjvuh00nh70hdj8/HOLOGRAMA+VERMELHO+3D.3105/file')
-          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105" "$holograma_url"
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -154,10 +152,8 @@ jobs:
           done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
           test "$(find "$APP_DIR/PreloadedPatches" -name 'dimitri_skin_*.3105' | wc -l | tr -d ' ')" = 8
           test "$(find "$APP_DIR/PreloadedPatches" -name 'alok_skin_*.3105' | wc -l | tr -d ' ')" = 8
-          dimitri_portrait_url=$(resolve_mediafire 'https://www.mediafire.com/file/ep3c75wxzoqxcag/IMG_2807.png/file')
           dimitri_portrait_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/ep3c75wxzoqxcag/IMG_2807.png/file' 'IMG_2807\.png')
           curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/dimitri_portrait.png "$dimitri_portrait_url"
-          alok_portrait_url=$(resolve_mediafire 'https://www.mediafire.com/file/uu6p0bek0dp9mu2/IMG_2806.jpeg/file')
           alok_portrait_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/uu6p0bek0dp9mu2/IMG_2806.jpeg/file' 'IMG_2806\.jpeg')
           curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/alok_portrait.jpeg "$alok_portrait_url"
           sips -s format png /tmp/alok_portrait.jpeg --out /tmp/alok_portrait.png >/dev/null
@@ -634,7 +630,6 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          test -s "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105"
           for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
             test -s "$APP_DIR/PreloadedPatches/$f"
           done
