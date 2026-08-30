@@ -375,7 +375,7 @@ jobs:
                       }
                       .background(Color.patchScreenBackground.ignoresSafeArea())
                       .scrollContentBackground(.hidden)
-                      .navigationTitle("Patches")
+                      .navigationTitle("FUNÇÕES EXTERNAL")
                       .navigationBarTitleDisplayMode(.inline)
                       .toolbar {
                           ToolbarItem(placement: .navigationBarTrailing) {
