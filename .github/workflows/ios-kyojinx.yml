@@ -378,7 +378,7 @@ jobs:
               var body: some View {
                   HStack(spacing: 14) {
                       if let imageName = patch.imageName {
-                          Image(imageName)
+                          Image(uiImage: UIImage(named: imageName) ?? UIImage(systemName: "photo")!)
                               .resizable()
                               .scaledToFill()
                               .frame(width: compact ? 58 : 72, height: compact ? 58 : 72)
