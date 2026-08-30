@@ -115,6 +115,25 @@ jobs:
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
           for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
+          curl -L --fail --retry 3 -o /tmp/dimitri.zip 'https://download944.mediafire.com/m3zay4rx1hagg4S5cpPKyz4EolgQYd4biHF7yUGn_tOeq7vxBAlexNck8QJ29D8mBmtdMJNWLDKXanQNDsIlFrMrS4LcKlT8TThFasLTlb4yysFtvn-XXjKI1IoWen3egPjKEAQ9pviXUE-wi0iQz5Ouwwm_cLnEAsO9QoOzQpCQGvnt/diwzzz12vnix2kb/DIMITRI_SKINS.zip'
+          curl -L --fail --retry 3 -o /tmp/alok.zip 'https://download1585.mediafire.com/u2xpgq6cz9ogKLWi6-Jsuf67gUe8rMjxbpdMModuBVeXDTTsaQnDs7ZQd40bkXKeEit0jyZMmv4VD94_tdC5SB1BVL2KTRGuP9RvZkENsWvHoYZJJGDkDQ0TUzufqAdFO69ikE9zy3QFScUUpTRGYWP7zEfGSpEYgcykL3y_4JtGyxcg/ss0cwznwxn8hgn6/ALOK_SKINS.zip'
+          unzip -q /tmp/dimitri.zip -d /tmp/freefire-skins/dimitri
+          unzip -q /tmp/alok.zip -d /tmp/freefire-skins/alok
+          i=1
+          while IFS= read -r src; do
+            cp "$src" "$APP_DIR/PreloadedPatches/dimitri_skin_$(printf '%02d' "$i").3105"
+            i=$((i + 1))
+          done < <(find /tmp/freefire-skins/dimitri -type f -name '*.3105' | sort)
+          i=1
+          while IFS= read -r src; do
+            cp "$src" "$APP_DIR/PreloadedPatches/alok_skin_$(printf '%02d' "$i").3105"
+            i=$((i + 1))
+          done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' | sort)
+          test "$(find "$APP_DIR/PreloadedPatches" -name 'dimitri_skin_*.3105' | wc -l | tr -d ' ')" = 8
+          test "$(find "$APP_DIR/PreloadedPatches" -name 'alok_skin_*.3105' | wc -l | tr -d ' ')" = 8
+          cp /tmp/freefire-skins/dimitri/DIMITRI_SKINS/Skin_01/IMG_0092.PNG "$APP_DIR/PreloadedPatches/dimitri_logo.png"
+          cp /tmp/freefire-skins/alok/ALOK_SKINS/Skin_01/IMG_0068.PNG "$APP_DIR/PreloadedPatches/alok_logo.png"
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -174,6 +193,29 @@ jobs:
                       PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
                   ]
+              ),
+              PreloadedGame(
+                  id: "free-fire-skins",
+                  title: "Free Fire skins",
+                  bundleID: "com.dts.freefireth",
+                  patches: [
+                      PreloadedPatch(id: "dimitri-skin-01", title: "Dimitri — Skin 01", fileName: "dimitri_skin_01.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-02", title: "Dimitri — Skin 02", fileName: "dimitri_skin_02.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-03", title: "Dimitri — Skin 03", fileName: "dimitri_skin_03.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-04", title: "Dimitri — Skin 04", fileName: "dimitri_skin_04.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-05", title: "Dimitri — Skin 05", fileName: "dimitri_skin_05.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-06", title: "Dimitri — Skin 06", fileName: "dimitri_skin_06.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-07", title: "Dimitri — Skin 07", fileName: "dimitri_skin_07.3105", replacementCount: 1),
+                      PreloadedPatch(id: "dimitri-skin-08", title: "Dimitri — Skin 08", fileName: "dimitri_skin_08.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-01", title: "Alok — Skin 01", fileName: "alok_skin_01.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-02", title: "Alok — Skin 02", fileName: "alok_skin_02.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-03", title: "Alok — Skin 03", fileName: "alok_skin_03.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-04", title: "Alok — Skin 04", fileName: "alok_skin_04.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-05", title: "Alok — Skin 05", fileName: "alok_skin_05.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-06", title: "Alok — Skin 06", fileName: "alok_skin_06.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-07", title: "Alok — Skin 07", fileName: "alok_skin_07.3105", replacementCount: 1),
+                      PreloadedPatch(id: "alok-skin-08", title: "Alok — Skin 08", fileName: "alok_skin_08.3105", replacementCount: 1)
+                  ]
               )
           ]
 
@@ -206,9 +248,13 @@ jobs:
                               .frame(height: 54)
                               .tint(.green)
 
-                              VStack(spacing: 14) {
-                                  ForEach(displayedPatches) { patch in
-                                      PreloadedPatchCard(patch: patch, store: store)
+                              if selectedGameID == "free-fire-skins" {
+                                  FreeFireSkinsCard(store: store)
+                              } else {
+                                  VStack(spacing: 14) {
+                                      ForEach(displayedPatches) { patch in
+                                          PreloadedPatchCard(patch: patch, store: store)
+                                      }
                                   }
                               }
                           }
@@ -240,6 +286,37 @@ jobs:
               }
           }
 
+          private struct FreeFireSkinsCard: View {
+              @ObservedObject var store: PatchProjectStore
+              @State private var expandedCharacter: String? = "dimitri"
+              private let dimitriPatches = (1...8).map { PreloadedPatch(id: "dimitri-skin-\($0)", title: "Dimitri — Skin 0\($0)", fileName: "dimitri_skin_0\($0).3105", replacementCount: 1) }
+              private let alokPatches = (1...8).map { PreloadedPatch(id: "alok-skin-\($0)", title: "Alok — Skin 0\($0)", fileName: "alok_skin_0\($0).3105", replacementCount: 1) }
+              var body: some View {
+                  VStack(spacing: 12) {
+                      skinGroup(title: "Dimitri", logo: "dimitri_logo", patches: dimitriPatches, key: "dimitri")
+                      skinGroup(title: "Alok", logo: "alok_logo", patches: alokPatches, key: "alok")
+                  }
+              }
+              @ViewBuilder private func skinGroup(title: String, logo: String, patches: [PreloadedPatch], key: String) -> some View {
+                  VStack(spacing: 0) {
+                      Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
+                          HStack(spacing: 13) {
+                              Image(logo).resizable().scaledToFill().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                              VStack(alignment: .leading, spacing: 3) {
+                                  Text(title).font(.headline.weight(.bold)).foregroundStyle(Color.patchPrimaryText)
+                                  Text("8 skins disponíveis").font(.caption).foregroundStyle(Color.patchSecondaryText)
+                              }
+                              Spacer()
+                              Image(systemName: expandedCharacter == key ? "chevron.up" : "chevron.down").foregroundStyle(Color.patchSecondaryText)
+                          }.padding(14)
+                      }.buttonStyle(.plain)
+                      if expandedCharacter == key {
+                          VStack(spacing: 9) { ForEach(patches) { patch in PreloadedPatchCard(patch: patch, store: store, compact: true) } }.padding(.horizontal, 10).padding(.bottom, 12)
+                      }
+                  }.background(Color.patchCardBackground, in: RoundedRectangle(cornerRadius: 22, style: .continuous)).overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
+              }
+          }
+
           private struct PreloadedPatchCard: View {
               let patch: PreloadedPatch
               @ObservedObject var store: PatchProjectStore
@@ -248,6 +325,7 @@ jobs:
               @State private var activeReceipt: PatchTransactionReceipt?
               @State private var isWorking = false
               @State private var alertMessage: String?
+              var compact = false
               private var iconName: String {
                   let title = (remoteTitle ?? patch.title).uppercased()
                   if title.contains("HOLOGRAMA") || title.contains("MAGIC") { return "sparkles" }
@@ -293,9 +371,9 @@ jobs:
                       .labelsHidden()
                       .toggleStyle(PatchToggleStyle())
                   }
-                  .padding(.horizontal, 18)
-                  .padding(.vertical, 22)
-                  .frame(maxWidth: .infinity, minHeight: 104, alignment: .leading)
+                  .padding(.horizontal, compact ? 12 : 18)
+                  .padding(.vertical, compact ? 10 : 22)
+                  .frame(maxWidth: .infinity, minHeight: compact ? 72 : 104, alignment: .leading)
                   .background(Color.patchCardBackground, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
                   .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
                   .opacity(isWorking ? 0.65 : 1)
