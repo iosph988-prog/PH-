@@ -333,7 +333,7 @@ jobs:
                   VStack(spacing: 0) {
                       Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
                           HStack(spacing: 13) {
-                              Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: logo, ofType: "png", inDirectory: "PreloadedPatches")!)!).resizable().scaledToFill().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                              Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: logo, ofType: "png", inDirectory: "PreloadedPatches")!)!).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                               VStack(alignment: .leading, spacing: 3) {
                                   Text(title).font(.headline.weight(.bold)).foregroundStyle(Color.patchPrimaryText)
                                   Text("8 skins disponíveis").font(.caption).foregroundStyle(Color.patchSecondaryText)
