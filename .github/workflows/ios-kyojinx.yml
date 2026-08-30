@@ -116,8 +116,17 @@ jobs:
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
           for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
-          curl -L --fail --retry 3 -o /tmp/dimitri.zip 'https://download944.mediafire.com/m3zay4rx1hagg4S5cpPKyz4EolgQYd4biHF7yUGn_tOeq7vxBAlexNck8QJ29D8mBmtdMJNWLDKXanQNDsIlFrMrS4LcKlT8TThFasLTlb4yysFtvn-XXjKI1IoWen3egPjKEAQ9pviXUE-wi0iQz5Ouwwm_cLnEAsO9QoOzQpCQGvnt/diwzzz12vnix2kb/DIMITRI_SKINS.zip'
-          curl -L --fail --retry 3 -o /tmp/alok.zip 'https://download1585.mediafire.com/u2xpgq6cz9ogKLWi6-Jsuf67gUe8rMjxbpdMModuBVeXDTTsaQnDs7ZQd40bkXKeEit0jyZMmv4VD94_tdC5SB1BVL2KTRGuP9RvZkENsWvHoYZJJGDkDQ0TUzufqAdFO69ikE9zy3QFScUUpTRGYWP7zEfGSpEYgcykL3y_4JtGyxcg/ss0cwznwxn8hgn6/ALOK_SKINS.zip'
+          resolve_mediafire() {
+            page="$1"
+            output="$2"
+            name="$3"
+            html=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$page")
+            url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+/'"$name"'\.zip' | head -n 1)
+            test -n "$url" || { echo "MediaFire download link not found for $name" >&2; exit 1; }
+            curl -L --fail --retry 3 -A 'Mozilla/5.0' -o "$output" "$url"
+          }
+          resolve_mediafire 'https://www.mediafire.com/file/diwzzz12vnix2kb/DIMITRI_SKINS.zip/file' /tmp/dimitri.zip DIMITRI_SKINS
+          resolve_mediafire 'https://www.mediafire.com/file/ss0cwznwxn8hgn6/ALOK_SKINS.zip/file' /tmp/alok.zip ALOK_SKINS
           unzip -q /tmp/dimitri.zip -d /tmp/freefire-skins/dimitri
           unzip -q /tmp/alok.zip -d /tmp/freefire-skins/alok
           i=1
