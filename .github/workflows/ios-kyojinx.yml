@@ -146,6 +146,14 @@ jobs:
           test -n "$dimitri_logo" && test -n "$alok_logo"
           cp "$dimitri_logo" "$APP_DIR/PreloadedPatches/dimitri_logo.png"
           cp "$alok_logo" "$APP_DIR/PreloadedPatches/alok_logo.png"
+          for group in dimitri alok; do
+            for n in $(seq 1 8); do
+              nn=$(printf '%02d' "$n")
+              photo=$(find "/tmp/freefire-skins/$group" -type f -path "*/Skin_${nn}/*" -iname '*.png' ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
+              test -n "$photo"
+              cp "$photo" "$APP_DIR/PreloadedPatches/${group}_skin_${nn}.png"
+            done
+          done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
@@ -177,6 +185,7 @@ jobs:
               let title: String
               let fileName: String
               let replacementCount: Int
+              let imageName: String? = nil
           }
 
           private let preloadedGames: [PreloadedGame] = [
@@ -301,8 +310,8 @@ jobs:
           private struct FreeFireSkinsCard: View {
               @ObservedObject var store: PatchProjectStore
               @State private var expandedCharacter: String? = "dimitri"
-              private let dimitriPatches = (1...8).map { PreloadedPatch(id: "dimitri-skin-\($0)", title: "Dimitri — Skin 0\($0)", fileName: "dimitri_skin_0\($0).3105", replacementCount: 1) }
-              private let alokPatches = (1...8).map { PreloadedPatch(id: "alok-skin-\($0)", title: "Alok — Skin 0\($0)", fileName: "alok_skin_0\($0).3105", replacementCount: 1) }
+              private let dimitriPatches = (1...8).map { PreloadedPatch(id: "dimitri-skin-\($0)", title: "Dimitri — Skin 0\($0)", fileName: "dimitri_skin_0\($0).3105", replacementCount: 1, imageName: "dimitri_skin_0\($0)") }
+              private let alokPatches = (1...8).map { PreloadedPatch(id: "alok-skin-\($0)", title: "Alok — Skin 0\($0)", fileName: "alok_skin_0\($0).3105", replacementCount: 1, imageName: "alok_skin_0\($0)") }
               var body: some View {
                   VStack(spacing: 12) {
                       skinGroup(title: "Dimitri", logo: "dimitri_logo", patches: dimitriPatches, key: "dimitri")
@@ -359,10 +368,19 @@ jobs:
 
               var body: some View {
                   HStack(spacing: 14) {
-                      Image(systemName: iconName)
-                          .font(.system(size: 25, weight: .medium))
-                          .foregroundStyle(Color.patchIcon)
-                          .frame(width: 34)
+                      if let imageName = patch.imageName {
+                          Image(imageName)
+                              .resizable()
+                              .scaledToFill()
+                              .frame(width: compact ? 58 : 72, height: compact ? 58 : 72)
+                              .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                              .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
+                      } else {
+                          Image(systemName: iconName)
+                              .font(.system(size: 25, weight: .medium))
+                              .foregroundStyle(Color.patchIcon)
+                              .frame(width: 34)
+                      }
                       VStack(alignment: .leading, spacing: 5) {
                           Text(remoteTitle ?? patch.title)
                               .font(.title3.weight(.bold))
