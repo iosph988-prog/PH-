@@ -186,7 +186,15 @@ jobs:
               let title: String
               let fileName: String
               let replacementCount: Int
-              let imageName: String? = nil
+              let imageName: String?
+
+              init(id: String, title: String, fileName: String, replacementCount: Int, imageName: String? = nil) {
+                  self.id = id
+                  self.title = title
+                  self.fileName = fileName
+                  self.replacementCount = replacementCount
+                  self.imageName = imageName
+              }
           }
 
           private let preloadedGames: [PreloadedGame] = [
