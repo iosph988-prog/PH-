@@ -187,13 +187,15 @@ jobs:
               let fileName: String
               let replacementCount: Int
               let imageName: String?
+              let logoName: String?
 
-              init(id: String, title: String, fileName: String, replacementCount: Int, imageName: String? = nil) {
+              init(id: String, title: String, fileName: String, replacementCount: Int, imageName: String? = nil, logoName: String? = nil) {
                   self.id = id
                   self.title = title
                   self.fileName = fileName
                   self.replacementCount = replacementCount
                   self.imageName = imageName
+                  self.logoName = logoName
               }
           }
 
@@ -319,8 +321,8 @@ jobs:
           private struct FreeFireSkinsCard: View {
               @ObservedObject var store: PatchProjectStore
               @State private var expandedCharacter: String? = "dimitri"
-              private let dimitriPatches = (1...8).map { PreloadedPatch(id: "dimitri-skin-\($0)", title: "Dimitri — Skin 0\($0)", fileName: "dimitri_skin_0\($0).3105", replacementCount: 1, imageName: "dimitri_skin_0\($0)") }
-              private let alokPatches = (1...8).map { PreloadedPatch(id: "alok-skin-\($0)", title: "Alok — Skin 0\($0)", fileName: "alok_skin_0\($0).3105", replacementCount: 1, imageName: "alok_skin_0\($0)") }
+              private let dimitriPatches = (1...8).map { PreloadedPatch(id: "dimitri-skin-\($0)", title: "Dimitri — Skin 0\($0)", fileName: "dimitri_skin_0\($0).3105", replacementCount: 1, imageName: "dimitri_skin_0\($0)", logoName: "dimitri_logo") }
+              private let alokPatches = (1...8).map { PreloadedPatch(id: "alok-skin-\($0)", title: "Alok — Skin 0\($0)", fileName: "alok_skin_0\($0).3105", replacementCount: 1, imageName: "alok_skin_0\($0)", logoName: "alok_logo") }
               var body: some View {
                   VStack(spacing: 12) {
                       skinGroup(title: "Dimitri", logo: "dimitri_logo", patches: dimitriPatches, key: "dimitri")
@@ -331,7 +333,7 @@ jobs:
                   VStack(spacing: 0) {
                       Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
                           HStack(spacing: 13) {
-                              Image(logo).resizable().scaledToFill().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                              Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: logo, ofType: "png", inDirectory: "PreloadedPatches")!)!).resizable().scaledToFill().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                               VStack(alignment: .leading, spacing: 3) {
                                   Text(title).font(.headline.weight(.bold)).foregroundStyle(Color.patchPrimaryText)
                                   Text("8 skins disponíveis").font(.caption).foregroundStyle(Color.patchSecondaryText)
@@ -378,12 +380,19 @@ jobs:
               var body: some View {
                   HStack(spacing: 14) {
                       if let imageName = patch.imageName {
-                          Image(uiImage: UIImage(named: imageName) ?? UIImage(systemName: "photo")!)
+                          Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: imageName, ofType: "png", inDirectory: "PreloadedPatches")!)!)
                               .resizable()
                               .scaledToFill()
                               .frame(width: compact ? 58 : 72, height: compact ? 58 : 72)
                               .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                               .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
+                              .overlay(alignment: .bottomTrailing) {
+                                  if let logoName = patch.logoName {
+                                      Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: logoName, ofType: "png", inDirectory: "PreloadedPatches")!)!)
+                                          .resizable().scaledToFill().frame(width: 22, height: 22)
+                                          .clipShape(Circle()).overlay(Circle().stroke(Color.patchCardBackground, lineWidth: 2)).padding(3)
+                                  }
+                              }
                       } else {
                           Image(systemName: iconName)
                               .font(.system(size: 25, weight: .medium))
