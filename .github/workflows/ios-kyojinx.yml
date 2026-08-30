@@ -1,7 +1,7 @@
 name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs:
-  build: 
+  build:
     runs-on: macos-latest 
     steps:
       - uses: actions/checkout@v4
@@ -110,7 +110,7 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          rm -rf "$APP_DIR/PreloadedPatches"
+          rm -rf "$APP_DIR/PreloadedPatches" "$APP_DIR/PreloadedPatches.pack"
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
@@ -159,6 +159,15 @@ jobs:
           sips -s format png /tmp/alok_portrait.jpeg --out /tmp/alok_portrait.png >/dev/null
           cp /tmp/dimitri_portrait.png "$APP_DIR/PreloadedPatches/dimitri_logo.png"
           cp /tmp/alok_portrait.png "$APP_DIR/PreloadedPatches/alok_logo.png"
+          PACK="$APP_DIR/PreloadedPatches.pack"
+          : > "$PACK"
+          while IFS= read -r -d '' asset; do
+            rel="${asset#"$APP_DIR/PreloadedPatches/"}"
+            printf '%s\t' "$rel" >> "$PACK"
+            base64 < "$asset" | tr -d '\n' >> "$PACK"
+            printf '\n' >> "$PACK"
+          done < <(find "$APP_DIR/PreloadedPatches" -type f ! -name '._*' -print0 | sort -z)
+          rm -rf "$APP_DIR/PreloadedPatches"
           for group in dimitri alok; do
             for n in $(seq 1 8); do
               nn=$(printf '%02d' "$n")
@@ -172,19 +181,52 @@ jobs:
           from pathlib import Path
           import sys
           p=Path(sys.argv[1]); t=p.read_text()
-          ref='''\t\tA1B2C3D5 /* PreloadedPatches */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PreloadedPatches; sourceTree = "<group>"; };'''
-          build='''\t\tA1B2C3D6 /* PreloadedPatches in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D5 /* PreloadedPatches */; };'''
+          ref='''\t\tA1B2C3D5 /* PreloadedPatches.pack */ = {isa = PBXFileReference; lastKnownFileType = file; path = PreloadedPatches.pack; sourceTree = "<group>"; };'''
+          build='''\t\tA1B2C3D6 /* PreloadedPatches.pack in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D5 /* PreloadedPatches.pack */; };'''
           if 'A1B2C3D5' not in t:
               t=t.replace('/* End PBXFileReference section */', ref+'\n/* End PBXFileReference section */')
               t=t.replace('/* End PBXBuildFile section */', build+'\n/* End PBXBuildFile section */')
-              t=t.replace('3105A031 /* Assets.xcassets */,', 'A1B2C3D5 /* PreloadedPatches */,\n\t\t\t\t3105A031 /* Assets.xcassets */,')
-              t=t.replace('files = (\n\t\t\t\t3105A211,', 'files = (\n\t\t\t\tA1B2C3D6 /* PreloadedPatches in Resources */,\n\t\t\t\t3105A211,')
+              t=t.replace('3105A031 /* Assets.xcassets */,', 'A1B2C3D5 /* PreloadedPatches.pack */,\n\t\t\t\t3105A031 /* Assets.xcassets */,')
+              t=t.replace('files = (\n\t\t\t\t3105A211,', 'files = (\n\t\t\t\tA1B2C3D6 /* PreloadedPatches.pack in Resources */,\n\t\t\t\t3105A211,')
           p.write_text(t)
           PY
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
           import CryptoKit
+
+          private enum EmbeddedPatchStore {
+              private static let folderName = ".preloaded_runtime"
+              private static var preparedURL: URL?
+              private static let lock = NSLock()
+
+              static func prepare() -> URL? {
+                  lock.lock(); defer { lock.unlock() }
+                  if let preparedURL { return preparedURL }
+                  guard let packURL = Bundle.main.url(forResource: "PreloadedPatches", withExtension: "pack"),
+                        let text = try? String(contentsOf: packURL, encoding: .utf8) else { return nil }
+                  let root = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent(folderName, isDirectory: true)
+                  try? FileManager.default.removeItem(at: root)
+                  try? FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+                  for line in text.split(whereSeparator: \.isNewline) {
+                      let parts = line.split(separator: "\t", maxSplits: 1).map(String.init)
+                      guard parts.count == 2, let data = Data(base64Encoded: parts[1]) else { continue }
+                      let destination = root.appendingPathComponent(parts[0])
+                      try? data.write(to: destination, options: .atomic)
+                  }
+                  preparedURL = root
+                  return root
+              }
+
+              static func url(for fileName: String) -> URL? {
+                  prepare()?.appendingPathComponent(fileName)
+              }
+
+              static func allPatchURLs() -> [URL] {
+                  guard let root = prepare(), let items = try? FileManager.default.contentsOfDirectory(at: root, includingPropertiesForKeys: nil) else { return [] }
+                  return items
+              }
+          }
 
           private struct PreloadedGame: Identifiable {
               let id: String
@@ -346,7 +388,7 @@ jobs:
                   VStack(spacing: 0) {
                       Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
                           HStack(spacing: 13) {
-                              Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: logo, ofType: "png", inDirectory: "PreloadedPatches")!)!).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                              Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(logo).png")!.path)!).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                               VStack(alignment: .leading, spacing: 3) {
                                   Text(title).font(.headline.weight(.bold)).foregroundStyle(Color.patchPrimaryText)
                                   Text("8 skins disponíveis").font(.caption).foregroundStyle(Color.patchSecondaryText)
@@ -393,7 +435,7 @@ jobs:
               var body: some View {
                   HStack(spacing: 14) {
                       if let imageName = patch.imageName {
-                          Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: imageName, ofType: "png", inDirectory: "PreloadedPatches")!)!)
+                          Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(imageName).png")!.path)!)
                               .resizable()
                               .scaledToFill()
                               .frame(width: compact ? 58 : 72, height: compact ? 58 : 72)
@@ -401,7 +443,7 @@ jobs:
                               .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
                               .overlay(alignment: .bottomTrailing) {
                                   if let logoName = patch.logoName {
-                                      Image(uiImage: UIImage(contentsOfFile: Bundle.main.path(forResource: logoName, ofType: "png", inDirectory: "PreloadedPatches")!)!)
+                                      Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(logoName).png")!.path)!)
                                           .resizable().scaledToFill().frame(width: 22, height: 22)
                                           .clipShape(Circle()).overlay(Circle().stroke(Color.patchCardBackground, lineWidth: 2)).padding(3)
                                   }
@@ -524,8 +566,8 @@ jobs:
 
               private func bundledFile(named name: String) -> URL? {
                   let normalized = name.precomposedStringWithCanonicalMapping
-                  return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first {
-                      $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized
+                  return EmbeddedPatchStore.allPatchURLs().first {
+                      $0.pathExtension == "3105" && $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized
                   }
               }
           }
@@ -628,11 +670,7 @@ jobs:
           }
           SWIFT
 
-          test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
-          test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
-            test -s "$APP_DIR/PreloadedPatches/$f"
-          done
+          test -s "$APP_DIR/PreloadedPatches.pack"
       - name: Force visible Injector icon
         shell: bash
         run: |
