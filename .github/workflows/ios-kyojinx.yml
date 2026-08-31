@@ -115,7 +115,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -256,12 +256,11 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-120fps", title: "120FPS", fileName: "120FPS(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-3d", title: "HOLOGRAMA 3D", fileName: "HOLOGRAMA3D.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-magic", title: "MAGIC", fileName: "MAGIC.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-vermelho-3d", title: "HOLOGRAMA VERMELHO 3D", fileName: "HOLOGRAMA VERMELHO 3D.3105", replacementCount: 1)
                   ]
               ),
@@ -494,11 +493,11 @@ jobs:
 
               private var description: String {
                   let title = (remoteTitle ?? patch.title).uppercased()
-                  if title.contains("ALTO") { return "HS acima da cabeça do inimigo." }
-                  if title.contains("PESCOÇO") { return "HS apenas no pescoço do inimigo." }
+                  if title.contains("ANTENA") || title.contains("WIFI") { return "HS apenas no pescoço do inimigo avatar" }
+                  if title == "HS PESCOÇO" { return "HS apenas no pescoço do inimigo cachê" }
+                  if title.contains("PESCOÇO") { return "HS apenas no pescoço do inimigo cachê" }
                   if title.contains("PEITO") { return "HS no peito do inimigo." }
                   if title.contains("HOLOGRAMA") { return "Usar gráfico no padrão para funcionar." }
-                  if title.contains("MAGIC") { return "Efeito visual mágico para o jogo." }
                   if title.contains("FPS") { return "Ajuste de desempenho e fluidez." }
                   return "Recurso disponível para ativação."
               }
