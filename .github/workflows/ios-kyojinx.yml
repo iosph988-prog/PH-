@@ -115,7 +115,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -134,8 +134,7 @@ jobs:
             test -n "$url" || { echo "MediaFire file link not found for $pattern" >&2; exit 1; }
             printf '%s\n' "$url"
           }
-          holograma_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/sjvuh00nh70hdj8/HOLOGRAMA+VERMELHO+3D.3105/file' 'HOLOGRAMA\+VERMELHO\+3D\.3105')
-          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105" "$holograma_url"
+          cp 'Hologramavermelho(2).3105' "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105"
           resolve_mediafire 'https://www.mediafire.com/file/diwzzz12vnix2kb/DIMITRI_SKINS.zip/file' /tmp/dimitri.zip DIMITRI_SKINS
           resolve_mediafire 'https://www.mediafire.com/file/ss0cwznwxn8hgn6/ALOK_SKINS.zip/file' /tmp/alok.zip ALOK_SKINS
           unzip -q /tmp/dimitri.zip -d /tmp/freefire-skins/dimitri
