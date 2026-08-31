@@ -265,10 +265,8 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-alto", title: "HS ALTO", fileName: "ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito", title: "HS PEITO", fileName: "PEITO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-3d", title: "HOLOGRAMA 3D", fileName: "HOLOGRAMA3D.3105", replacementCount: 1),
@@ -283,8 +281,6 @@ jobs:
                   patches: [
                       PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
                   ]
               ),
               PreloadedGame(
@@ -322,9 +318,7 @@ jobs:
               }
               private var displayedPatches: [PreloadedPatch] {
                   if selectedGameID == "free-fire-max" {
-                      return selectedGame.patches + [
-                          PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESCOCO(3).3105", replacementCount: 1)
-                      ]
+                      return selectedGame.patches
                   }
                   return selectedGame.patches
               }
