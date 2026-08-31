@@ -115,7 +115,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 HOLOGRAMA3D.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -143,6 +143,9 @@ jobs:
           sips -s format png /tmp/free_fire_max_card.jpeg --out "$APP_DIR/PreloadedPatches/free_fire_max_card.png" >/dev/null
           resolve_mediafire 'https://www.mediafire.com/file/y96f4eo6jsxxxha/DIMITRI_SKINS.zip/file' /tmp/dimitri.zip DIMITRI_SKINS
           resolve_mediafire 'https://www.mediafire.com/file/10ifzo6sg0ljx06/ALOK_SKINS.zip/file' /tmp/alok.zip ALOK_SKINS
+          resolve_mediafire 'https://www.mediafire.com/file/44gyv9vem2ivyve/Pastas_arquivos_.zip/file' /tmp/pastas_arquivos.zip Pastas_arquivos_
+          unzip -q /tmp/pastas_arquivos.zip -d /tmp/pastas-arquivos
+          while IFS= read -r src; do cp "$src" "$APP_DIR/PreloadedPatches/$(basename "$src")"; done < <(find /tmp/pastas-arquivos -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
           unzip -q /tmp/dimitri.zip -d /tmp/freefire-skins/dimitri
           unzip -q /tmp/alok.zip -d /tmp/freefire-skins/alok
           i=1
@@ -262,10 +265,17 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-pescoco-melhorado", title: "HS PESCOÇO MELHORADO", fileName: "HS PESCOÇO MELHORADO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-barriga-antena", title: "HS BARRIGA - ANTENA", fileName: "HS BARRIGA - ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-peito-bruto", title: "HS PEITO BRUTO", fileName: "HS PEITO BRUTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-peito-lite-antena", title: "HS PEITO LITE - ANTENA", fileName: "HS PEITO LITE - ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-peito-bruto-antena", title: "HS PEITO BRUTO - ANTENA", fileName: "HS PEITO BRUTO - ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-bala-magica-antena", title: "BALA MAGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-peito-lite", title: "HS PEITO LITE", fileName: "HS PEITO LITE.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-alto", title: "HS ALTO", fileName: "HS ALTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-alto-pescoco", title: "HS ALTO + PESCOÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pastas-pescoco-antena", title: "HS PESCOÇO - ANTENA", fileName: "HS PESCOÇO - ANTENA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-120fps", title: "120FPS", fileName: "120FPS(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-3d", title: "HOLOGRAMA 3D", fileName: "HOLOGRAMA3D.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-vermelho-3d", title: "HOLOGRAMA VERMELHO 3D", fileName: "HOLOGRAMA VERMELHO 3D.3105", replacementCount: 1)
                   ]
