@@ -510,6 +510,11 @@ jobs:
                   return "scope"
               }
 
+              private var displayTitle: String {
+                  let raw = remoteTitle ?? patch.title
+                  return raw.replacingOccurrences(of: ".3105", with: "", options: .caseInsensitive)
+              }
+
               private var description: String {
                   let title = (remoteTitle ?? patch.title).uppercased()
                   if title.contains("ANTENA") || title.contains("WIFI") { return "HS apenas no pescoço do inimigo avatar" }
@@ -544,7 +549,7 @@ jobs:
                               .frame(width: 34)
                       }
                       VStack(alignment: .leading, spacing: 5) {
-                          Text(remoteTitle ?? patch.title)
+                          Text(displayTitle)
                               .font(.title3.weight(.bold))
                               .foregroundStyle(Color.patchPrimaryText)
                           Text(description)
