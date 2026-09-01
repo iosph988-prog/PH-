@@ -76,7 +76,7 @@ jobs:
               "6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png", "BC397CF8-956B-49A7-A6BB-772CEEA5217A.png",
               "ALTO.3105", "PEITO.3105", "PESC*.3105", "CABEC*.3105", "120FPS(2).3105",
               "PEITO-ANTENA.3105", "ALTO(3).3105", "PEITO(3).3105", "Hologramazul(2).3105",
-              "Hologramaverde(4).3105", "PESCOCO-Wifi.3105", "HOLOGRAMA3D.3105", "MAGIC.3105",
+              "Hologramaverde(4).3105", "Hologramavermelho(2).3105", "PESCOCO-Wifi.3105", "HOLOGRAMA3D.3105", "MAGIC.3105",
           ]
           root = Path(destination)
           root.mkdir(parents=True, exist_ok=True)
