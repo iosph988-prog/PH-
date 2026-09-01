@@ -20,7 +20,11 @@ jobs:
             'APIClient+Config.m' \
             'APIClient.h' \
             'libKyojinxSDK.a' \
-            'Hologramavermelho(2).3105' \
+            '*.3105' \
+            '*.png' \
+            '*.PNG' \
+            '*.jpg' \
+            '*.JPG' \
             -d "$GITHUB_WORKSPACE"
       - name: Extract original project
         shell: bash
