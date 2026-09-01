@@ -508,15 +508,12 @@ jobs:
 
               private var description: String {
                   let title = (remoteTitle ?? patch.title).uppercased()
-                  let normalized = title.folding(options: .diacriticInsensitive, locale: .current)
-                  let suffix = (normalized.contains("ANTENA") || normalized.contains("WIFI"))
-                      ? "avatar método 40% no lobby desativa"
-                      : "avatar"
-                  if normalized.contains("PEITO") { return "HS apenas no peito do inimigo \(suffix)" }
-                  if normalized.contains("PESCOCO") { return "HS apenas no pescoço do inimigo \(suffix)" }
-                  if normalized.contains("ALTO") { return "HS apenas no alto do inimigo \(suffix)" }
-                  if normalized.contains("HOLOGRAMA") { return "Usar gráfico no padrão para funcionar." }
-                  if normalized.contains("FPS") { return "Ajuste de desempenho e fluidez." }
+                  if title.contains("ANTENA") || title.contains("WIFI") { return "HS apenas no pescoço do inimigo avatar" }
+                  if title == "HS PESCOÇO" { return "HS apenas no pescoço do inimigo avatar" }
+                  if title.contains("PESCOÇO") { return "HS apenas no pescoço do inimigo avatar" }
+                  if title.contains("PEITO") { return "HS no peito do inimigo." }
+                  if title.contains("HOLOGRAMA") { return "Usar gráfico no padrão para funcionar." }
+                  if title.contains("FPS") { return "Ajuste de desempenho e fluidez." }
                   return "Recurso disponível para ativação."
               }
 
