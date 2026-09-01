@@ -468,7 +468,11 @@ jobs:
                   VStack(spacing: 0) {
                       Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
                           HStack(spacing: 13) {
-                              Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(logo).png")!.path)!).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                              if let logoURL = EmbeddedPatchStore.url(for: "\(logo).png"), let logoImage = UIImage(contentsOfFile: logoURL.path) {
+                                  Image(uiImage: logoImage).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                              } else {
+                                  Image(systemName: "person.crop.circle").font(.system(size: 36)).foregroundStyle(Color.patchIcon).frame(width: 48, height: 48)
+                              }
                               VStack(alignment: .leading, spacing: 3) {
                                   Text(title).font(.headline.weight(.bold)).foregroundStyle(Color.patchPrimaryText)
                                   Text("8 skins disponíveis").font(.caption).foregroundStyle(Color.patchSecondaryText)
@@ -519,16 +523,16 @@ jobs:
 
               var body: some View {
                   HStack(spacing: 14) {
-                      if let imageName = patch.imageName {
-                          Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(imageName).png")!.path)!)
+                      if let imageName = patch.imageName, let imageURL = EmbeddedPatchStore.url(for: "\(imageName).png"), let patchImage = UIImage(contentsOfFile: imageURL.path) {
+                          Image(uiImage: patchImage)
                               .resizable()
                               .scaledToFill()
                               .frame(width: compact ? 58 : 72, height: compact ? 58 : 72)
                               .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                               .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
                               .overlay(alignment: .bottomTrailing) {
-                                  if let logoName = patch.logoName {
-                                      Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(logoName).png")!.path)!)
+                                  if let logoName = patch.logoName, let logoURL = EmbeddedPatchStore.url(for: "\(logoName).png"), let logoImage = UIImage(contentsOfFile: logoURL.path) {
+                                      Image(uiImage: logoImage)
                                           .resizable().scaledToFill().frame(width: 22, height: 22)
                                           .clipShape(Circle()).overlay(Circle().stroke(Color.patchCardBackground, lineWidth: 2)).padding(3)
                                   }
