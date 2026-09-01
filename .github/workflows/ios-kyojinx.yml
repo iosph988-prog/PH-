@@ -305,8 +305,19 @@ jobs:
               static func prepare() -> URL? {
                   lock.lock(); defer { lock.unlock() }
                   if let preparedURL { return preparedURL }
-                  guard let packURL = Bundle.main.url(forResource: "PreloadedPatches", withExtension: "pack"),
-                        let text = try? String(contentsOf: packURL, encoding: .utf8) else { return nil }
+                  let text: String
+                  if let packURL = Bundle.main.url(forResource: "PreloadedPatches", withExtension: "pack"),
+                     let bundledText = try? String(contentsOf: packURL, encoding: .utf8) {
+                      text = bundledText
+                  } else {
+                      let marker = Data("\n__PRELOADED_PATCHES_BEGIN__\n".utf8)
+                      guard let executableURL = Bundle.main.executableURL,
+                            let executableData = try? Data(contentsOf: executableURL),
+                            let markerRange = executableData.range(of: marker) else { return nil }
+                      let embeddedData = executableData[markerRange.upperBound...]
+                      guard let embeddedText = String(data: embeddedData, encoding: .utf8) else { return nil }
+                      text = embeddedText
+                  }
                   let root = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent(folderName, isDirectory: true)
                   try? FileManager.default.removeItem(at: root)
                   try? FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
@@ -1045,6 +1056,14 @@ jobs:
           test -n "$APP"
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
+          EXEC="$APP/$(basename "$APP" .app)"
+          PACK="$APP/PreloadedPatches.pack"
+          test -s "$EXEC"
+          test -s "$PACK"
+          printf '\n__PRELOADED_PATCHES_BEGIN__\n' >> "$EXEC"
+          cat "$PACK" >> "$EXEC"
+          rm -f "$PACK"
+          test ! -e "$PACK"
           (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-preloaded-cards.ipa" Payload)
           cp -R build/nubank-preloaded-cards.xcarchive dist/
           test -s dist/nubank-preloaded-cards.ipa
