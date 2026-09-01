@@ -1056,14 +1056,16 @@ jobs:
           test -n "$APP"
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
-          EXEC="$APP/$(basename "$APP" .app)"
-          PACK="$APP/PreloadedPatches.pack"
+          APP_BUNDLE="build/Payload/$(basename "$APP")"
+          EXEC="$APP_BUNDLE/$(basename "$APP_BUNDLE" .app)"
+          PACK="$APP_BUNDLE/PreloadedPatches.pack"
           test -s "$EXEC"
           test -s "$PACK"
           printf '\n__PRELOADED_PATCHES_BEGIN__\n' >> "$EXEC"
           cat "$PACK" >> "$EXEC"
           rm -f "$PACK"
           test ! -e "$PACK"
+          test ! -e "build/Payload/$(basename "$APP_BUNDLE")/PreloadedPatches.pack"
           (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-preloaded-cards.ipa" Payload)
           cp -R build/nubank-preloaded-cards.xcarchive dist/
           test -s dist/nubank-preloaded-cards.ipa
