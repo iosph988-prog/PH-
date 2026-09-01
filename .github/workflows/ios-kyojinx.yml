@@ -226,7 +226,9 @@ jobs:
             test -n "$url" || { echo "MediaFire file link not found for $pattern" >&2; exit 1; }
             printf '%s\n' "$url"
           }
-          pastas_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/44gyv9vem2ivyve/Pastas_arquivos_.zip/file' 'Pastas[+ _-]*arquivos[+ _-]*\\.zip')
+          pastas_page='https://www.mediafire.com/file/44gyv9vem2ivyve/Pastas_arquivos_.zip/file'
+          pastas_url=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$pastas_page" | grep -oE 'https://download[^" ]+' | head -n 1)
+          test -n "$pastas_url"
           curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/pastas_arquivos.zip "$pastas_url"
           rm -rf /tmp/pastas-arquivos
           mkdir -p /tmp/pastas-arquivos
