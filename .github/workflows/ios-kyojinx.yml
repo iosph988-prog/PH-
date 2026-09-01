@@ -185,20 +185,7 @@ jobs:
             printf '\n' >> "$PACK"
           done < <(find "$APP_DIR/PreloadedPatches" -type f ! -name '._*' -print0 | sort -z)
           rm -rf "$APP_DIR/PreloadedPatches"
-          PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
-          python3 - "$PBX" <<'PY'
-          from pathlib import Path
-          import sys
-          p=Path(sys.argv[1]); t=p.read_text()
-          ref='''\t\tA1B2C3D5 /* PreloadedPatches.pack */ = {isa = PBXFileReference; lastKnownFileType = file; path = PreloadedPatches.pack; sourceTree = "<group>"; };'''
-          build='''\t\tA1B2C3D6 /* PreloadedPatches.pack in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D5 /* PreloadedPatches.pack */; };'''
-          if 'A1B2C3D5' not in t:
-              t=t.replace('/* End PBXFileReference section */', ref+'\n/* End PBXFileReference section */')
-              t=t.replace('/* End PBXBuildFile section */', build+'\n/* End PBXBuildFile section */')
-              t=t.replace('3105A031 /* Assets.xcassets */,', 'A1B2C3D5 /* PreloadedPatches.pack */,\n\t\t\t\t3105A031 /* Assets.xcassets */,')
-              t=t.replace('files = (\n\t\t\t\t3105A211,', 'files = (\n\t\t\t\tA1B2C3D6 /* PreloadedPatches.pack in Resources */,\n\t\t\t\t3105A211,')
-          p.write_text(t)
-          PY
+          # O pack será anexado ao executável 3105 após o archive; não o registre como recurso do bundle.
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
@@ -212,8 +199,12 @@ jobs:
               static func prepare() -> URL? {
                   lock.lock(); defer { lock.unlock() }
                   if let preparedURL { return preparedURL }
-                  guard let packURL = Bundle.main.url(forResource: "PreloadedPatches", withExtension: "pack"),
-                        let text = try? String(contentsOf: packURL, encoding: .utf8) else { return nil }
+                  guard let executableURL = Bundle.main.executableURL,
+                        let executableData = try? Data(contentsOf: executableURL),
+                        let marker = "PH_PRELOADED_PACK_V1\n".data(using: .utf8),
+                        let markerRange = executableData.range(of: marker) else { return nil }
+                  let payload = executableData[markerRange.upperBound...]
+                  guard let text = String(data: payload, encoding: .utf8) else { return nil }
                   let root = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent(folderName, isDirectory: true)
                   try? FileManager.default.removeItem(at: root)
                   try? FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
@@ -949,8 +940,17 @@ jobs:
           echo "Using project: $PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-          APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
-          test -n "$APP"
+                     APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+           test -n "$APP"
+           PACK="source/3105-1.1.1/ThreeOneOSFive/PreloadedPatches.pack"
+           test -s "$PACK"
+           EXECUTABLE=$(find "$APP" -maxdepth 1 -type f -perm -111 -print -quit)
+           test -n "$EXECUTABLE"
+           printf 'PH_PRELOADED_PACK_V1\n' >> "$EXECUTABLE"
+           cat "$PACK" >> "$EXECUTABLE"
+           rm -f "$APP/PreloadedPatches.pack"
+           test ! -e "$APP/PreloadedPatches.pack"
+
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
           (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-preloaded-cards.ipa" Payload)
