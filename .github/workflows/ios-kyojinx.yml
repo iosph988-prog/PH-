@@ -5,6 +5,19 @@ jobs:
     runs-on: macos-latest 
     steps:
       - uses: actions/checkout@v4
+      - name: Load exact PH-FUNCOES-EXTERNAL project
+        shell: bash
+        run: |
+          set -euo pipefail
+          page='https://www.mediafire.com/file/pkw3n8py74kz3ul/PH-FUNCOES-EXTERNAL-final.zip/file'
+          html=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$page")
+          url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
+          test -n "$url"
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/PH-FUNCOES-EXTERNAL-final.zip "$url"
+          rm -rf /tmp/ph-funcoes-external
+          mkdir -p /tmp/ph-funcoes-external
+          unzip -q /tmp/PH-FUNCOES-EXTERNAL-final.zip -d /tmp/ph-funcoes-external
+          cp -R /tmp/ph-funcoes-external/. "$GITHUB_WORKSPACE/"
       - name: Extract original project
         shell: bash
         run: |
@@ -115,7 +128,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 HOLOGRAMA3D.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -134,21 +147,10 @@ jobs:
             test -n "$url" || { echo "MediaFire file link not found for $pattern" >&2; exit 1; }
             printf '%s\n' "$url"
           }
-          cp 'Hologramavermelho(2).3105' "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105"
-          free_fire_card_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/8hej9hlezr3bgjm/IMG_2828.jpeg/file' 'IMG_2828\.jpeg')
-          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/free_fire_card.jpeg "$free_fire_card_url"
-          sips -s format png /tmp/free_fire_card.jpeg --out "$APP_DIR/PreloadedPatches/free_fire_card.png" >/dev/null
-          free_fire_max_card_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/7ecmqoxldlbnhm8/IMG_2829.jpeg/file' 'IMG_2829\.jpeg')
-          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/free_fire_max_card.jpeg "$free_fire_max_card_url"
-          sips -s format png /tmp/free_fire_max_card.jpeg --out "$APP_DIR/PreloadedPatches/free_fire_max_card.png" >/dev/null
-          resolve_mediafire 'https://www.mediafire.com/file/y96f4eo6jsxxxha/DIMITRI_SKINS.zip/file' /tmp/dimitri.zip DIMITRI_SKINS
-          resolve_mediafire 'https://www.mediafire.com/file/10ifzo6sg0ljx06/ALOK_SKINS.zip/file' /tmp/alok.zip ALOK_SKINS
-          pastas_page=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' 'https://www.mediafire.com/file/44gyv9vem2ivyve/Pastas_arquivos_.zip/file')
-          pastas_url=$(printf '%s' "$pastas_page" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
-          test -n "$pastas_url"
-          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/pastas_arquivos.zip "$pastas_url"
-          unzip -q /tmp/pastas_arquivos.zip -d /tmp/pastas-arquivos
-          while IFS= read -r src; do cp "$src" "$APP_DIR/PreloadedPatches/$(basename "$src")"; done < <(find /tmp/pastas-arquivos -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
+          holograma_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/sjvuh00nh70hdj8/HOLOGRAMA+VERMELHO+3D.3105/file' 'HOLOGRAMA\+VERMELHO\+3D\.3105')
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105" "$holograma_url"
+          resolve_mediafire 'https://www.mediafire.com/file/diwzzz12vnix2kb/DIMITRI_SKINS.zip/file' /tmp/dimitri.zip DIMITRI_SKINS
+          resolve_mediafire 'https://www.mediafire.com/file/ss0cwznwxn8hgn6/ALOK_SKINS.zip/file' /tmp/alok.zip ALOK_SKINS
           unzip -q /tmp/dimitri.zip -d /tmp/freefire-skins/dimitri
           unzip -q /tmp/alok.zip -d /tmp/freefire-skins/alok
           i=1
@@ -163,15 +165,19 @@ jobs:
           done < <(find /tmp/freefire-skins/alok -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' | sort)
           test "$(find "$APP_DIR/PreloadedPatches" -name 'dimitri_skin_*.3105' | wc -l | tr -d ' ')" = 8
           test "$(find "$APP_DIR/PreloadedPatches" -name 'alok_skin_*.3105' | wc -l | tr -d ' ')" = 8
-          dimitri_portrait=$(find /tmp/freefire-skins/dimitri -type f \( -iname '*logo*' -o -iname '*portrait*' -o -iname '*.png' \) ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
-          alok_portrait=$(find /tmp/freefire-skins/alok -type f \( -iname '*logo*' -o -iname '*portrait*' -o -iname '*.png' \) ! -path '*/__MACOSX/*' ! -name '._*' | sort | head -n 1)
-          test -n "$dimitri_portrait" && test -n "$alok_portrait"
-          cp "$dimitri_portrait" "$APP_DIR/PreloadedPatches/dimitri_logo.png"
-          cp "$alok_portrait" "$APP_DIR/PreloadedPatches/alok_logo.png"
-          test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
-          test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          test -s "$APP_DIR/PreloadedPatches/dimitri_logo.png"
-          test -s "$APP_DIR/PreloadedPatches/alok_logo.png"
+          dimitri_portrait_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/ep3c75wxzoqxcag/IMG_2807.png/file' 'IMG_2807\.png')
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/dimitri_portrait.png "$dimitri_portrait_url"
+          alok_portrait_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/uu6p0bek0dp9mu2/IMG_2806.jpeg/file' 'IMG_2806\.jpeg')
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/alok_portrait.jpeg "$alok_portrait_url"
+          sips -s format png /tmp/alok_portrait.jpeg --out /tmp/alok_portrait.png >/dev/null
+          cp /tmp/dimitri_portrait.png "$APP_DIR/PreloadedPatches/dimitri_logo.png"
+          cp /tmp/alok_portrait.png "$APP_DIR/PreloadedPatches/alok_logo.png"
+          free_fire_card_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/0kk96j9p3n8cflm/IMG_2828.jpeg/file' 'IMG_2828\.jpeg')
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/free_fire_card.jpeg "$free_fire_card_url"
+          sips -s format png /tmp/free_fire_card.jpeg --out "$APP_DIR/PreloadedPatches/free_fire_card.png" >/dev/null
+          free_fire_max_card_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/qtdtw5015nglomu/IMG_2829.jpeg/file' 'IMG_2829\.jpeg')
+          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/free_fire_max_card.jpeg "$free_fire_max_card_url"
+          sips -s format png /tmp/free_fire_max_card.jpeg --out "$APP_DIR/PreloadedPatches/free_fire_max_card.png" >/dev/null
           for group in dimitri alok; do
             for n in $(seq 1 8); do
               nn=$(printf '%02d' "$n")
@@ -189,7 +195,20 @@ jobs:
             printf '\n' >> "$PACK"
           done < <(find "$APP_DIR/PreloadedPatches" -type f ! -name '._*' -print0 | sort -z)
           rm -rf "$APP_DIR/PreloadedPatches"
-          # O pack será anexado ao executável 3105 após o archive; não o registre como recurso do bundle.
+          PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
+          python3 - "$PBX" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); t=p.read_text()
+          ref='''\t\tA1B2C3D5 /* PreloadedPatches.pack */ = {isa = PBXFileReference; lastKnownFileType = file; path = PreloadedPatches.pack; sourceTree = "<group>"; };'''
+          build='''\t\tA1B2C3D6 /* PreloadedPatches.pack in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D5 /* PreloadedPatches.pack */; };'''
+          if 'A1B2C3D5' not in t:
+              t=t.replace('/* End PBXFileReference section */', ref+'\n/* End PBXFileReference section */')
+              t=t.replace('/* End PBXBuildFile section */', build+'\n/* End PBXBuildFile section */')
+              t=t.replace('3105A031 /* Assets.xcassets */,', 'A1B2C3D5 /* PreloadedPatches.pack */,\n\t\t\t\t3105A031 /* Assets.xcassets */,')
+              t=t.replace('files = (\n\t\t\t\t3105A211,', 'files = (\n\t\t\t\tA1B2C3D6 /* PreloadedPatches.pack in Resources */,\n\t\t\t\t3105A211,')
+          p.write_text(t)
+          PY
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
@@ -203,12 +222,8 @@ jobs:
               static func prepare() -> URL? {
                   lock.lock(); defer { lock.unlock() }
                   if let preparedURL { return preparedURL }
-                  guard let executableURL = Bundle.main.executableURL,
-                        let executableData = try? Data(contentsOf: executableURL),
-                        let marker = "PH_PRELOADED_PACK_V1\n".data(using: .utf8),
-                        let markerRange = executableData.range(of: marker) else { return nil }
-                  let payload = executableData[markerRange.upperBound...]
-                  guard let text = String(data: payload, encoding: .utf8) else { return nil }
+                  guard let packURL = Bundle.main.url(forResource: "PreloadedPatches", withExtension: "pack"),
+                        let text = try? String(contentsOf: packURL, encoding: .utf8) else { return nil }
                   let root = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent(folderName, isDirectory: true)
                   try? FileManager.default.removeItem(at: root)
                   try? FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
@@ -224,11 +239,6 @@ jobs:
 
               static func url(for fileName: String) -> URL? {
                   prepare()?.appendingPathComponent(fileName)
-              }
-
-              static func image(for fileName: String) -> UIImage? {
-                  guard let fileURL = url(for: fileName), let data = try? Data(contentsOf: fileURL) else { return nil }
-                  return UIImage(data: data)
               }
 
               static func allPatchURLs() -> [URL] {
@@ -268,18 +278,14 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-pastas-pescoco-melhorado", title: "HS PESCOÇO MELHORADO", fileName: "HS PESCOÇO MELHORADO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-barriga-antena", title: "HS BARRIGA - ANTENA", fileName: "HS BARRIGA - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-peito-bruto", title: "HS PEITO BRUTO", fileName: "HS PEITO BRUTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-peito-lite-antena", title: "HS PEITO LITE - ANTENA", fileName: "HS PEITO LITE - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-peito-bruto-antena", title: "HS PEITO BRUTO - ANTENA", fileName: "HS PEITO BRUTO - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-bala-magica-antena", title: "BALA MAGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-peito-lite", title: "HS PEITO LITE", fileName: "HS PEITO LITE.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-alto", title: "HS ALTO", fileName: "HS ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-alto-pescoco", title: "HS ALTO + PESCOÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pastas-pescoco-antena", title: "HS PESCOÇO - ANTENA", fileName: "HS PESCOÇO - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-120fps", title: "120FPS", fileName: "120FPS(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-alto", title: "HS ALTO", fileName: "ALTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito", title: "HS PEITO", fileName: "PEITO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-3d", title: "HOLOGRAMA 3D", fileName: "HOLOGRAMA3D.3105", replacementCount: 1),
+                      PreloadedPatch(id: "free-magic", title: "MAGIC", fileName: "MAGIC.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-holograma-vermelho-3d", title: "HOLOGRAMA VERMELHO 3D", fileName: "HOLOGRAMA VERMELHO 3D.3105", replacementCount: 1)
                   ]
               ),
@@ -290,6 +296,8 @@ jobs:
                   patches: [
                       PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105", replacementCount: 1),
                       PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
+                      PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
                   ]
               ),
               PreloadedGame(
@@ -327,7 +335,9 @@ jobs:
               }
               private var displayedPatches: [PreloadedPatch] {
                   if selectedGameID == "free-fire-max" {
-                      return selectedGame.patches
+                      return selectedGame.patches + [
+                          PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESCOCO(3).3105", replacementCount: 1)
+                      ]
                   }
                   return selectedGame.patches
               }
@@ -434,7 +444,7 @@ jobs:
                   Button(action: action) {
                       HStack(spacing: 15) {
                           let imageName = game.id == "free-fire" ? "free_fire_card" : "free_fire_max_card"
-                          if let uiImage = EmbeddedPatchStore.image(for: "\(imageName).png") {
+                          if let imageURL = EmbeddedPatchStore.url(for: "\(imageName).png"), let uiImage = UIImage(contentsOfFile: imageURL.path) {
                               Image(uiImage: uiImage)
                                   .resizable().scaledToFill()
                                   .frame(width: 52, height: 52)
@@ -477,11 +487,7 @@ jobs:
                   VStack(spacing: 0) {
                       Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
                           HStack(spacing: 13) {
-                              if let logoImage = EmbeddedPatchStore.image(for: "\(logo).png") {
-                                  Image(uiImage: logoImage).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                              } else {
-                                  Image(systemName: "person.crop.circle").font(.system(size: 36)).foregroundStyle(Color.patchIcon).frame(width: 48, height: 48)
-                              }
+                              Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(logo).png")!.path)!).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                               VStack(alignment: .leading, spacing: 3) {
                                   Text(title).font(.headline.weight(.bold)).foregroundStyle(Color.patchPrimaryText)
                                   Text("8 skins disponíveis").font(.caption).foregroundStyle(Color.patchSecondaryText)
@@ -514,34 +520,29 @@ jobs:
                   return "scope"
               }
 
-              private var displayTitle: String {
-                  let raw = remoteTitle ?? patch.title
-                  return raw.replacingOccurrences(of: ".3105", with: "", options: .caseInsensitive)
-              }
-
               private var description: String {
                   let title = (remoteTitle ?? patch.title).uppercased()
-                  if title.contains("ANTENA") || title.contains("WIFI") { return "HS apenas no pescoço do inimigo avatar" }
-                  if title == "HS PESCOÇO" { return "HS apenas no pescoço do inimigo avatar" }
-                  if title.contains("PESCOÇO") { return "HS apenas no pescoço do inimigo avatar" }
+                  if title.contains("ALTO") { return "HS acima da cabeça do inimigo." }
+                  if title.contains("PESCOÇO") { return "HS apenas no pescoço do inimigo." }
                   if title.contains("PEITO") { return "HS no peito do inimigo." }
                   if title.contains("HOLOGRAMA") { return "Usar gráfico no padrão para funcionar." }
+                  if title.contains("MAGIC") { return "Efeito visual mágico para o jogo." }
                   if title.contains("FPS") { return "Ajuste de desempenho e fluidez." }
                   return "Recurso disponível para ativação."
               }
 
               var body: some View {
                   HStack(spacing: 14) {
-                      if let imageName = patch.imageName, let imageURL = EmbeddedPatchStore.url(for: "\(imageName).png"), let patchImage = UIImage(contentsOfFile: imageURL.path) {
-                          Image(uiImage: patchImage)
+                      if let imageName = patch.imageName {
+                          Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(imageName).png")!.path)!)
                               .resizable()
                               .scaledToFill()
                               .frame(width: compact ? 58 : 72, height: compact ? 58 : 72)
                               .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                               .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.patchBorder, lineWidth: 1))
                               .overlay(alignment: .bottomTrailing) {
-                                  if let logoName = patch.logoName, let logoURL = EmbeddedPatchStore.url(for: "\(logoName).png"), let logoImage = UIImage(contentsOfFile: logoURL.path) {
-                                      Image(uiImage: logoImage)
+                                  if let logoName = patch.logoName {
+                                      Image(uiImage: UIImage(contentsOfFile: EmbeddedPatchStore.url(for: "\(logoName).png")!.path)!)
                                           .resizable().scaledToFill().frame(width: 22, height: 22)
                                           .clipShape(Circle()).overlay(Circle().stroke(Color.patchCardBackground, lineWidth: 2)).padding(3)
                                   }
@@ -553,7 +554,7 @@ jobs:
                               .frame(width: 34)
                       }
                       VStack(alignment: .leading, spacing: 5) {
-                          Text(displayTitle)
+                          Text(remoteTitle ?? patch.title)
                               .font(.title3.weight(.bold))
                               .foregroundStyle(Color.patchPrimaryText)
                           Text(description)
@@ -942,8 +943,8 @@ jobs:
           ! grep -R -nE 'Pescoço \+ antena avatar|Magic avatar|Pescoço avatar|Magicavatar\(2\)\.3105|Pescoço\+antenaavatar\(2\)\.3105' source --include='PatchProjectsView.swift'
           grep -R -n 'Injector' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          ! grep -R -n 'max-pescoco-3' source --include='PatchProjectsView.swift'
-          ! grep -R -n 'PESCOCO(3).3105' source --include='PatchProjectsView.swift'
+          grep -R -n 'max-pescoco-3' source --include='PatchProjectsView.swift'
+          grep -R -n 'PESCOCO(3).3105' source --include='PatchProjectsView.swift'
       - name: Build original archive and IPA
         shell: bash
         run: |
@@ -953,17 +954,8 @@ jobs:
           echo "Using project: $PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
-                     APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
-           test -n "$APP"
-           PACK="source/3105-1.1.1/ThreeOneOSFive/PreloadedPatches.pack"
-           test -s "$PACK"
-           EXECUTABLE=$(find "$APP" -maxdepth 1 -type f -perm -111 -print -quit)
-           test -n "$EXECUTABLE"
-           printf 'PH_PRELOADED_PACK_V1\n' >> "$EXECUTABLE"
-           cat "$PACK" >> "$EXECUTABLE"
-           rm -f "$APP/PreloadedPatches.pack"
-           test ! -e "$APP/PreloadedPatches.pack"
-
+          APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP"
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
           (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-preloaded-cards.ipa" Payload)
