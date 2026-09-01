@@ -226,8 +226,7 @@ jobs:
             test -n "$url" || { echo "MediaFire file link not found for $pattern" >&2; exit 1; }
             printf '%s\n' "$url"
           }
-          holograma_url=$(resolve_mediafire_file 'https://www.mediafire.com/file/sjvuh00nh70hdj8/HOLOGRAMA+VERMELHO+3D.3105/file' 'HOLOGRAMA\+VERMELHO\+3D\.3105')
-          curl -L --fail --retry 3 -A 'Mozilla/5.0' -o "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105" "$holograma_url"
+          cp 'Hologramavermelho(2).3105' "$APP_DIR/PreloadedPatches/HOLOGRAMA VERMELHO 3D.3105"
           resolve_mediafire 'https://www.mediafire.com/file/diwzzz12vnix2kb/DIMITRI_SKINS.zip/file' /tmp/dimitri.zip DIMITRI_SKINS
           resolve_mediafire 'https://www.mediafire.com/file/ss0cwznwxn8hgn6/ALOK_SKINS.zip/file' /tmp/alok.zip ALOK_SKINS
           unzip -q /tmp/dimitri.zip -d /tmp/freefire-skins/dimitri
