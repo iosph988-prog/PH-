@@ -168,6 +168,10 @@ jobs:
           test -n "$dimitri_portrait" && test -n "$alok_portrait"
           cp "$dimitri_portrait" "$APP_DIR/PreloadedPatches/dimitri_logo.png"
           cp "$alok_portrait" "$APP_DIR/PreloadedPatches/alok_logo.png"
+          test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
+          test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
+          test -s "$APP_DIR/PreloadedPatches/dimitri_logo.png"
+          test -s "$APP_DIR/PreloadedPatches/alok_logo.png"
           for group in dimitri alok; do
             for n in $(seq 1 8); do
               nn=$(printf '%02d' "$n")
@@ -220,6 +224,11 @@ jobs:
 
               static func url(for fileName: String) -> URL? {
                   prepare()?.appendingPathComponent(fileName)
+              }
+
+              static func image(for fileName: String) -> UIImage? {
+                  guard let fileURL = url(for: fileName), let data = try? Data(contentsOf: fileURL) else { return nil }
+                  return UIImage(data: data)
               }
 
               static func allPatchURLs() -> [URL] {
@@ -425,7 +434,7 @@ jobs:
                   Button(action: action) {
                       HStack(spacing: 15) {
                           let imageName = game.id == "free-fire" ? "free_fire_card" : "free_fire_max_card"
-                          if let imageURL = EmbeddedPatchStore.url(for: "\(imageName).png"), let uiImage = UIImage(contentsOfFile: imageURL.path) {
+                          if let uiImage = EmbeddedPatchStore.image(for: "\(imageName).png") {
                               Image(uiImage: uiImage)
                                   .resizable().scaledToFill()
                                   .frame(width: 52, height: 52)
@@ -468,7 +477,7 @@ jobs:
                   VStack(spacing: 0) {
                       Button { withAnimation(.easeInOut(duration: 0.2)) { expandedCharacter = expandedCharacter == key ? nil : key } } label: {
                           HStack(spacing: 13) {
-                              if let logoURL = EmbeddedPatchStore.url(for: "\(logo).png"), let logoImage = UIImage(contentsOfFile: logoURL.path) {
+                              if let logoImage = EmbeddedPatchStore.image(for: "\(logo).png") {
                                   Image(uiImage: logoImage).resizable().scaledToFit().frame(width: 48, height: 48).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                               } else {
                                   Image(systemName: "person.crop.circle").font(.system(size: 36)).foregroundStyle(Color.patchIcon).frame(width: 48, height: 48)
