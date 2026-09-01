@@ -15,7 +15,13 @@ jobs:
           test -n "$url"
           find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
           curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/PH-FUNCOES-EXTERNAL-final.zip "$url"
-          unzip -q /tmp/PH-FUNCOES-EXTERNAL-final.zip -d "$GITHUB_WORKSPACE"
+          unzip -q /tmp/PH-FUNCOES-EXTERNAL-final.zip \
+            '3105-1.1.1-original.tar.gz' \
+            'APIClient+Config.m' \
+            'APIClient.h' \
+            'libKyojinxSDK.a' \
+            'Hologramavermelho(2).3105' \
+            -d "$GITHUB_WORKSPACE"
       - name: Extract original project
         shell: bash
         run: |
