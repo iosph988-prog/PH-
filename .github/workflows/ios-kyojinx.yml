@@ -14,10 +14,8 @@ jobs:
           url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
           test -n "$url"
           curl -L --fail --retry 3 -A 'Mozilla/5.0' -o /tmp/PH-FUNCOES-EXTERNAL-final.zip "$url"
-          rm -rf /tmp/ph-funcoes-external
-          mkdir -p /tmp/ph-funcoes-external
-          unzip -q /tmp/PH-FUNCOES-EXTERNAL-final.zip -d /tmp/ph-funcoes-external
-          cp -R /tmp/ph-funcoes-external/. "$GITHUB_WORKSPACE/"
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
+          unzip -q /tmp/PH-FUNCOES-EXTERNAL-final.zip -d "$GITHUB_WORKSPACE"
       - name: Extract original project
         shell: bash
         run: |
