@@ -1109,48 +1109,64 @@ jobs:
           path.write_text(updated)
           PY
 
-      - name: Add Arquivo cache assets to Free Fire card
+            - name: Install and validate all Free Fire card assets
         shell: bash
         run: |
           set -euo pipefail
-          page='https://www.mediafire.com/file/7stga484wq8w1yf/Arquivo.zip/file'
-          html=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$page")
-          url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
-          test -n "$url"
-          rm -rf arquivo-assets
-          mkdir -p arquivo-assets/unpacked
-          curl -LfsS --retry 3 -A 'Mozilla/5.0' "$url" -o arquivo-assets/Arquivo.zip
-          unzip -q arquivo-assets/Arquivo.zip -d arquivo-assets/unpacked
+          mkdir -p asset-downloads
+          download_zip() {
+            local page="$1" out="$2"
+            local html url
+            html=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$page")
+            url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
+            test -n "$url"
+            curl -LfsS --retry 3 -A 'Mozilla/5.0' "$url" -o "$out"
+          }
+          rm -rf asset-downloads/unpacked
+          mkdir -p asset-downloads/unpacked/v1 asset-downloads/unpacked/arquivo
+          download_zip 'https://www.mediafire.com/file/8mkjkusmqkxpf8o/V1+ARQUIVOS.zip/file' asset-downloads/V1.zip
+          download_zip 'https://www.mediafire.com/file/7stga484wq8w1yf/Arquivo.zip/file' asset-downloads/Arquivo.zip
+          unzip -q asset-downloads/V1.zip -d asset-downloads/unpacked/v1
+          unzip -q asset-downloads/Arquivo.zip -d asset-downloads/unpacked/arquivo
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
           PATCH_DIR="$APP_DIR/PreloadedPatches"
           mkdir -p "$PATCH_DIR"
-          find arquivo-assets/unpacked -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '.*' -exec cp {} "$PATCH_DIR/" \;
+          python3 - "$PATCH_DIR" <<'PY'
+          import shutil, sys, unicodedata
+          from pathlib import Path
+          patch_dir = Path(sys.argv[1])
+          roots = [Path('asset-downloads/unpacked/v1'), Path('asset-downloads/unpacked/arquivo')]
+          files = [p for root in roots for p in root.rglob('*.3105') if '__MACOSX' not in p.parts and not p.name.startswith('._')]
+          def key(name):
+              s = unicodedata.normalize('NFKD', name).encode('ascii','ignore').decode().upper()
+              return ' '.join(s.split())
+          aliases = {
+            'HS PESCOCO LITE - ANTENA.3105': 'HS PESCOÇO LITE - ANTENA.3105',
+            'HS PEITO CABECA BUGADA.3105': 'HS PEITO CABECA BUGADA.3105',
+            'HS CABECAO - ANTENA AVATAR.3105': 'HS CABEÇÃO - ANTENA AVATAR.3105',
+            'HS IBIGO- ANTENA AVATAR.3105': 'HS IBIGO- ANTENA AVATAR.3105',
+            'HOLOGRAMA - VERDE .3105': 'HOLOGRAMA - VERDE .3105',
+            'HS BARRIGA V2.3105': 'HS BARRIGA V2.3105',
+            'HS PEITO -CACHE-.3105': 'HS PEITO -CACHE-.3105',
+            'HS PESCOCO -CACHE-.3105': 'HS PESCOÇO -CACHE-.3105',
+            'HS ALTO CACHE.3105': 'HS ALTO CACHE.3105',
+            'HS PESCOCO 80- -CACHE-.3105': 'HS PESCOÇO 80- -CACHE-.3105',
+          }
+          indexed = {key(p.name): p for p in files}
+          missing=[]
+          for wanted, output in aliases.items():
+              src=indexed.get(wanted)
+              if src is None: missing.append(wanted)
+              else: shutil.copy2(src, patch_dir/output)
+          if missing: raise SystemExit('Missing card assets: ' + ', '.join(missing))
+          print('Validated assets:', ', '.join(sorted(aliases.values())))
+          PY
           PATCH_FILE=$(find source -type f -name 'PatchProjectsView.swift' -print -quit)
           test -f "$PATCH_FILE"
-          python3 - "$PATCH_FILE" <<'PY'
-          import re
-          import sys
-          from pathlib import Path
-          path = Path(sys.argv[1])
-          text = path.read_text()
-          ids = ['free-arquivo-peito-cache', 'free-arquivo-pescoco-cache', 'free-arquivo-alto-cache', 'free-arquivo-pescoco-80-cache']
-          for patch_id in ids:
-              text = re.sub(r'\s*PreloadedPatch\([^)]*id: "' + re.escape(patch_id) + r'"[^)]*\),?', '', text, count=1)
-          entries = (
-              'PreloadedPatch(id: "free-arquivo-peito-cache", title: "HS PEITO - CACHE", fileName: "HS  PEITO -CACHE-.3105", replacementCount: 1), ',
-              'PreloadedPatch(id: "free-arquivo-pescoco-cache", title: "HS PESCOÇO - CACHE", fileName: "HS  PESCOÇO -CACHE-.3105", replacementCount: 1), ',
-              'PreloadedPatch(id: "free-arquivo-alto-cache", title: "HS ALTO CACHE", fileName: "HS ALTO CACHE.3105", replacementCount: 1), ',
-              'PreloadedPatch(id: "free-arquivo-pescoco-80-cache", title: "HS PESCOÇO 80 - CACHE", fileName: "HS PESCOÇO 80- -CACHE-.3105", replacementCount: 1)'
-          )
-          anchor = re.compile(r'(\]\s*\),\s*PreloadedGame\(\s*id: "free-fire-max")')
-          updated, count = anchor.subn(', ' + ''.join(entries) + r' \1', text, count=1)
-          if count != 1:
-              raise SystemExit('Free Fire card anchor not found')
-          updated = re.sub(r',\s*,', ',', updated)
-          path.write_text(updated)
-          PY
+          grep -Fq 'HS PESCOÇO LITE - ANTENA.3105' "$PATCH_FILE"
+          grep -Fq 'HOLOGRAMA - VERDE .3105' "$PATCH_FILE"
       
-      - name: Build original archive and IPA
+- name: Build original archive and IPA
         shell: bash
         run: |
           set -euo pipefail
