@@ -1102,11 +1102,10 @@ jobs:
           mkdir -p v1-assets/unpacked
           curl -LfsS --retry 3 -A 'Mozilla/5.0' "$url" -o v1-assets/V1-ARQUIVOS.zip
           unzip -q v1-assets/V1-ARQUIVOS.zip -d v1-assets/unpacked
-          PATCH_DIR=$(find source -type d -name 'PreloadedPatches' -print -quit)
-          PATCH_FILE=$(find source -name 'PatchProjectsView.swift' -print -quit)
-          test -n "$PATCH_DIR"
-          test -n "$PATCH_FILE"
-          find v1-assets/unpacked -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' -exec cp {} "$PATCH_DIR/" \;
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          find v1-assets/unpacked -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' -exec cp {} "$APP_DIR/PreloadedPatches/" \;
+          PATCH_FILE=$(find source -type f -name 'PatchProjectsView.swift' -print -quit)
+          test -f "$PATCH_FILE"
           python3 - "$PATCH_FILE" <<'PY'
           import re
           import sys
@@ -1114,7 +1113,6 @@ jobs:
           path = Path(sys.argv[1])
           text = path.read_text()
           text = re.sub(r'\s*PreloadedPatch\(id: "free-new-holograma-verde"[^)]*\),?', '', text, count=1)
-          text = re.sub(r'\s*PreloadedPatch\(id: "free-v1-[^"]+"[^)]*\),?', '', text)
           entries = (
               'PreloadedPatch(id: "free-v1-pescoco-lite-antena", title: "HS PESCOÇO LITE - ANTENA", fileName: "HS PESCOÇO LITE - ANTENA.3105", replacementCount: 1), ',
               'PreloadedPatch(id: "free-v1-peito-cabeca-bugada", title: "HS PEITO CABEÇA BUGADA", fileName: "HS PEITO CABECA BUGADA.3105", replacementCount: 1), ',
