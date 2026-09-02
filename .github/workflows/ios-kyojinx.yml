@@ -1047,12 +1047,16 @@ jobs:
           find replacement-assets/unpacked -type f ! -path '*/__MACOSX/*' -print0 | while IFS= read -r -d '' file; do
             name=$(basename "$file")
             case "$name" in
-              'PESCOCO -CACHE-.3105'|'PESCOÇO -CACHE-.3105') cp "$file" 'PESCOÇO -CACHE-.3105' ;;
-              'PESCOCO 80- -CACHE-.3105'|'PESCOÇO 80- -CACHE-.3105') cp "$file" 'PESCOÇO 80- -CACHE-.3105' ;;
-              'PEITO -CACHE-.3105') cp "$file" 'PEITO -CACHE-.3105' ;;
-              'Holograma verde .3105') cp "$file" 'Holograma verde .3105' ;;
+              *'PESCOC'*'80'*'CACHE'*) cp "$file" 'PESCOÇO 80- -CACHE-.3105' ;;
+              *'PESCOC'*'CACHE'*) cp "$file" 'PESCOÇO -CACHE-.3105' ;;
+              *'PEITO'*'CACHE'*) cp "$file" 'PEITO -CACHE-.3105' ;;
+              *'Holograma verde'*) cp "$file" 'Holograma verde .3105' ;;
             esac
           done
+          test -s 'PESCOÇO -CACHE-.3105'
+          test -s 'PESCOÇO 80- -CACHE-.3105'
+          test -s 'PEITO -CACHE-.3105'
+          test -s 'Holograma verde .3105'
           mv 'PESCOÇO -CACHE-.3105' 'HS BARRIGA - ANTENA.3105'
           mv 'PESCOÇO 80- -CACHE-.3105' 'HS PEITO BRUTO.3105'
           mv 'PEITO -CACHE-.3105' 'HOLOGRAMA3D.3105'
