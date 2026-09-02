@@ -1090,6 +1090,9 @@ jobs:
           from pathlib import Path
           path = Path(sys.argv[1])
           text = path.read_text()
+          text = re.sub(r'\s*PreloadedPatch\([^)]*title: "HOLOGRAMA 3D"[^)]*\),?', '', text, count=1)
+          text = re.sub(r'\s*PreloadedPatch\([^)]*title: "HOLOGRAMA VERMELHO 3D"[^)]*\),?', '', text, count=1)
+          text = re.sub(r'\s*PreloadedPatch\([^)]*title: "HOLOGRAMA"[^)]*\),?', '', text, count=1)
           text = re.sub(r'\s*PreloadedPatch\(id: "free-new-holograma-verde"[^)]*\),?', '', text, count=1)
           entries = (
               'PreloadedPatch(id: "free-v1-pescoco-lite-antena", title: "HS PESCOÇO LITE - ANTENA", fileName: "HS PESCOÇO LITE - ANTENA.3105", replacementCount: 1), ',
