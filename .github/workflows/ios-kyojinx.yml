@@ -1066,29 +1066,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          PATCH_FILE=$(find source -name 'PatchProjectsView.swift' -print -quit)
-          test -n "$PATCH_FILE"
-          python3 - "$PATCH_FILE" <<'PY'
-          import re
-          import sys
-          from pathlib import Path
-          path = Path(sys.argv[1])
-          text = path.read_text()
-          old_ids = ('free-holograma-3d', 'free-holograma-vermelho-3d', 'free-pastas-02', 'free-pastas-03')
-          for old_id in old_ids:
-              text = re.sub(r'\s*PreloadedPatch\(id: "' + re.escape(old_id) + r'"[^)]*\),?', '', text, count=1)
-          new = (
-              'PreloadedPatch(id: "free-new-pescoco-cache", title: "PESCOÇO - CACHE", fileName: "HS BARRIGA - ANTENA.3105", replacementCount: 1), '
-              'PreloadedPatch(id: "free-new-pescoco-80-cache", title: "PESCOÇO 80 - CACHE", fileName: "HS PEITO BRUTO.3105", replacementCount: 1), '
-              'PreloadedPatch(id: "free-new-peito-cache", title: "PEITO - CACHE", fileName: "HOLOGRAMA3D.3105", replacementCount: 1), '
-              'PreloadedPatch(id: "free-new-holograma-verde", title: "HOLOGRAMA VERDE", fileName: "HOLOGRAMA VERMELHO 3D.3105", replacementCount: 1)'
-          )
-          anchor = re.compile(r'(\]\s*\),\s*PreloadedGame\(\s*id: "free-fire-max")')
-          updated, count = anchor.subn(', ' + ''.join(new) + r' \1', text, count=1)
-          if count != 1:
-              raise SystemExit('Free Fire card anchor not found')
-          path.write_text(updated)
-          PY
+          echo "Free Fire entries are managed by the V1 asset step"
 
       - name: Replace green hologram and add V1 Free Fire assets
         shell: bash
@@ -1112,7 +1090,6 @@ jobs:
           from pathlib import Path
           path = Path(sys.argv[1])
           text = path.read_text()
-          text = re.sub(r",\s*,", ",", text)
           text = re.sub(r'\s*PreloadedPatch\(id: "free-new-holograma-verde"[^)]*\),?', '', text, count=1)
           entries = (
               'PreloadedPatch(id: "free-v1-pescoco-lite-antena", title: "HS PESCOÇO LITE - ANTENA", fileName: "HS PESCOÇO LITE - ANTENA.3105", replacementCount: 1), ',
