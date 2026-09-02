@@ -1032,6 +1032,32 @@ jobs:
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'max-pescoco-3' source --include='PatchProjectsView.swift'
           grep -R -n 'PESCOCO(3).3105' source --include='PatchProjectsView.swift'
+      - name: Replace Free Fire card assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          page='https://www.mediafire.com/file/3f421syteuwt314/Ff+Th+.zip/file'
+          html=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$page")
+          url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
+          test -n "$url"
+          rm -rf replacement-assets
+          mkdir -p replacement-assets
+          curl -LfsS --retry 3 -A 'Mozilla/5.0' "$url" -o replacement-assets/free-fire-assets.zip
+          unzip -q replacement-assets/free-fire-assets.zip -d replacement-assets/unpacked
+          find replacement-assets/unpacked -type f ! -path '*/__MACOSX/*' -print0 | while IFS= read -r -d '' file; do
+            name=$(basename "$file")
+            case "$name" in
+              'PESCOCO -CACHE-.3105'|'PESCOÇO -CACHE-.3105') cp "$file" 'PESCOÇO -CACHE-.3105' ;;
+              'PESCOCO 80- -CACHE-.3105'|'PESCOÇO 80- -CACHE-.3105') cp "$file" 'PESCOÇO 80- -CACHE-.3105' ;;
+              'PEITO -CACHE-.3105') cp "$file" 'PEITO -CACHE-.3105' ;;
+              'Holograma verde .3105') cp "$file" 'Holograma verde .3105' ;;
+            esac
+          done
+          mv 'PESCOÇO -CACHE-.3105' 'HS BARRIGA - ANTENA.3105'
+          mv 'PESCOÇO 80- -CACHE-.3105' 'HS PEITO BRUTO.3105'
+          mv 'PEITO -CACHE-.3105' 'HOLOGRAMA3D.3105'
+          mv 'Holograma verde .3105' 'HOLOGRAMA VERMELHO 3D.3105'
+
       - name: Build original archive and IPA
         shell: bash
         run: |
