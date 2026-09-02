@@ -15,7 +15,7 @@ jobs:
           set -euo pipefail
           rm -rf workspace
           mkdir -p workspace
-          unzip -q VisualStore-online-readonly-compact.zip -d workspace
+          unzip -q VisualStore-online-readonly-fixed.zip -d workspace
 
       - name: Install XcodeGen
         run: brew install xcodegen
