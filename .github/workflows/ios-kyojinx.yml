@@ -1150,6 +1150,25 @@ jobs:
           path.write_text(updated)
           PY
       
+      - name: Repack Free Fire card assets after all additions
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          PATCH_DIR="$APP_DIR/PreloadedPatches"
+          PACK="$APP_DIR/PreloadedPatches.pack"
+          test -d "$PATCH_DIR"
+          : > "$PACK"
+          while IFS= read -r -d '' asset; do
+            rel="${asset#"$APP_DIR/PreloadedPatches/"}"
+            printf '%s\t' "$rel" >> "$PACK"
+            base64 < "$asset" | tr -d '\n' >> "$PACK"
+            printf '\n' >> "$PACK"
+          done < <(find "$PATCH_DIR" -type f ! -name '._*' -print0 | sort -z)
+          test -s "$PACK"
+          for required in 'HS  PEITO -CACHE-.3105' 'HS  PESCOÇO -CACHE-.3105' 'HS ALTO CACHE.3105' 'HS PESCOÇO 80- -CACHE-.3105'; do
+            grep -Fq "$required" "$PACK"
+          done
       - name: Build original archive and IPA
         shell: bash
         run: |
