@@ -1,0 +1,50 @@
+name: VisualStore Online Read-Only iOS Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract VisualStore source
+        run: |
+          set -euo pipefail
+          rm -rf workspace
+          mkdir -p workspace
+          unzip -q VisualStore-online-readonly-compact.zip -d workspace
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: workspace/ipa-visual-only
+        run: xcodegen generate
+
+      - name: Build simulator app
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project workspace/ipa-visual-only/VisualStore.xcodeproj \
+            -scheme VisualStore \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath workspace/build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package simulator app
+        run: |
+          set -euo pipefail
+          ditto -c -k --sequesterRsrc --keepParent \
+            workspace/build/Build/Products/Debug-iphonesimulator/VisualStore.app \
+            VisualStore-online-readonly-simulator.zip
+
+      - name: Upload VisualStore artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: VisualStore-online-readonly-simulator
+          path: VisualStore-online-readonly-simulator.zip
