@@ -1090,6 +1090,42 @@ jobs:
           path.write_text(updated)
           PY
 
+      - name: Replace green hologram and add V1 Free Fire assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          page='https://www.mediafire.com/file/8mkjkusmqkxpf8o/V1+ARQUIVOS.zip/file'
+          html=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$page")
+          url=$(printf '%s' "$html" | grep -oE 'https://download[^" ]+\.zip' | head -n 1)
+          test -n "$url"
+          rm -rf v1-assets
+          mkdir -p v1-assets/unpacked
+          curl -LfsS --retry 3 -A 'Mozilla/5.0' "$url" -o v1-assets/V1-ARQUIVOS.zip
+          unzip -q v1-assets/V1-ARQUIVOS.zip -d v1-assets/unpacked
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          find v1-assets/unpacked -type f -name '*.3105' ! -path '*/__MACOSX/*' ! -name '._*' -exec cp {} "$APP_DIR/PreloadedPatches/" \;
+          python3 - "$APP_DIR/PatchProjectsView.swift" <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+          path = Path(sys.argv[1])
+          text = path.read_text()
+          text = re.sub(r'\s*PreloadedPatch\(id: "free-new-holograma-verde"[^)]*\),?', '', text, count=1)
+          entries = (
+              'PreloadedPatch(id: "free-v1-pescoco-lite-antena", title: "HS PESCOÇO LITE - ANTENA", fileName: "HS PESCOÇO LITE - ANTENA.3105", replacementCount: 1), ',
+              'PreloadedPatch(id: "free-v1-peito-cabeca-bugada", title: "HS PEITO CABEÇA BUGADA", fileName: "HS PEITO CABECA BUGADA.3105", replacementCount: 1), ',
+              'PreloadedPatch(id: "free-v1-cabecao-antena-avatar", title: "HS CABEÇÃO - ANTENA AVATAR", fileName: "HS CABEÇÃO - ANTENA AVATAR.3105", replacementCount: 1), ',
+              'PreloadedPatch(id: "free-v1-ibigo-antena-avatar", title: "HS IBIGO - ANTENA AVATAR", fileName: "HS IBIGO- ANTENA AVATAR.3105", replacementCount: 1), ',
+              'PreloadedPatch(id: "free-v1-holograma-verde", title: "HOLOGRAMA - VERDE", fileName: "HOLOGRAMA - VERDE .3105", replacementCount: 1), ',
+              'PreloadedPatch(id: "free-v1-barriga-v2", title: "HS BARRIGA V2", fileName: "HS BARRIGA V2.3105", replacementCount: 1)'
+          )
+          anchor = re.compile(r'(\]\s*\),\s*PreloadedGame\(\s*id: "free-fire-max")')
+          updated, count = anchor.subn(', ' + ''.join(entries) + r' \1', text, count=1)
+          if count != 1:
+              raise SystemExit('Free Fire card anchor not found')
+          path.write_text(updated)
+          PY
+
       - name: Build original archive and IPA
         shell: bash
         run: |
