@@ -207,7 +207,7 @@ jobs:
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           GAGO_PAGE='https://www.mediafire.com/file/p8dswb2z2cbeosj/GAGO.zip/file'
           GAGO_HTML=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$GAGO_PAGE")
           GAGO_URL=$(printf '%s' "$GAGO_HTML" | grep -oE 'https://download[^" ]+GAGO\.zip' | head -n 1)
@@ -357,9 +357,6 @@ jobs:
                   title: "Free Fire",
                   bundleID: "com.dts.freefireth",
                   patches: [
-                      PreloadedPatch(id: "free-alto", title: "HS ALTO", fileName: "ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito", title: "HS PEITO", fileName: "PEITO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
                       PreloadedPatch(id: "free-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1),
                       PreloadedPatch(id: "free-pescoco-wifi", title: "HS PESCOÇO + ANTENA", fileName: "PESCOCO-Wifi.3105", replacementCount: 1),
