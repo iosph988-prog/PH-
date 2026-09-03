@@ -2,7 +2,11 @@ name: Build 3105 iOS
 
 
 
+
+
+
 on:
+
 
   workflow_dispatch:
   
@@ -12,7 +16,10 @@ on:
     
 
 
+
+
 jobs:
+
 
   build:
   
@@ -32,13 +39,13 @@ jobs:
         
           set -euo pipefail
           
-          test -f PHATT_PH_XITER.tar.gz
+          test -f 3105-1.1.1-original.tar.gz
           
           rm -rf source build
           
           mkdir -p source build
           
-          tar -xzf PHATT_PH_XITER.tar.gz -C source
+          tar -xzf 3105-1.1.1-original.tar.gz -C source
           
       - name: Locate Xcode project
       
@@ -78,86 +85,3 @@ jobs:
         
         run: |
         
-          set -euo pipefail
-          
-          if [ -n "${WORKSPACE:-}" ]; then xcodebuild -workspace "$WORKSPACE" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO; else xcodebuild -project "$PROJECT" -scheme 3105 -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/3105.xcarchive" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO; fi
-          
-      - name: Create IPA
-      
-        shell: bash
-        
-        run: |
-        
-          set -euo pipefail
-          
-          mkdir -p build/Payload
-          
-          cp -R build/3105.xcarchive/Products/Applications/*.app build/Payload/
-          
-          cd build
-          
-          zip -qry 3105-unsigned.ipa Payload
-          
-      - name: Upload IPA
-      
-        uses: actions/upload-artifact@v4
-        
-        with:
-        
-          name: 3105-build
-          
-          path: build/3105-unsigned.ipa
-          
-          retention-days: 7
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
