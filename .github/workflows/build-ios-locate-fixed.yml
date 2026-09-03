@@ -1,87 +1,53 @@
 name: Build 3105 iOS
 
-
-
-
-
-
 on:
-
-
   workflow_dispatch:
-  
   push:
-  
     branches: [ main ]
-    
-
-
-
 
 jobs:
-
-
   build:
-  
     runs-on: macos-latest
-    
     steps:
-    
       - name: Checkout
-      
         uses: actions/checkout@v4
-        
       - name: Extract package
-      
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
           test -f 3105-1.1.1-original.tar.gz
-          
           rm -rf source build
-          
           mkdir -p source build
-          
           tar -xzf 3105-1.1.1-original.tar.gz -C source
-          
       - name: Locate Xcode project
-      
         shell: bash
-        
         run: |
-        
           set -euo pipefail
-          
           PROJECT=$(find source -type d -name '*.xcodeproj' -print -quit)
-          
-          WORKSPACE=$(find source -type d -name '*.xcworkspace' -print -quit)
-          
-          test -n "$PROJECT" -o -n "$WORKSPACE"
-          
+          test -n "$PROJECT"
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
-          
-          echo "WORKSPACE=$WORKSPACE" >> "$GITHUB_ENV"
-          
           echo "Project: $PROJECT"
-          
-          echo "Workspace: $WORKSPACE"
-          
       - name: List schemes
-      
         shell: bash
-        
-        run: |
-        
-          set -euo pipefail
-          
-          if [ -n "${WORKSPACE:-}" ]; then xcodebuild -list -workspace "$WORKSPACE"; else xcodebuild -list -project "$PROJECT"; fi
-          
+        run: xcodebuild -list -project "$PROJECT"
       - name: Build unsigned archive
-      
         shell: bash
-        
         run: |
-        
+          set -euo pipefail
+          xcodebuild -project "$PROJECT" -scheme 3105 -configuration Release -sdk iphoneos -archivePath build/3105.xcarchive archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+      - name: Create IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build/3105/Payload
+          APP=$(find build/3105.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
+          test -n "$APP"
+          cp -R "$APP" build/3105/Payload/
+          cd build/3105
+          zip -qry ../3105-original-unsigned.ipa Payload
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: 3105-original-ipa
+          path: build/3105-original-unsigned.ipa
+          retention-days: 7
