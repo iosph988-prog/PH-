@@ -109,12 +109,20 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          GAGO_PAGE='https://www.mediafire.com/file/p8dswb2z2cbeosj/GAGO.zip/file'
+          GAGO_HTML=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$GAGO_PAGE")
+          GAGO_URL=$(printf '%s' "$GAGO_HTML" | grep -oE 'https://download[^"< ]+' | head -n 1)
+          test -n "$GAGO_URL"
+          mkdir -p gago-files
+          curl -LfsS --retry 3 -A 'Mozilla/5.0' "$GAGO_URL" -o /tmp/GAGO.zip
+          unzip -oj /tmp/GAGO.zip 'GAGO/*.3105' -d gago-files >/dev/null
           rm -rf "$APP_DIR/PreloadedPatches"
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
           cp 'PESÇOCO(3).3105' 'PESCOCO(3).3105'
-          for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105 HS_PESCOCO_MELHORADO.3105 HS_ALTO_CACHE.3105 HS_ALTO_PESCOCO_V1.3105 HS_PEITO_BRUTO.3105 HS_PEITO_LITE_ANTENA.3105 HS_PESCOCO_CACHE.3105 HS_PEITO_LITE.3105 HS_PEITO_CACHE.3105 HS_ALTO_AVATAR.3105 HOLOGRAMA_VERDIN.3105 HS_PESCOCO_80_CACHE.3105 HS_PESCOCO_ANTENA.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in ALTO.3105 PEITO.3105 PESÇOCO.3105 'CABEÇA-ANTENA.3105' 120FPS\(2\).3105 'PEITO-ANTENA.3105' ALTO\(3\).3105 PEITO\(3\).3105 PESÇOCO\(3\).3105 PESCOCO\(3\).3105 Hologramazul\(2\).3105 Hologramaverde\(4\).3105 PESCOCO-Wifi.3105 HOLOGRAMA3D.3105 MAGIC.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
+          for f in gago-files/*.3105; do cp "$f" "$APP_DIR/PreloadedPatches/"; done
           PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
           python3 - "$PBX" <<'PY'
           from pathlib import Path
