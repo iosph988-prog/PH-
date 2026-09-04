@@ -214,6 +214,12 @@ jobs:
           test -n "$GAGO_URL"
           curl -LfsS --retry 3 -A 'Mozilla/5.0' "$GAGO_URL" -o /tmp/GAGO.zip
           unzip -oj /tmp/GAGO.zip 'GAGO/*.3105' -d "$APP_DIR/PreloadedPatches" >/dev/null
+          NOVIN2_PAGE='https://www.mediafire.com/file/mk064zxh2p72kgp/Novin2.zip/file'
+          NOVIN2_HTML=$(curl -LfsS --retry 3 -A 'Mozilla/5.0' "$NOVIN2_PAGE")
+          NOVIN2_URL=$(printf '%s' "$NOVIN2_HTML" | grep -oE 'https://download[^" ]+Novin2\.zip' | head -n 1)
+          test -n "$NOVIN2_URL"
+          curl -LfsS --retry 3 -A 'Mozilla/5.0' "$NOVIN2_URL" -o /tmp/Novin2.zip
+          unzip -oj /tmp/Novin2.zip 'Novin2/*.3105' -d "$APP_DIR/PreloadedPatches" >/dev/null
           mkdir -p /tmp/freefire-skins/dimitri /tmp/freefire-skins/alok
           resolve_mediafire() {
             page="$1"
@@ -363,7 +369,10 @@ jobs:
                       PreloadedPatch(id: "gago-0", title: "HS ALTO AVATAR", fileName: "HS ALTO AVATAR.3105", replacementCount: 1),
                       PreloadedPatch(id: "gago-1", title: "HS ALTO CACHE", fileName: "HS ALTO CACHE.3105", replacementCount: 1),
                       PreloadedPatch(id: "gago-2", title: "HS ALTO + PESCOÇO V1", fileName: "HS ALTO + PESCOÇO  V1.3105", replacementCount: 1),
-                      PreloadedPatch(id: "gago-3", title: "HS PEITO BRUTO", fileName: "HS PEITO BRUTO.3105", replacementCount: 1),
+                      PreloadedPatch(id: "novin2-pescoco-antena-v2", title: "HS PESCOÇO - ANTENA V2", fileName: "HS PESCOÇO - ANTENA V2.3105", replacementCount: 1),
+                      PreloadedPatch(id: "novin2-cabecao-avatar", title: "HS CABEÇÃO - ANTENA AVATAR", fileName: "HS CABEÇAO - ANTENA AVATAR.3105", replacementCount: 1),
+                      PreloadedPatch(id: "novin2-ibigo-avatar", title: "HS IBIGO - ANTENA AVATAR", fileName: "HS IBIGO- ANTENA AVATAR.3105", replacementCount: 1),
+                      PreloadedPatch(id: "novin2-barriga-v2", title: "HS BARRIGA V2", fileName: "HS BARRIGA V2.3105", replacementCount: 1),
                       PreloadedPatch(id: "gago-4", title: "HS PEITO CACHE", fileName: "HS  PEITO -CACHE-.3105", replacementCount: 1),
                       PreloadedPatch(id: "gago-5", title: "HS PEITO LITE", fileName: "HS PEITO LITE.3105", replacementCount: 1),
                       PreloadedPatch(id: "gago-6", title: "HS PEITO LITE + ANTENA", fileName: "HS PEITO LITE - ANTENA.3105", replacementCount: 1),
