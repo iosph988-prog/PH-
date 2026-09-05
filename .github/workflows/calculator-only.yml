@@ -1,0 +1,19 @@
+name: CalculatorOnly iOS Build
+on: [push, workflow_dispatch]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build CalculatorOnly IPA
+        run: |
+          set -euo pipefail
+          xcodebuild -project CalculatorOnly.xcodeproj -scheme CalculatorOnly -configuration Release -sdk iphoneos -derivedDataPath build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO PRODUCT_BUNDLE_IDENTIFIER=com.calculatoronly.app build
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/CalculatorOnly.app Payload/
+          zip -qry CalculatorOnly.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CalculatorOnly-ipa
+          path: CalculatorOnly.ipa
+          if-no-files-found: error

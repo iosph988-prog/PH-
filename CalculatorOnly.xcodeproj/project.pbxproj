@@ -1,0 +1,51 @@
+// !$*UTF8*$!
+{
+  archiveVersion = 1;
+  objectVersion = 56;
+  objects = {
+    000000000000000000000001 /* Project object */ = {
+      isa = PBXProject;
+      attributes = { LastUpgradeCheck = 1500; ORGANIZATIONNAME = CalculatorOnly; TargetAttributes = { 000000000000000000000002 = { CreatedOnToolsVersion = 15.0; }; }; };
+      buildConfigurationList = 000000000000000000000010;
+      compatibilityVersion = "Xcode 14.0";
+      developmentRegion = en;
+      hasScannedForEncodings = 0;
+      knownRegions = ( en, Base );
+      mainGroup = 000000000000000000000003;
+      productRefGroup = 000000000000000000000004;
+      projectDirPath = "";
+      projectRoot = "";
+      targets = ( 000000000000000000000002 );
+    };
+    000000000000000000000002 /* CalculatorOnly */ = {
+      isa = PBXNativeTarget;
+      buildConfigurationList = 000000000000000000000011;
+      buildPhases = ( 000000000000000000000020, 000000000000000000000021, 000000000000000000000022 );
+      buildRules = ( );
+      dependencies = ( );
+      name = CalculatorOnly;
+      productName = CalculatorOnly;
+      productReference = 000000000000000000000005;
+      productType = "com.apple.product-type.application";
+    };
+    000000000000000000000003 = { isa = PBXGroup; children = ( 000000000000000000000006, 000000000000000000000007, 000000000000000000000008 ); sourceTree = "<group>"; };
+    000000000000000000000004 = { isa = PBXGroup; children = ( 000000000000000000000005 ); name = Products; sourceTree = "<group>"; };
+    000000000000000000000005 /* CalculatorOnly.app */ = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalculatorOnly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+    000000000000000000000006 /* CalculatorOnlyApp.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorOnlyApp.swift; sourceTree = "<group>"; };
+    000000000000000000000008 /* LicenseEndpoint.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseEndpoint.swift; sourceTree = "<group>"; };
+    000000000000000000000007 /* CalculatorView.swift */ = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorView.swift; sourceTree = "<group>"; };
+    000000000000000000000020 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( 000000000000000000000030, 000000000000000000000031, 000000000000000000000032 ); runOnlyForDeploymentPostprocessing = 0; };
+    000000000000000000000021 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+    000000000000000000000022 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
+    000000000000000000000030 = { isa = PBXBuildFile; fileRef = 000000000000000000000006; };
+    000000000000000000000031 = { isa = PBXBuildFile; fileRef = 000000000000000000000007; };
+    000000000000000000000032 = { isa = PBXBuildFile; fileRef = 000000000000000000000008; };
+    000000000000000000000010 = { isa = XCConfigurationList; buildConfigurations = ( 000000000000000000000040, 000000000000000000000041 ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+    000000000000000000000011 = { isa = XCConfigurationList; buildConfigurations = ( 000000000000000000000042, 000000000000000000000043 ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+    000000000000000000000040 = { isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; DEVELOPMENT_TEAM = ""; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Debug; };
+    000000000000000000000041 = { isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; IPHONEOS_DEPLOYMENT_TARGET = 16.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
+    000000000000000000000042 = { isa = XCBuildConfiguration; buildSettings = { INFOPLIST_FILE = Info.plist; PRODUCT_BUNDLE_IDENTIFIER = com.calculatoronly.app; INFOPLIST_KEY_CFBundleDisplayName = CalculatorOnly; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities"; IPHONEOS_DEPLOYMENT_TARGET = 16.0; LD_RUNPATH_SEARCH_PATHS = ( "$(inherited)", "@executable_path/Frameworks" ); PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Debug; };
+    000000000000000000000043 = { isa = XCBuildConfiguration; buildSettings = { INFOPLIST_FILE = Info.plist; PRODUCT_BUNDLE_IDENTIFIER = com.calculatoronly.app; INFOPLIST_KEY_CFBundleDisplayName = CalculatorOnly; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities"; IPHONEOS_DEPLOYMENT_TARGET = 16.0; LD_RUNPATH_SEARCH_PATHS = ( "$(inherited)", "@executable_path/Frameworks" ); PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = "1,2"; }; name = Release; };
+  };
+  rootObject = 000000000000000000000001;
+}
