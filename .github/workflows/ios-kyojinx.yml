@@ -5,7 +5,7 @@ jobs:
     runs-on: macos-latest 
     steps:
       - name: Load exact PH-FUNCOES-EXTERNAL project
-        shell: bash
+        shell: bash 
         run: |
           set -euo pipefail
           page='https://www.mediafire.com/file/pkw3n8py74kz3ul/PH-FUNCOES-EXTERNAL-final.zip/file'
