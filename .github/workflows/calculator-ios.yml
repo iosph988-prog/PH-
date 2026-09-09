@@ -1,0 +1,53 @@
+name: CalculatorOnly iOS Build
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'CalculatorOnly/**'
+      - '.github/workflows/calculator-ios.yml'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build unsigned iOS archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          xcodebuild \
+            -project CalculatorOnly/CalculatorOnly.xcodeproj \
+            -scheme CalculatorOnly \
+            -sdk iphoneos \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$PWD/build/CalculatorOnly.xcarchive" \
+            archive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Package unsigned IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build/Payload
+          mkdir -p build/Payload
+          cp -R build/CalculatorOnly.xcarchive/Products/Applications/*.app build/Payload/
+          cd build
+          zip -qry CalculatorOnly-unsigned.ipa Payload
+
+      - name: Upload CalculatorOnly artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CalculatorOnly-ios-build
+          path: |
+            build/CalculatorOnly-unsigned.ipa
+            build/CalculatorOnly.xcarchive
+          retention-days: 7
+
+# The archive is intentionally unsigned. Installing on a device requires
+# an Apple development certificate and provisioning profile.
