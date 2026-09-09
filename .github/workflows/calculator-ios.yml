@@ -20,7 +20,7 @@ jobs:
           set -euo pipefail
           mkdir -p build
           xcodebuild \
-            -project CalculatorOnly/CalculatorOnly.xcodeproj \
+            -project CalculatorOnly/CalculatorOnly/CalculatorOnly.xcodeproj \
             -scheme CalculatorOnly \
             -sdk iphoneos \
             -configuration Release \
