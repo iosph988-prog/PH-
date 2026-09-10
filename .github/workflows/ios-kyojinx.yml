@@ -1,6 +1,6 @@
 name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
-jobs:
+jobs: 
   build:
     runs-on: macos-latest 
     steps:
