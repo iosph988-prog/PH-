@@ -97,13 +97,13 @@ jobs:
                           target.write(chunk)
                   print(output.name)
           PY
-      - name: Extract original project
+      - name: Extract correct PHATT card project
         shell: bash
         run: |
           set -euo pipefail
           rm -rf source build dist
-          mkdir -p source build dist
-          tar -xzf 3105-1.1.1-original.tar.gz -C source
+          mkdir -p source/3105-1.1.1 build dist
+          tar -xzf PHATT_injector_freefiremax_v5.tar.gz --strip-components=1 -C source/3105-1.1.1
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Apply app startup and navigation changes
