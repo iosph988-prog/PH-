@@ -161,8 +161,23 @@ jobs:
               PreloadedPatch(id: "hs-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
           ]
           
+          private let freeFirePatchCatalog: [PreloadedPatch] = [
+              PreloadedPatch(id: "free-fire-0", title: "BALA MAGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-1", title: "HS ALTO + PESCOCÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-2", title: "HS ALTO", fileName: "HS ALTO.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-3", title: "HS BARRIGA V2", fileName: "HS BARRIGA V2.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-4", title: "HS CABECÇAO - ANTENA AVATAR", fileName: "HS CABEÇAO - ANTENA AVATAR.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-5", title: "HS IBIGO- ANTENA AVATAR", fileName: "HS IBIGO- ANTENA AVATAR.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-6", title: "HS PEITO CABECA BUGADA", fileName: "HS PEITO CABECA BUGADA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-7", title: "HS PEITO LITE - ANTENA", fileName: "HS PEITO LITE - ANTENA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-8", title: "HS PESCOCÇO  LITE - ANTENA", fileName: "HS PESCOÇO  LITE - ANTENA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-9", title: "HS PESCOCÇO - ANTENA", fileName: "HS PESCOÇO - ANTENA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-10", title: "HS PESCOCÇO MELHORADO", fileName: "HS PESCOÇO MELHORADO.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-11", title: "Holograma verde", fileName: "Holograma verde .3105", replacementCount: 1),
+          ]
+
           private let preloadedGames: [PreloadedGame] = [
-              PreloadedGame(id: "free-fire", title: "FREE FIRE", bundleID: "com.dts.freefireth", patches: patchCatalog),
+              PreloadedGame(id: "free-fire", title: "FREE FIRE", bundleID: "com.dts.freefireth", patches: freeFirePatchCatalog),
               PreloadedGame(id: "free-fire-max", title: "FREE FIRE MAX", bundleID: "com.dts.freefiremax", patches: patchCatalog)
           ]
           
@@ -184,16 +199,17 @@ jobs:
               }
           
               private var features: [CompactFeature] {
-                  let byID = Dictionary(uniqueKeysWithValues: selectedGame.patches.map { ($0.id, $0) })
-                  return [
-                      CompactFeature(id: "hs-alto", title: "HS ALTO", subtitle: "HS acima da cabeça do inimigo.", icon: "scope", patch: byID["hs-alto"] ?? patchCatalog[0]),
-                      CompactFeature(id: "hs-peito", title: "HS PEITO", subtitle: "HS no peito do inimigo.", icon: "circle.grid.cross", patch: byID["hs-peito"] ?? patchCatalog[1]),
-                      CompactFeature(id: "hs-pescoco", title: "HS PESCOÇO", subtitle: "HS apenas no pescoço do inimigo.", icon: "dot.radiowaves.left.and.right", patch: byID["hs-pescoco"] ?? patchCatalog[2]),
-                      CompactFeature(id: "fps-120", title: "120 FPS", subtitle: "Ajuste de desempenho e fluidez.", icon: "gauge.with.dots.needle.67percent", patch: byID["fps-120"] ?? patchCatalog[3]),
-                      CompactFeature(id: "hs-peito-antena", title: "HS PEITO + ANTENA", subtitle: "HS no peito com antena.", icon: "antenna.radiowaves.left.and.right", patch: byID["hs-peito-antena"] ?? patchCatalog[4])
-                  ]
+                  selectedGame.patches.enumerated().map { index, patch in
+                      CompactFeature(
+                          id: patch.id,
+                          title: patch.title,
+                          subtitle: "Recurso pré-carregado do Free Fire.",
+                          icon: index == 0 ? "scope" : (index == 1 ? "circle.grid.cross" : "antenna.radiowaves.left.and.right"),
+                          patch: patch
+                      )
+                  }
               }
-          
+
               var body: some View {
                   ZStack(alignment: .bottom) {
                       (darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()
@@ -535,6 +551,18 @@ jobs:
           t=t.replace('UIColor.orange', 'UIColor.systemBlue')
           p.write_text(t)
           PY
+
+      - name: Verify compact Free Fire route
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches=$(find source -type f -iname 'PatchProjectsView.swift')
+          test -n "$matches"
+          for f in $matches; do
+            grep -q 'SELECIONE O JOGO' "$f"
+            ! grep -q 'FileDocumentPicker' "$f"
+            ! grep -q 'PatchPackagePickerPolicy' "$f"
+          done
 
       - name: Integrar API Kyojinx funcional
         shell: bash
