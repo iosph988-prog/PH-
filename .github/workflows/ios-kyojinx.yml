@@ -461,7 +461,7 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
+          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESÇOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
             test -s "$APP_DIR/PreloadedPatches/$f"
           done
       - name: Force visible Injector icon
@@ -632,7 +632,7 @@ jobs:
           grep -R -n 'Injector' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'max-pescoco-3' source --include='PatchProjectsView.swift'
-          grep -R -n 'PESCOCO(3).3105' source --include='PatchProjectsView.swift'
+          grep -R -n 'PESÇOCO(3).3105' source --include='PatchProjectsView.swift'
       - name: Build original archive and IPA
         shell: bash
         run: |
