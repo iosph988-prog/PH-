@@ -138,242 +138,284 @@ jobs:
           import SwiftUI
           import UIKit
           import CryptoKit
-
+          
           private struct PreloadedGame: Identifiable {
               let id: String
               let title: String
               let bundleID: String
               let patches: [PreloadedPatch]
           }
-
+          
           private struct PreloadedPatch: Identifiable, Hashable {
               let id: String
               let title: String
               let fileName: String
               let replacementCount: Int
           }
-
-          private let preloadedGames: [PreloadedGame] = [
-              PreloadedGame(
-                  id: "free-fire",
-                  title: "Free Fire",
-                  bundleID: "com.dts.freefireth",
-                  patches: [
-                      PreloadedPatch(id: "free-120fps", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-alto", title: "HS ALTO", fileName: "HS ALTO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-alto-pescoco", title: "HS ALTO + PESCOÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-pescoco-melhorado", title: "HS PESCOÇO MELHORADO", fileName: "HS PESCOÇO MELHORADO.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-pescoco-lite", title: "HS PESCOÇO LITE - ANTENA", fileName: "HS PESCOÇO  LITE - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito-cabeca", title: "HS PEITO CABEÇA BUGADA", fileName: "HS PEITO CABECA BUGADA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-cabecao", title: "HS CABEÇÃO - ANTENA AVATAR", fileName: "HS CABEÇAO - ANTENA AVATAR.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-ibigo", title: "HS IBIGO - ANTENA AVATAR", fileName: "HS IBIGO- ANTENA AVATAR.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-peito-lite", title: "HS PEITO LITE - ANTENA", fileName: "HS PEITO LITE - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-bala-magica", title: "BALA MÁGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-holograma-verde", title: "HOLOGRAMA VERDE", fileName: "Holograma verde .3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-pescoco-antena", title: "HS PESCOÇO - ANTENA", fileName: "HS PESCOÇO - ANTENA.3105", replacementCount: 1),
-                      PreloadedPatch(id: "free-hs-barriga", title: "HS BARRIGA V2", fileName: "HS BARRIGA V2.3105", replacementCount: 1)
-                  ]
-              ),
-              PreloadedGame(
-                  id: "free-fire-max",
-                  title: "Free Fire MAX",
-                  bundleID: "com.dts.freefiremax",
-                  patches: [
-                      PreloadedPatch(id: "max-verde", title: "Holograma verde", fileName: "Hologramaverde(4).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-azul", title: "Holograma azul", fileName: "Hologramazul(2).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
-                      PreloadedPatch(id: "max-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
-                  ]
-              )
+          
+          private let patchCatalog: [PreloadedPatch] = [
+              PreloadedPatch(id: "hs-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
+              PreloadedPatch(id: "hs-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
+              PreloadedPatch(id: "hs-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO(3).3105", replacementCount: 1),
+              PreloadedPatch(id: "fps-120", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
+              PreloadedPatch(id: "hs-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
           ]
-
+          
+          private let preloadedGames: [PreloadedGame] = [
+              PreloadedGame(id: "free-fire", title: "FREE FIRE", bundleID: "com.dts.freefireth", patches: patchCatalog),
+              PreloadedGame(id: "free-fire-max", title: "FREE FIRE MAX", bundleID: "com.dts.freefiremax", patches: patchCatalog)
+          ]
+          
+          private struct CompactFeature: Identifiable {
+              let id: String
+              let title: String
+              let subtitle: String
+              let icon: String
+              let patch: PreloadedPatch
+          }
+          
           struct PatchProjectsView: View {
               @StateObject private var store = PatchProjectStore()
               @State private var selectedGameID = "free-fire"
               @AppStorage("patchesDarkMode") private var darkMode = false
-
-                            private var selectedGame: PreloadedGame {
+          
+              private var selectedGame: PreloadedGame {
                   preloadedGames.first(where: { $0.id == selectedGameID }) ?? preloadedGames[0]
               }
-              private var displayedPatches: [PreloadedPatch] {
-                  if selectedGameID == "free-fire-max" {
-                      return selectedGame.patches + [
-                          PreloadedPatch(id: "max-pescoco-3", title: "HS PESCOÇO", fileName: "PESÇOCO(3).3105", replacementCount: 1)
-                      ]
-                  }
-                  return selectedGame.patches
+          
+              private var features: [CompactFeature] {
+                  let byID = Dictionary(uniqueKeysWithValues: selectedGame.patches.map { ($0.id, $0) })
+                  return [
+                      CompactFeature(id: "hs-alto", title: "HS ALTO", subtitle: "HS acima da cabeça do inimigo.", icon: "scope", patch: byID["hs-alto"] ?? patchCatalog[0]),
+                      CompactFeature(id: "hs-peito", title: "HS PEITO", subtitle: "HS no peito do inimigo.", icon: "circle.grid.cross", patch: byID["hs-peito"] ?? patchCatalog[1]),
+                      CompactFeature(id: "hs-pescoco", title: "HS PESCOÇO", subtitle: "HS apenas no pescoço do inimigo.", icon: "dot.radiowaves.left.and.right", patch: byID["hs-pescoco"] ?? patchCatalog[2]),
+                      CompactFeature(id: "fps-120", title: "120 FPS", subtitle: "Ajuste de desempenho e fluidez.", icon: "gauge.with.dots.needle.67percent", patch: byID["fps-120"] ?? patchCatalog[3]),
+                      CompactFeature(id: "hs-peito-antena", title: "HS PEITO + ANTENA", subtitle: "HS no peito com antena.", icon: "antenna.radiowaves.left.and.right", patch: byID["hs-peito-antena"] ?? patchCatalog[4])
+                  ]
               }
+          
               var body: some View {
-                  NavigationStack {
-                      ScrollView {
-                          VStack(alignment: .leading, spacing: 22) {
-                              HStack {
-                                  Text("FUNÇÕES EXTERNAL").font(.headline)
-                                  Spacer()
-                                  Button { darkMode.toggle() } label: {
-                                      Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
-                                          .font(.title3)
-                                          .foregroundStyle(darkMode ? .white : .black)
-                                  }
-                                  .accessibilityLabel(darkMode ? "Tema noite" : "Tema dia")
-                              }
-                              Picker("Jogo", selection: $selectedGameID) {
-                                  ForEach(preloadedGames) { game in
-                                      Text(game.title).tag(game.id)
-                                  }
-                              }
-                              .pickerStyle(.segmented)
-                              .frame(height: 54)
-                              .tint(darkMode ? .white : .black)
-
-                              VStack(spacing: 14) {
-                                  ForEach(displayedPatches) { patch in
-                                      PreloadedPatchCard(patch: patch, store: store)
-                                  }
-                              }
+                  ZStack(alignment: .bottom) {
+                      (darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()
+                      ScrollView(.vertical, showsIndicators: false) {
+                          VStack(alignment: .leading, spacing: 0) {
+                              header
+                              sectionTitle("SELECIONE O JOGO", top: 30)
+                              gameCards
+                              sectionTitle("FUNÇÕES DE AIMBOT", top: 28)
+                              Text("Recursos de precisão e desempenho")
+                                  .font(.system(size: 14, weight: .medium))
+                                  .foregroundStyle(muted)
+                                  .padding(.top, 7)
+                              featureList.padding(.top, 14)
                           }
                           .padding(.horizontal, 16)
-                          .padding(.top, 20)
-                          .padding(.bottom, 28)
+                          .padding(.top, 14)
+                          .padding(.bottom, 104)
                       }
-                      .background(darkMode ? Color.black : Color(.systemGroupedBackground))
-                      .scrollContentBackground(.hidden)
-                      .navigationTitle("Patches")
-                      .navigationBarTitleDisplayMode(.inline)
-                          .preferredColorScheme(darkMode ? .dark : .light)
+                      bottomNav
+                  }
+                  .preferredColorScheme(darkMode ? .dark : .light)
+                  .toolbar(.hidden, for: .tabBar)
+                  .navigationBarHidden(true)
+              }
+          
+              private var fg: Color { darkMode ? .white : .black }
+              private var muted: Color { darkMode ? Color.white.opacity(0.56) : Color.black.opacity(0.54) }
+              private var panel: Color { darkMode ? Color.white.opacity(0.10) : .white }
+          
+              private var header: some View {
+                  ZStack {
+                      Text("FUNÇÕES EXTERNAL")
+                          .font(.system(size: 20, weight: .bold, design: .rounded))
+                          .foregroundStyle(fg)
+                          .frame(maxWidth: .infinity)
+                      HStack {
+                          Spacer()
+                          Button { darkMode.toggle() } label: {
+                              Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
+                                  .font(.system(size: 17, weight: .semibold))
+                                  .foregroundStyle(darkMode ? .white : .black)
+                                  .frame(width: 40, height: 40)
+                                  .background(panel, in: Circle())
+                          }
+                          .accessibilityLabel(darkMode ? "Tema noite" : "Tema dia")
+                      }
+                  }
+                  .frame(height: 42)
+              }
+          
+              private func sectionTitle(_ title: String, top: CGFloat) -> some View {
+                  Text(title)
+                      .font(.system(size: 18, weight: .bold, design: .rounded))
+                      .foregroundStyle(fg)
+                      .padding(.top, top)
+              }
+          
+              private var gameCards: some View {
+                  GeometryReader { proxy in
+                      let width = max(145, (proxy.size.width - 10) / 2)
+                      HStack(spacing: 10) {
+                          ForEach(preloadedGames) { game in
+                              Button { withAnimation(.easeInOut(duration: 0.18)) { selectedGameID = game.id } } label: {
+                                  VStack(alignment: .leading, spacing: 8) {
+                                      bundleImage(named: game.id == "free-fire" ? "free_fire_card" : "free_fire_max_card")
+                                          .frame(width: 42, height: 42)
+                                          .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+                                      Text(game.title)
+                                          .font(.system(size: 13, weight: .bold))
+                                          .foregroundStyle(fg)
+                                          .lineLimit(1)
+                                      Text(selectedGameID == game.id ? "Selecionado" : "Toque para selecionar")
+                                          .font(.system(size: 11, weight: .medium))
+                                          .foregroundStyle(selectedGameID == game.id ? fg : muted)
+                                          .lineLimit(1)
+                                  }
+                                  .frame(maxWidth: .infinity, alignment: .leading)
+                                  .padding(12)
+                                  .frame(width: width, height: 116, alignment: .topLeading)
+                                  .background(panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                  .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(selectedGameID == game.id ? fg.opacity(0.8) : fg.opacity(0.12), lineWidth: selectedGameID == game.id ? 1.5 : 1))
+                              }
+                              .buttonStyle(.plain)
+                          }
+                      }
+                  }
+                  .frame(height: 116)
+                  .padding(.top, 14)
+              }
+          
+              private var featureList: some View {
+                  VStack(spacing: 9) {
+                      ForEach(features) { feature in
+                          CompactPatchCard(feature: feature, store: store, darkMode: darkMode)
+                      }
+                  }
+              }
+          
+              private var bottomNav: some View {
+                  HStack(spacing: 4) {
+                      navItem(title: "Início", icon: "house.fill", active: false)
+                      navItem(title: "Injector", icon: "gamecontroller.fill", active: true)
+                  }
+                  .padding(5)
+                  .frame(width: 220, height: 62)
+                  .background(.ultraThinMaterial, in: Capsule())
+                  .overlay(Capsule().stroke(fg.opacity(0.12), lineWidth: 1))
+                  .padding(.bottom, 14)
+              }
+          
+              private func navItem(title: String, icon: String, active: Bool) -> some View {
+                  VStack(spacing: 3) {
+                      Image(systemName: icon).font(.system(size: 17, weight: .semibold))
+                      Text(title).font(.system(size: 11, weight: .bold))
+                  }
+                  .foregroundStyle(active ? .orange : fg)
+                  .frame(maxWidth: .infinity, maxHeight: .infinity)
+                  .background(active ? fg.opacity(0.10) : .clear, in: Capsule())
+              }
+          
+              @ViewBuilder
+              private func bundleImage(named name: String) -> some View {
+                  if let url = Bundle.main.url(forResource: name, withExtension: "png", subdirectory: "PreloadedPatches"), let image = UIImage(contentsOfFile: url.path) {
+                      Image(uiImage: image).resizable().scaledToFill()
+                  } else if let image = UIImage(named: name) {
+                      Image(uiImage: image).resizable().scaledToFill()
+                  } else {
+                      ZStack {
+                          RoundedRectangle(cornerRadius: 11).fill(fg.opacity(0.10))
+                          Image(systemName: "gamecontroller.fill").foregroundStyle(muted)
+                      }
                   }
               }
           }
-
-          private struct PreloadedPatchCard: View {
-              let patch: PreloadedPatch
-              @Environment(\.colorScheme) private var colorScheme
+          
+          private struct CompactPatchCard: View {
+              let feature: CompactFeature
               @ObservedObject var store: PatchProjectStore
+              let darkMode: Bool
               @State private var isActive = false
-              @State private var remoteTitle: String?
               @State private var activeReceipt: PatchTransactionReceipt?
               @State private var isWorking = false
               @State private var alertMessage: String?
-
+          
               var body: some View {
-                  HStack(spacing: 14) {
-                      VStack(alignment: .leading, spacing: 7) {
-                          Text(remoteTitle ?? patch.title)
-                              .font(.title3.weight(.semibold))
-                              .foregroundStyle(colorScheme == .dark ? Color.white : Color.black)
-                          Text("\(patch.replacementCount) replacement rules")
-                              .font(.body)
-                              .foregroundStyle(colorScheme == .dark ? Color.white.opacity(0.65) : Color.gray)
+                  HStack(spacing: 12) {
+                      Image(systemName: feature.icon)
+                          .font(.system(size: 20, weight: .semibold))
+                          .foregroundStyle(darkMode ? .white : .black)
+                          .frame(width: 30)
+                      VStack(alignment: .leading, spacing: 3) {
+                          Text(feature.title).font(.system(size: 15, weight: .bold)).foregroundStyle(darkMode ? .white : .black)
+                          Text(feature.subtitle).font(.system(size: 11, weight: .medium)).foregroundStyle(darkMode ? Color.white.opacity(0.55) : Color.black.opacity(0.55)).lineLimit(2)
                       }
-                      Spacer(minLength: 8)
-                      Toggle("", isOn: Binding(
-                          get: { isActive },
-                          set: { enabled in
-                              guard !isWorking else { return }
-                              if enabled { applyPatch() } else { restorePatch() }
-                          }
-                      ))
+                      Spacer(minLength: 4)
+                      Toggle("", isOn: Binding(get: { isActive }, set: { on in
+                          guard !isWorking else { return }
+                          if on { applyPatch() } else { restorePatch() }
+                      }))
                       .labelsHidden()
-                      .toggleStyle(PatchToggleStyle())
+                      .tint(darkMode ? .white : .black)
                   }
-                  .padding(.horizontal, 22)
-                  .padding(.vertical, 28)
-                  .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
-                  .background(colorScheme == .dark ? Color.white.opacity(0.12) : Color.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-                  .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.black.opacity(0.08), lineWidth: 1))
-                  .opacity(isWorking ? 0.65 : 1)
-                  .onAppear {
-                      synchronizeAppliedState()
-                      loadRemoteTitle()
-                  }
-                  .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                      loadRemoteTitle()
-                  }
+                  .padding(.horizontal, 14)
+                  .frame(minHeight: 72)
+                  .background(darkMode ? Color.white.opacity(0.10) : .white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke((darkMode ? Color.white : Color.black).opacity(0.10), lineWidth: 1))
+                  .opacity(isWorking ? 0.6 : 1)
+                  .onAppear { synchronizeAppliedState() }
                   .alert("Patch", isPresented: Binding(get: { alertMessage != nil }, set: { if !$0 { alertMessage = nil } })) {
                       Button("OK", role: .cancel) { alertMessage = nil }
-                  } message: {
-                      Text(alertMessage ?? "")
-                  }
+                  } message: { Text(alertMessage ?? "") }
               }
-
-              private func loadRemoteTitle() {
-                  Task {
-                      let title = await RemotePatchAPI.title(for: patch)
-                      await MainActor.run {
-                          if let title, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                              remoteTitle = title
-                          }
-                      }
-                  }
-              }
-
+          
               private func applyPatch() {
                   isWorking = true
                   Task {
                       do {
-                          guard let url = await RemotePatchAPI.resolve(patch: patch) ?? bundledFile(named: patch.fileName) else {
-                              throw NSError(domain: "RemotePatch", code: 404, userInfo: [NSLocalizedDescriptionKey: "Arquivo não encontrado: \(patch.fileName)"])
+                          guard let url = await RemotePatchAPI.resolve(patch: feature.patch) ?? bundledFile(named: feature.patch.fileName) else {
+                              throw NSError(domain: "RemotePatch", code: 404, userInfo: [NSLocalizedDescriptionKey: "Arquivo não encontrado: \(feature.patch.fileName)"])
                           }
                           let data = try PatchProjectLibrary.readPackage(at: url)
                           let decoded = try PatchPackageCodec.decode(data, password: nil)
-                          let newReceipt = try DevicePatchService.apply(project: decoded.project)
-                          await MainActor.run {
-                              activeReceipt = newReceipt
-                              isActive = true
-                              isWorking = false
-                          }
+                          let receipt = try DevicePatchService.apply(project: decoded.project)
+                          await MainActor.run { activeReceipt = receipt; isActive = true; isWorking = false }
                       } catch {
-                          await MainActor.run {
-                              isWorking = false
-                              alertMessage = error.localizedDescription
-                          }
+                          await MainActor.run { isWorking = false; alertMessage = error.localizedDescription }
                       }
                   }
               }
-
+          
               private func restorePatch() {
-                  let currentReceipt = activeReceipt ?? findAppliedProjectID().flatMap { DevicePatchService.latestReceipt(projectID: $0) }
-                  guard let currentReceipt else {
-                      isActive = false
-                      return
-                  }
+                  guard let receipt = activeReceipt ?? findAppliedProjectID().flatMap({ DevicePatchService.latestReceipt(projectID: $0) }) else { isActive = false; return }
                   isWorking = true
                   Task.detached(priority: .userInitiated) {
                       do {
-                          try DevicePatchService.restore(receipt: currentReceipt)
-                          await MainActor.run {
-                              activeReceipt = nil
-                              isActive = false
-                              isWorking = false
-                          }
+                          try DevicePatchService.restore(receipt: receipt)
+                          await MainActor.run { activeReceipt = nil; isActive = false; isWorking = false }
                       } catch {
-                          await MainActor.run {
-                              isWorking = false
-                              alertMessage = error.localizedDescription
-                          }
+                          await MainActor.run { isWorking = false; alertMessage = error.localizedDescription }
                       }
                   }
               }
-
+          
               private func synchronizeAppliedState() {
                   guard let projectID = findAppliedProjectID() else { return }
                   let latest = DevicePatchService.latestReceipt(projectID: projectID)
                   activeReceipt = latest
                   isActive = latest != nil
               }
+          
               private func findAppliedProjectID() -> UUID? {
-                  guard let url = RemotePatchAPI.cachedFile(named: patch.fileName) ?? bundledFile(named: patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
+                  guard let url = RemotePatchAPI.cachedFile(named: feature.patch.fileName) ?? bundledFile(named: feature.patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
                   return decoded.project.id
               }
-
+          
               private func bundledFile(named name: String) -> URL? {
                   let normalized = name.precomposedStringWithCanonicalMapping
-                  return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first {
-                      $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized
-                  }
+                  return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first { $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized }
               }
           }
-
+          
           private struct RemotePatchDescriptor: Decodable {
               let title: String?
               let fileName: String
@@ -381,95 +423,45 @@ jobs:
               let sizeBytes: Int
               let downloadUrl: String
           }
-
+          
           private struct RemotePatchCatalogResponse: Decodable {
               let valid: Bool
               let patches: [RemotePatchDescriptor]?
           }
-
+          
           private enum RemotePatchAPI {
               private static let catalogURL = URL(string: "https://api-production-182c.up.railway.app/api/patches/catalog")!
-
               static func cachedFile(named name: String) -> URL? {
-                  let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
-                  let url = directory.appendingPathComponent(name)
+                  let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
+                  let url = dir.appendingPathComponent(name)
                   return FileManager.default.fileExists(atPath: url.path) ? url : nil
               }
-
-              static func title(for patch: PreloadedPatch) async -> String? {
-                  await descriptor(for: patch)?.title
-              }
-
-              private static func descriptor(for patch: PreloadedPatch) async -> RemotePatchDescriptor? {
-                  guard let key = LicenseStore.storedKey else { return nil }
+              static func resolve(patch: PreloadedPatch) async -> URL? {
+                  guard let key = LicenseStore.storedKey else { return cachedFile(named: patch.fileName) }
                   do {
                       var request = URLRequest(url: catalogURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
                       request.httpMethod = "POST"
                       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                      let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device"
-                      let packageName = Bundle.main.bundleIdentifier ?? "unknown.bundle"
-                      let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": deviceID, "package": packageName, "app_version": appVersion])
+                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"])
                       let (data, response) = try await URLSession.shared.data(for: request)
-                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return nil }
-                      let catalog = try JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data)
-                      return catalog.valid ? catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }) : nil
-                  } catch {
-                      return nil
-                  }
-              }
-
-              static func resolve(patch: PreloadedPatch) async -> URL? {
-                  do {
-                      guard let descriptor = await descriptor(for: patch), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
                       let (fileData, fileResponse) = try await URLSession.shared.data(from: url)
                       guard let fileHTTP = fileResponse as? HTTPURLResponse, (200..<300).contains(fileHTTP.statusCode), fileData.count == descriptor.sizeBytes else { return cachedFile(named: patch.fileName) }
                       let digest = SHA256.hash(data: fileData).map { String(format: "%02x", $0) }.joined()
                       guard digest.caseInsensitiveCompare(descriptor.sha256) == .orderedSame else { return cachedFile(named: patch.fileName) }
-                      let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
-                      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-                      let destination = directory.appendingPathComponent(patch.fileName)
+                      let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
+                      try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                      let destination = dir.appendingPathComponent(patch.fileName)
                       try fileData.write(to: destination, options: .atomic)
                       return destination
-                  } catch {
-                      return cachedFile(named: patch.fileName)
-                  }
+                  } catch { return cachedFile(named: patch.fileName) }
               }
-          }
-
-          private struct PatchToggleStyle: ToggleStyle {
-              func makeBody(configuration: Configuration) -> some View {
-                  Button {
-                      configuration.isOn.toggle()
-                  } label: {
-                      HStack {
-                          Spacer(minLength: 0)
-                          Circle()
-                              .fill(Color.white)
-                              .frame(width: 24, height: 24)
-                              .shadow(color: .black.opacity(0.18), radius: 2, y: 1)
-                      }
-                      .padding(4)
-                      .frame(width: 58, height: 32)
-                      .background(configuration.isOn ? Color.green : Color.gray.opacity(0.65), in: Capsule())
-                  }
-                  .buttonStyle(.plain)
-                  .accessibilityValue(configuration.isOn ? "Ativado" : "Desativado")
-              }
-          }
-
-          private extension Color {
-              static var patchCardBackground: Color { Color(.secondarySystemBackground) }
-          }
-
-          private extension PatchProjectStore {
-              // Keeps the existing store dependency available to the card without changing its behavior.
           }
           SWIFT
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESÇOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
+          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESCOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
             test -s "$APP_DIR/PreloadedPatches/$f"
           done
       - name: Force visible Injector icon
@@ -640,7 +632,7 @@ jobs:
           grep -R -n 'Injector' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'max-pescoco-3' source --include='PatchProjectsView.swift'
-          grep -R -n 'PESÇOCO(3).3105' source --include='PatchProjectsView.swift'
+          grep -R -n 'PESCOCO(3).3105' source --include='PatchProjectsView.swift'
       - name: Build original archive and IPA
         shell: bash
         run: |
