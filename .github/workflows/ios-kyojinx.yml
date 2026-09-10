@@ -102,8 +102,10 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf source build dist
-          mkdir -p source/3105-1.1.1 build dist
-          tar -xzf PHATT_injector_freefiremax_v5.tar.gz --strip-components=1 -C source/3105-1.1.1
+          mkdir -p source/3105-1.1.1 build dist /tmp/phatt-project
+          tar -xzf PHATT_injector_freefiremax_v5.tar.gz -C /tmp/phatt-project
+          cp -R /tmp/phatt-project/ThreeOneOSFive source/3105-1.1.1/
+          cp -R /tmp/phatt-project/ThreeOneOSFive.xcodeproj source/3105-1.1.1/
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Apply app startup and navigation changes
