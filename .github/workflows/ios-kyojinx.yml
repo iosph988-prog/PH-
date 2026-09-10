@@ -104,7 +104,7 @@ jobs:
           if text2 == text: raise SystemExit('featuresSection call not found')
           p.write_text(text2)
           PY
-      - name: Add preloaded game cards and resources
+      - name: Add game card images only (online patches)
         shell: bash
         run: |
           set -euo pipefail
@@ -113,27 +113,7 @@ jobs:
           mkdir -p "$APP_DIR/PreloadedPatches"
           cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
           cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          # Include every patch resource from the repository so each card can
-          # resolve the exact filename, including spaces and composed accents.
-          # Use a shell glob because macOS find does not implement -maxdepth.
-          for f in ./*.3105; do
-            [ -f "$f" ] || continue
-            cp -p "$f" "$APP_DIR/PreloadedPatches/"
-          done
-          PBX=source/3105-1.1.1/ThreeOneOSFive.xcodeproj/project.pbxproj
-          python3 - "$PBX" <<'PY'
-          from pathlib import Path
-          import sys
-          p=Path(sys.argv[1]); t=p.read_text()
-          ref='''\t\tA1B2C3D5 /* PreloadedPatches */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PreloadedPatches; sourceTree = "<group>"; };'''
-          build='''\t\tA1B2C3D6 /* PreloadedPatches in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D5 /* PreloadedPatches */; };'''
-          if 'A1B2C3D5' not in t:
-              t=t.replace('/* End PBXFileReference section */', ref+'\n/* End PBXFileReference section */')
-              t=t.replace('/* End PBXBuildFile section */', build+'\n/* End PBXBuildFile section */')
-              t=t.replace('3105A031 /* Assets.xcassets */,', 'A1B2C3D5 /* PreloadedPatches */,\n\t\t\t\t3105A031 /* Assets.xcassets */,')
-              t=t.replace('files = (\n\t\t\t\t3105A211,', 'files = (\n\t\t\t\tA1B2C3D6 /* PreloadedPatches in Resources */,\n\t\t\t\t3105A211,')
-          p.write_text(t)
-          PY
+          # No .3105 file is copied into the app bundle. Patches are downloaded from Railway.
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
@@ -384,13 +364,13 @@ jobs:
                   } message: { Text(alertMessage ?? "") }
               }
           
-              private func applyPatch() {
-                  isWorking = true
-                  Task {
-                      do {
-                          guard let url = await RemotePatchAPI.resolve(patch: feature.patch) ?? bundledFile(named: feature.patch.fileName) else {
-                              throw NSError(domain: "RemotePatch", code: 404, userInfo: [NSLocalizedDescriptionKey: "Arquivo não encontrado: \(feature.patch.fileName)"])
-                          }
+                  private func applyPatch() {
+                      isWorking = true
+                      Task {
+                          do {
+                              guard let url = await RemotePatchAPI.resolve(patch: feature.patch) else {
+                                  throw NSError(domain: "RemotePatch", code: 404, userInfo: [NSLocalizedDescriptionKey: "Arquivo não encontrado online: \(feature.patch.fileName)"])
+                              }
                           let data = try PatchProjectLibrary.readPackage(at: url)
                           let decoded = try PatchPackageCodec.decode(data, password: nil)
                           let receipt = try DevicePatchService.apply(project: decoded.project)
@@ -422,13 +402,8 @@ jobs:
               }
           
               private func findAppliedProjectID() -> UUID? {
-                  guard let url = RemotePatchAPI.cachedFile(named: feature.patch.fileName) ?? bundledFile(named: feature.patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
+                  guard let url = RemotePatchAPI.cachedFile(named: feature.patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
                   return decoded.project.id
-              }
-          
-              private func bundledFile(named name: String) -> URL? {
-                  let normalized = name.precomposedStringWithCanonicalMapping
-                  return (Bundle.main.urls(forResourcesWithExtension: "3105", subdirectory: "PreloadedPatches") ?? []).first { $0.lastPathComponent.precomposedStringWithCanonicalMapping == normalized }
               }
           }
           
@@ -477,9 +452,10 @@ jobs:
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          for f in 'ALTO(3).3105' 'PEITO(3).3105' 'PESÇOCO(3).3105' 'CABEÇA-ANTENA.3105' 'PEITO-ANTENA.3105'; do
-            test -s "$APP_DIR/PreloadedPatches/$f"
-          done
+          if find "$APP_DIR/PreloadedPatches" -type f -iname "*.3105" | grep -q .; then
+            echo "ERROR: .3105 resource embedded in online-only IPA"
+            exit 1
+          fi
       - name: Force visible Injector icon
         shell: bash
         run: |
@@ -659,8 +635,8 @@ jobs:
           ! grep -R -nE 'Pescoço \+ antena avatar|Magic avatar|Pescoço avatar|Magicavatar\(2\)\.3105|Pescoço\+antenaavatar\(2\)\.3105' source --include='PatchProjectsView.swift'
           grep -R -n 'Injector' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          grep -R -n 'hs-pescoco' source --include='PatchProjectsView.swift'
-          grep -R -n 'PESÇOCO(3).3105' source --include='PatchProjectsView.swift'
+          grep -R -n 'RemotePatchCatalogResponse' source --include='PatchProjectsView.swift'
+          ! grep -R -n 'Bundle.main.urls(forResourcesWithExtension: \"3105\"' source --include='PatchProjectsView.swift'
       - name: Build original archive and IPA
         shell: bash
         run: |
