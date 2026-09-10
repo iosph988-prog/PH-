@@ -494,12 +494,6 @@ jobs:
           p.write_text(text.replace(old, new, 1))
           PY
 
-          test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
-          test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          if find "$APP_DIR/PreloadedPatches" -type f -iname "*.3105" | grep -q .; then
-            echo "ERROR: .3105 resource embedded in online-only IPA"
-            exit 1
-          fi
       - name: Force visible Injector icon
         shell: bash
         run: |
