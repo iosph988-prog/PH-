@@ -1,7 +1,7 @@
 name: CalculatorOnly iOS Build
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: 
   push:
     paths:
       - 'CalculatorOnly/**'
