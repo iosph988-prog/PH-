@@ -1,7 +1,7 @@
 name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
-jobs: 
-  build: 
+jobs:
+  build:
     runs-on: macos-latest 
     steps:
       - uses: actions/checkout@v4
@@ -136,23 +136,23 @@ jobs:
           private let patchCatalog: [PreloadedPatch] = [
               PreloadedPatch(id: "hs-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
               PreloadedPatch(id: "hs-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
-              PreloadedPatch(id: "hs-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO(3).3105", replacementCount: 1),
+              PreloadedPatch(id: "hs-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO(3).3105", replacementCount: 1),
               PreloadedPatch(id: "fps-120", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
               PreloadedPatch(id: "hs-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
           ]
           
           private let freeFirePatchCatalog: [PreloadedPatch] = [
               PreloadedPatch(id: "free-fire-0", title: "BALA MAGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
-              PreloadedPatch(id: "free-fire-1", title: "HS ALTO + PESCOCÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-1", title: "HS ALTO + PESCOCÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-2", title: "HS ALTO", fileName: "HS ALTO.3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-3", title: "HS BARRIGA V2", fileName: "HS BARRIGA V2.3105", replacementCount: 1),
-              PreloadedPatch(id: "free-fire-4", title: "HS CABECÇAO - ANTENA AVATAR", fileName: "HS CABEÇAO - ANTENA AVATAR.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-4", title: "HS CABECÇAO - ANTENA AVATAR", fileName: "HS CABEÇAO - ANTENA AVATAR.3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-5", title: "HS IBIGO- ANTENA AVATAR", fileName: "HS IBIGO- ANTENA AVATAR.3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-6", title: "HS PEITO CABECA BUGADA", fileName: "HS PEITO CABECA BUGADA.3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-7", title: "HS PEITO LITE - ANTENA", fileName: "HS PEITO LITE - ANTENA.3105", replacementCount: 1),
-              PreloadedPatch(id: "free-fire-8", title: "HS PESCOCÇO  LITE - ANTENA", fileName: "HS PESCOÇO  LITE - ANTENA.3105", replacementCount: 1),
-              PreloadedPatch(id: "free-fire-9", title: "HS PESCOCÇO - ANTENA", fileName: "HS PESCOÇO - ANTENA.3105", replacementCount: 1),
-              PreloadedPatch(id: "free-fire-10", title: "HS PESCOCÇO MELHORADO", fileName: "HS PESCOÇO MELHORADO.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-8", title: "HS PESCOCÇO  LITE - ANTENA", fileName: "HS PESCOÇO  LITE - ANTENA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-9", title: "HS PESCOCÇO - ANTENA", fileName: "HS PESCOÇO - ANTENA.3105", replacementCount: 1),
+              PreloadedPatch(id: "free-fire-10", title: "HS PESCOCÇO MELHORADO", fileName: "HS PESCOÇO MELHORADO.3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-11", title: "Holograma verde", fileName: "Holograma verde .3105", replacementCount: 1),
           ]
 
@@ -172,6 +172,7 @@ jobs:
           struct PatchProjectsView: View {
               @StateObject private var store = PatchProjectStore()
               @State private var selectedGameID = "free-fire"
+              @State private var remoteCatalog: [RemotePatchDescriptor]?
               @AppStorage("patchesDarkMode") private var darkMode = false
           
               private var selectedGame: PreloadedGame {
@@ -179,7 +180,13 @@ jobs:
               }
           
               private var features: [CompactFeature] {
-                  selectedGame.patches.enumerated().map { index, patch in
+                  let visiblePatches: [PreloadedPatch] = {
+                      guard let remoteCatalog else { return selectedGame.patches }
+                      return remoteCatalog.filter { $0.game == selectedGameID }.map { item in
+                          PreloadedPatch(id: item.slug, title: item.title ?? item.fileName, fileName: item.fileName, replacementCount: 1)
+                      }
+                  }()
+                  return visiblePatches.enumerated().map { index, patch in
                       CompactFeature(
                           id: patch.id,
                           title: patch.title,
@@ -214,6 +221,7 @@ jobs:
                   .preferredColorScheme(darkMode ? .dark : .light)
                   .toolbar(.hidden, for: .tabBar)
                   .navigationBarHidden(true)
+                  .task { remoteCatalog = await RemotePatchAPI.fetchCatalog() }
               }
           
               private var fg: Color { darkMode ? .white : .black }
@@ -408,7 +416,10 @@ jobs:
           }
           
           private struct RemotePatchDescriptor: Decodable {
+              let id: Int
+              let slug: String
               let title: String?
+              let game: String
               let fileName: String
               let sha256: String
               let sizeBytes: Int
@@ -426,6 +437,18 @@ jobs:
                   let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
                   let url = dir.appendingPathComponent(name)
                   return FileManager.default.fileExists(atPath: url.path) ? url : nil
+              }
+              static func fetchCatalog() async -> [RemotePatchDescriptor]? {
+                  guard let key = LicenseStore.storedKey else { return nil }
+                  do {
+                      var request = URLRequest(url: catalogURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
+                      request.httpMethod = "POST"
+                      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"])
+                      let (data, response) = try await URLSession.shared.data(for: request)
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid else { return nil }
+                      return catalog.patches
+                  } catch { return nil }
               }
               static func resolve(patch: PreloadedPatch) async -> URL? {
                   guard let key = LicenseStore.storedKey else { return cachedFile(named: patch.fileName) }
@@ -449,6 +472,27 @@ jobs:
               }
           }
           SWIFT
+
+      - name: Enforce disabled patches from Railway
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 - "$PATCH_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          text = p.read_text()
+          old = 'guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }'
+          new = '''guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid else { return cachedFile(named: patch.fileName) }
+                      guard let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else {
+                          if let cached = cachedFile(named: patch.fileName) { try? FileManager.default.removeItem(at: cached) }
+                          return nil
+                      }'''
+          if old not in text:
+              raise SystemExit("remote catalog guard not found")
+          p.write_text(text.replace(old, new, 1))
+          PY
 
           test -s "$APP_DIR/PreloadedPatches/free_fire_card.png"
           test -s "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
@@ -626,13 +670,13 @@ jobs:
                   old = any(token in line for token in (
                       'max-peito-antena', 'max-magic', 'max-pescoco",',
                       'Pescoço + antena avatar', 'Magic avatar', 'Pescoço avatar',
-                      'Magicavatar(2).3105', 'Pescoço+antenaavatar(2).3105',
+                      'Magicavatar(2).3105', 'Pescoço+antenaavatar(2).3105',
                   ))
                   if not old:
                       filtered.append(line)
               path.write_text(''.join(filtered))
           PY
-          ! grep -R -nE 'Pescoço \+ antena avatar|Magic avatar|Pescoço avatar|Magicavatar\(2\)\.3105|Pescoço\+antenaavatar\(2\)\.3105' source --include='PatchProjectsView.swift'
+          ! grep -R -nE 'Pescoço \+ antena avatar|Magic avatar|Pescoço avatar|Magicavatar\(2\)\.3105|Pescoço\+antenaavatar\(2\)\.3105' source --include='PatchProjectsView.swift'
           grep -R -n 'Injector' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'RemotePatchCatalogResponse' source --include='PatchProjectsView.swift'
