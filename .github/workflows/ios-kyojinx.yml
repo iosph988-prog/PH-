@@ -139,11 +139,7 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          rm -rf "$APP_DIR/PreloadedPatches"
-          mkdir -p "$APP_DIR/PreloadedPatches"
-          cp 6F54F0A3-A7FC-4AED-8E8E-4234D141B85D.png "$APP_DIR/PreloadedPatches/free_fire_card.png"
-          cp BC397CF8-956B-49A7-A6BB-772CEEA5217A.png "$APP_DIR/PreloadedPatches/free_fire_max_card.png"
-          # No .3105 file is copied into the app bundle. Patches are downloaded from Railway.
+          # Logos and .3105 patches are loaded from Railway at runtime; nothing is copied into the app bundle.
           cat > source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift <<'SWIFT'
           import SwiftUI
           import UIKit
@@ -203,6 +199,7 @@ jobs:
               @StateObject private var store = PatchProjectStore()
               @State private var selectedGameID = "free-fire"
               @State private var remoteCatalog: [RemotePatchDescriptor]?
+              @State private var logoURLs: [String: String] = [:]
               @AppStorage("patchesDarkMode") private var darkMode = false
           
               private var selectedGame: PreloadedGame {
@@ -251,7 +248,12 @@ jobs:
                   .preferredColorScheme(darkMode ? .dark : .light)
                   .toolbar(.hidden, for: .tabBar)
                   .navigationBarHidden(true)
-                  .task { remoteCatalog = await RemotePatchAPI.fetchCatalog() }
+                  .task {
+                      async let catalog = RemotePatchAPI.fetchCatalog()
+                      async let logos = RemotePatchAPI.fetchLogos()
+                      remoteCatalog = await catalog
+                      logoURLs = await logos
+                  }
               }
           
               private var fg: Color { darkMode ? .white : .black }
@@ -293,7 +295,7 @@ jobs:
                           ForEach(preloadedGames) { game in
                               Button { withAnimation(.easeInOut(duration: 0.18)) { selectedGameID = game.id } } label: {
                                   VStack(alignment: .leading, spacing: 8) {
-                                      bundleImage(named: game.id == "free-fire" ? "free_fire_card" : "free_fire_max_card")
+                                      remoteLogo(url: logoURLs[game.id])
                                           .frame(width: 42, height: 42)
                                           .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
                                       Text(game.title)
@@ -350,16 +352,17 @@ jobs:
               }
           
               @ViewBuilder
-              private func bundleImage(named name: String) -> some View {
-                  if let url = Bundle.main.url(forResource: name, withExtension: "png", subdirectory: "PreloadedPatches"), let image = UIImage(contentsOfFile: url.path) {
-                      Image(uiImage: image).resizable().scaledToFill()
-                  } else if let image = UIImage(named: name) {
-                      Image(uiImage: image).resizable().scaledToFill()
-                  } else {
-                      ZStack {
-                          RoundedRectangle(cornerRadius: 11).fill(fg.opacity(0.10))
-                          Image(systemName: "gamecontroller.fill").foregroundStyle(muted)
+              private func remoteLogo(url: String?) -> some View {
+                  if let url, let remoteURL = URL(string: url) {
+                      AsyncImage(url: remoteURL) { phase in
+                          if let image = phase.image { image.resizable().scaledToFill() } else { logoFallback }
                       }
+                  } else { logoFallback }
+              }
+              private var logoFallback: some View {
+                  ZStack {
+                      RoundedRectangle(cornerRadius: 11).fill(fg.opacity(0.10))
+                      Image(systemName: "gamecontroller.fill").foregroundStyle(muted)
                   }
               }
           }
@@ -456,6 +459,11 @@ jobs:
               let downloadUrl: String
           }
           
+          private struct RemoteAnnouncement: Decodable {
+              let freeFireLogoUrl: String
+              let freeFireMaxLogoUrl: String
+          }
+
           private struct RemotePatchCatalogResponse: Decodable {
               let valid: Bool
               let patches: [RemotePatchDescriptor]?
@@ -463,10 +471,19 @@ jobs:
           
           private enum RemotePatchAPI {
               private static let catalogURL = URL(string: "https://api-production-182c.up.railway.app/api/patches/catalog")!
+              private static let announcementURL = URL(string: "https://api-production-182c.up.railway.app/api/announcement")!
               static func cachedFile(named name: String) -> URL? {
                   let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
                   let url = dir.appendingPathComponent(name)
                   return FileManager.default.fileExists(atPath: url.path) ? url : nil
+              }
+              static func fetchLogos() async -> [String: String] {
+                  do {
+                      let (data, response) = try await URLSession.shared.data(from: announcementURL)
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [:] }
+                      let announcement = try JSONDecoder().decode(RemoteAnnouncement.self, from: data)
+                      return ["free-fire": announcement.freeFireLogoUrl, "free-fire-max": announcement.freeFireMaxLogoUrl]
+                  } catch { return [:] }
               }
               static func fetchCatalog() async -> [RemotePatchDescriptor]? {
                   guard let key = LicenseStore.storedKey else { return nil }
