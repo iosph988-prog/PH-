@@ -31,7 +31,7 @@ jobs:
           n = nav.read_text()
           old = "AppSection.allCases.filter(isVisible)"
           if old not in n: raise SystemExit("visibleSections declaration not found")
-          nav.write_text(n.replace(old, "return [.home, .patches].filter(isVisible)", 1))
+          nav.write_text(n.replace(old, "return [.home, .patches, .external].filter(isVisible)", 1))
           PY
       - name: Add API login gate
         shell: bash
@@ -134,6 +134,29 @@ jobs:
           if text2 == text: raise SystemExit('featuresSection call not found')
           p.write_text(text2)
           PY
+      - name: Add ProjectX external panel tab
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          NAV_SWIFT="$APP_DIR/helpers/AppTabNavigationState.swift"
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912304691/FmfNNyafsKTztgam.swift -o "$APP_DIR/views/ExternalPanelView.swift"
+          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          nav, content = map(Path, sys.argv[1:])
+          n = nav.read_text()
+          n = n.replace("    case patches\n", "    case patches\n    case external\n", 1)
+          n = n.replace("case .home, .files, .patches:", "case .home, .files, .patches, .external:", 1)
+          nav.write_text(n)
+          c = content.read_text()
+          c = c.replace("        case .patches:\n            PatchProjectsView()", "        case .patches:\n            PatchProjectsView()\n        case .external:\n            ExternalPanelView()", 1)
+          c = c.replace("        case .patches: return \"tab.patches\"", "        case .patches: return \"ProjectX\"\n        case .external: return \"ProjectX\"", 1)
+          c = c.replace("        case .patches: return \"shippingbox.fill\"", "        case .patches: return \"gamecontroller.fill\"\n        case .external: return \"scope\"", 1)
+          content.write_text(c)
+          PY
+
       - name: Add game card images only (online patches)
         shell: bash
         run: |
