@@ -544,6 +544,13 @@ jobs:
           }
           SWIFT
 
+      - name: Attach ProjectX panel to Xcode source
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912304691/FmfNNyafsKTztgam.swift -o /tmp/ExternalPanelView.swift
+          cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
       - name: Enforce disabled patches from Railway
         shell: bash
         run: |
