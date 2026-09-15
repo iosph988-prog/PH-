@@ -141,7 +141,8 @@ jobs:
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
           NAV_SWIFT="$APP_DIR/helpers/AppTabNavigationState.swift"
           CONTENT_SWIFT="$APP_DIR/ContentView.swift"
-          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912304691/FmfNNyafsKTztgam.swift -o "$APP_DIR/views/ExternalPanelView.swift"
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912304691/FmfNNyafsKTztgam.swift -o /tmp/ExternalPanelView.swift
+          cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
           python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" <<'PY'
           from pathlib import Path
           import sys
