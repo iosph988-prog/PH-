@@ -153,7 +153,7 @@ jobs:
           nav.write_text(n)
           c = content.read_text()
           c = c.replace("        case .patches:\n            PatchProjectsView()", "        case .patches:\n            PatchProjectsView()\n        case .external:\n            ExternalPanelView()", 1)
-          c = c.replace("        case .patches: return \"tab.patches\"", "        case .patches: return \"Proxy Cheats\"\n        case .external: return \"Proxy Cheats\"", 1)
+          c = c.replace("        case .patches: return \"tab.patches\"", "        case .patches: return \"Online\"\n        case .external: return \"Proxy Cheats\"", 1)
           c = c.replace("        case .patches: return \"shippingbox.fill\"", "        case .patches: return \"gamecontroller.fill\"\n        case .external: return \"scope\"", 1)
           content.write_text(c)
           PY
