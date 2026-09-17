@@ -3,7 +3,7 @@ name: VisualStore Online Read-Only iOS Build
 on:
   workflow_dispatch:
 
-jobs:
+jobs: 
   build:
     runs-on: macos-latest
     steps:
