@@ -760,8 +760,8 @@ jobs:
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/YHJbZDZREkgEQQYA.py -o /tmp/fix_tabs.py
           python3 /tmp/fix_tabs.py "$CONTENT_SWIFT"
-          grep -q sectionContent(.patches) "$CONTENT_SWIFT"
-          grep -q sectionContent(.external) "$CONTENT_SWIFT"
+          grep -q "sectionContent(.patches)" "$CONTENT_SWIFT"
+          grep -q "sectionContent(.external)" "$CONTENT_SWIFT"
           grep -q scope "$CONTENT_SWIFT"
       - name: Build original archive and IPA
         shell: bash
