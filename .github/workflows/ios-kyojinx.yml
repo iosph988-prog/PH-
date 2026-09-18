@@ -753,6 +753,16 @@ jobs:
           grep -R -n 'gamecontroller.fill' source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
           grep -R -n 'RemotePatchCatalogResponse' source --include='PatchProjectsView.swift'
           ! grep -R -n 'Bundle.main.urls(forResourcesWithExtension: \"3105\"' source --include='PatchProjectsView.swift'
+      - name: Fix explicit compact tab selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/YHJbZDZREkgEQQYA.py -o /tmp/fix_tabs.py
+          python3 /tmp/fix_tabs.py "$CONTENT_SWIFT"
+          grep -q sectionContent(.patches) "$CONTENT_SWIFT"
+          grep -q sectionContent(.external) "$CONTENT_SWIFT"
+          grep -q scope "$CONTENT_SWIFT"
       - name: Build original archive and IPA
         shell: bash
         run: |
