@@ -116,8 +116,8 @@ jobs:
           import sys
           p=Path(sys.argv[1])
           t=p.read_text()
-          t=t.replace('title: language.text(section.titleKey)', 'title: section == .home ? "Início" : (section == .external ? "External" : "Injector")', 1)
-          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : "gamecontroller.fill"', 1)
+          t=t.replace('title: language.text(section.titleKey)', 'title: section == .home ? "Início" : (section == .external ? "External" : "PROXY")', 1)
+          t=t.replace('systemImage: section.systemImage', 'systemImage: section == .home ? "house.fill" : (section == .patches ? "scope" : "gamecontroller.fill")', 1)
           p.write_text(t)
           PY
 
