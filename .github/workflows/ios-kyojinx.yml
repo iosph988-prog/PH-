@@ -1,4 +1,4 @@
-fname: 3105 - Nubank Build Without API
+ffname: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs: 
   build: 
@@ -730,7 +730,7 @@ jobs:
           import sys
           content = Path(sys.argv[1])
           text = content.read_text()
-          text = text.replace('Patches para External injector', 'Injector')
+          text = text.replace('Patches para External injector', 'External')
           text = text.replace('rocket.fill', 'gamecontroller.fill')
           text = text.replace('shippingbox.fill', 'gamecontroller.fill')
           text = text.replace('syringe.fill', 'gamecontroller.fill')
