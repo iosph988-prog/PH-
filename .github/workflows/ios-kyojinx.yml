@@ -8,7 +8,7 @@ jobs:
       - name: Extract original project
         shell: bash
         run: |
-          set -euo pipefail
+   fhgg       set -euo pipefail
           rm -rf source build dist
           mkdir -p source build dist
           tar -xzf 3105-1.1.1-original.tar.gz -C source
@@ -134,7 +134,7 @@ jobs:
           if text2 == text: raise SystemExit('featuresSection call not found')
           p.write_text(text2)
           PY
-      - name: Add Proxy Cheats external panel tab
+      - name: Add External external panel tab
         shell: bash
         run: |
           set -euo pipefail
@@ -153,8 +153,8 @@ jobs:
           nav.write_text(n)
           c = content.read_text()
           c = c.replace("        case .patches:\n            PatchProjectsView()", "        case .patches:\n            PatchProjectsView()\n        case .external:\n            ExternalPanelView()", 1)
-          c = c.replace("        case .patches: return \"tab.patches\"", "        case .patches: return \"Online\"\n        case .external: return \"Proxy Cheats\"", 1)
-          c = c.replace("        case .patches: return \"shippingbox.fill\"", "        case .patches: return \"gamecontroller.fill\"\n        case .external: return \"scope\"", 1)
+          c = c.replace("        case .patches: return \"tab.patches\"", "        case .patches: return \"Online\"\n        case .external: return \"External\"", 1)
+          c = c.replace("        case .patches: return \"shippingbox.fill\"", "        case .patches: return \"gamecontroller.fill\"\n        case .external: return \"gamecontroller.fill\"", 1)
           content.write_text(c)
           PY
 
