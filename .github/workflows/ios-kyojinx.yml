@@ -760,6 +760,13 @@ jobs:
           PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
           curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/KUTFJGNjLKkqpOFd.py -o /tmp/fix_nested.py
           python3 /tmp/fix_nested.py "$PATCH_SWIFT"
+      - name: Fix PROXY nested navigation and catalog fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/bDcHhVlzkLosPbzs.py -o /tmp/fix_proxy_final.py
+          python3 /tmp/fix_proxy_final.py "$PATCH_SWIFT"
       - name: Fix explicit compact tab selection
         shell: bash
         run: |
