@@ -1,4 +1,4 @@
-name: 3105 - Nubank Build Without API
+fname: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs: 
   build: 
