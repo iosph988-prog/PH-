@@ -1,4 +1,4 @@
-ffname: 3105 - Nubank Build Without API
+name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs: 
   build: 
@@ -8,7 +8,7 @@ jobs:
       - name: Extract original project
         shell: bash
         run: |
-   fhgg       set -euo pipefail
+          set -euo pipefail
           rm -rf source build dist
           mkdir -p source build dist
           tar -xzf 3105-1.1.1-original.tar.gz -C source
