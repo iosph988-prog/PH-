@@ -38,7 +38,7 @@ async function getOrCreateAdmin() {
 export async function loginLocalAdmin(req: Request, res: Response, identifierInput: string, password: string) {
   const identifier = identifierInput.trim().toLowerCase(); if (!identifier || !password) return false; const db = await getDb(); if (!db) return false; await ensureResellerColumns(db);
   let user: any;
-  if (identifier === adminEmail()) { const encodedHash = process.env.ADMIN_PASSWORD_HASH; const configuredPassword = process.env.ADMIN_PASSWORD; const ok = encodedHash ? await verifyPassword(password, encodedHash) : Boolean(configuredPassword && verifyPlainPassword(password, configuredPassword)); if (!ok) return false; user = await getOrCreateAdmin(); }
+  if (identifier === adminEmail()) { const encodedHash = process.env.ADMIN_PASSWORD_HASH; const configuredPassword = process.env.ADMIN_PASSWORD; const ok = configuredPassword ? verifyPlainPassword(password, configuredPassword) : Boolean(encodedHash && await verifyPassword(password, encodedHash)); if (!ok) return false; user = await getOrCreateAdmin(); }
   else { user = (await db.select().from(users).where(or(eq(users.username, identifier), eq(users.email, identifier))).limit(1))[0]; if (!user || user.role !== "reseller" || !user.passwordHash || !(await verifyPassword(password, user.passwordHash))) return false; if (user.resellerExpiresAt && new Date(user.resellerExpiresAt) <= new Date()) return false; }
   if (!user) return false; const expiresAt = Date.now() + SESSION_TTL_MS; const payload = Buffer.from(JSON.stringify({ uid: user.id, exp: expiresAt }), "utf8").toString("base64url"); res.cookie(LOCAL_SESSION_COOKIE, `${payload}.${sign(payload)}`, { ...cookieOptions(req), maxAge: SESSION_TTL_MS }); return true;
 }
