@@ -546,64 +546,9 @@ jobs:
           from pathlib import Path
           p = Path('/tmp/ExternalPanelView.swift')
           s = p.read_text()
-          old = """private struct ProxyOnlinePatch: Decodable, Identifiable {
-    let id: Int
-    let title: String?
-    let game: String
-    let fileName: String
-    let interfaceTab: String?
-    let version: Int
-    let downloadUrl: String
-    var enabled = false
-}
-
-private struct ProxyOnlineCatalog: Decodable {
-    let valid: Bool
-    let patches: [ProxyOnlinePatch]?
-}"""
-          new = """private struct ProxyOnlinePatch: Decodable, Identifiable {
-    let id: Int
-    let title: String?
-    let game: String
-    let fileName: String
-    let interfaceTab: String?
-    let section: String?
-    let version: Int
-    let downloadUrl: String
-    var enabled = false
-    enum CodingKeys: String, CodingKey { case id, title, game, fileName, interfaceTab, section, version, downloadUrl }
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = (try? c.decode(Int.self, forKey: .id)) ?? 0
-        title = try? c.decodeIfPresent(String.self, forKey: .title)
-        game = (try? c.decode(String.self, forKey: .game)) ?? "online-free-fire:other"
-        fileName = (try? c.decode(String.self, forKey: .fileName)) ?? "patch.3105"
-        interfaceTab = try? c.decodeIfPresent(String.self, forKey: .interfaceTab)
-        section = try? c.decodeIfPresent(String.self, forKey: .section)
-        version = (try? c.decode(Int.self, forKey: .version)) ?? 0
-        downloadUrl = (try? c.decode(String.self, forKey: .downloadUrl)) ?? ""
-    }
-}
-
-private struct ProxyOnlineCatalog: Decodable {
-    let valid: Bool
-    let patches: [ProxyOnlinePatch]
-    enum CodingKeys: String, CodingKey { case valid, patches }
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        valid = (try? c.decode(Bool.self, forKey: .valid)) ?? false
-        patches = (try? c.decodeIfPresent([ProxyOnlinePatch].self, forKey: .patches)) ?? []
-    }
-}"""
-          if old not in s:
-              raise SystemExit('decoder block not found')
-          s = s.replace(old, new, 1)
-          s = s.replace("let filtered = patches.filter { patch in", "let externalPatches = patches.filter { patch in patch.section?.lowercased() == \"external\" || patch.interfaceTab != nil || patch.game.lowercased().contains(\"online-\") }\n        let source = externalPatches.isEmpty ? patches : externalPatches\n        let filtered = source.filter { patch in")
-          s = s.replace("return filtered.isEmpty ? patches : filtered", "return filtered.isEmpty ? source : filtered")
-          s = s.replace("\"catalog\": \"online\"", "\"catalog\": \"external\"")
-          s = s.replace("[\"key\": key,", "[\"key\": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(),")
-          s = s.replace("guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }", "guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { let body = String(data: data, encoding: .utf8) ?? \"HTTP \\\(String(describing: (response as? HTTPURLResponse)?.statusCode))\"; throw NSError(domain: \"ExternalCatalog\", code: (response as? HTTPURLResponse)?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: body]) }")
-          s = s.replace("} catch { await MainActor.run { lastError = \"Não foi possível atualizar os recursos online.\" } }", "} catch { await MainActor.run { lastError = \"Catálogo: \\(error.localizedDescription)\" } }")
+          import base64
+          old = base64.b64decode("cHJpdmF0ZSBzdHJ1Y3QgUHJveHlPbmxpbmVQYXRjaDogRGVjb2RhYmxlLCBJZGVudGlmaWFibGUgewogICAgbGV0IGlkOiBJbnQKICAgIGxldCB0aXRsZTogU3RyaW5nPwogICAgbGV0IGdhbWU6IFN0cmluZwogICAgbGV0IGZpbGVOYW1lOiBTdHJpbmcKICAgIGxldCBpbnRlcmZhY2VUYWI6IFN0cmluZz8KICAgIGxldCB2ZXJzaW9uOiBJbnQKICAgIGxldCBkb3dubG9hZFVybDogU3RyaW5nCiAgICB2YXIgZW5hYmxlZCA9IGZhbHNlCn0KCnByaXZhdGUgc3RydWN0IFByb3h5T25saW5lQ2F0YWxvZzogRGVjb2RhYmxlIHsKICAgIGxldCB2YWxpZDogQm9vbAogICAgbGV0IHBhdGNoZXM6IFtQcm94eU9ubGluZVBhdGNoXT8KfQ==").decode()
+          new = base64.b64decode("cHJpdmF0ZSBzdHJ1Y3QgUHJveHlPbmxpbmVQYXRjaDogRGVjb2RhYmxlLCBJZGVudGlmaWFibGUgewogICAgbGV0IGlkOiBJbnQKICAgIGxldCB0aXRsZTogU3RyaW5nPwogICAgbGV0IGdhbWU6IFN0cmluZwogICAgbGV0IGZpbGVOYW1lOiBTdHJpbmcKICAgIGxldCBpbnRlcmZhY2VUYWI6IFN0cmluZz8KICAgIGxldCBzZWN0aW9uOiBTdHJpbmc/CiAgICBsZXQgdmVyc2lvbjogSW50CiAgICBsZXQgZG93bmxvYWRVcmw6IFN0cmluZwogICAgdmFyIGVuYWJsZWQgPSBmYWxzZQogICAgZW51bSBDb2RpbmdLZXlzOiBTdHJpbmcsIENvZGluZ0tleSB7IGNhc2UgaWQsIHRpdGxlLCBnYW1lLCBmaWxlTmFtZSwgaW50ZXJmYWNlVGFiLCBzZWN0aW9uLCB2ZXJzaW9uLCBkb3dubG9hZFVybCB9CiAgICBpbml0KGZyb20gZGVjb2RlcjogRGVjb2RlcikgdGhyb3dzIHsKICAgICAgICBsZXQgYyA9IHRyeSBkZWNvZGVyLmNvbnRhaW5lcihrZXllZEJ5OiBDb2RpbmdLZXlzLnNlbGYpCiAgICAgICAgaWQgPSAodHJ5PyBjLmRlY29kZShJbnQuc2VsZiwgZm9yS2V5OiAuaWQpKSA/PyAwCiAgICAgICAgdGl0bGUgPSB0cnk/IGMuZGVjb2RlSWZQcmVzZW50KFN0cmluZy5zZWxmLCBmb3JLZXk6IC50aXRsZSkKICAgICAgICBnYW1lID0gKHRyeT8gYy5kZWNvZGUoU3RyaW5nLnNlbGYsIGZvcktleTogLmdhbWUpKSA/PyAib25saW5lLWZyZWUtZmlyZTpvdGhlciIKICAgICAgICBmaWxlTmFtZSA9ICh0cnk/IGMuZGVjb2RlKFN0cmluZy5zZWxmLCBmb3JLZXk6IC5maWxlTmFtZSkpID8/ICJwYXRjaC4zMTA1IgogICAgICAgIGludGVyZmFjZVRhYiA9IHRyeT8gYy5kZWNvZGVJZlByZXNlbnQoU3RyaW5nLnNlbGYsIGZvcktleTogLmludGVyZmFjZVRhYikKICAgICAgICBzZWN0aW9uID0gdHJ5PyBjLmRlY29kZUlmUHJlc2VudChTdHJpbmcuc2VsZiwgZm9yS2V5OiAuc2VjdGlvbikKICAgICAgICB2ZXJzaW9uID0gKHRyeT8gYy5kZWNvZGUoSW50LnNlbGYsIGZvcktleTogLnZlcnNpb24pKSA/PyAwCiAgICAgICAgZG93bmxvYWRVcmwgPSAodHJ5PyBjLmRlY29kZShTdHJpbmcuc2VsZiwgZm9yS2V5OiAuZG93bmxvYWRVcmwpKSA/PyAiIgogICAgfQp9Cgpwcml2YXRlIHN0cnVjdCBQcm94eU9ubGluZUNhdGFsb2c6IERlY29kYWJsZSB7CiAgICBsZXQgdmFsaWQ6IEJvb2wKICAgIGxldCBwYXRjaGVzOiBbUHJveHlPbmxpbmVQYXRjaF0KICAgIGVudW0gQ29kaW5nS2V5czogU3RyaW5nLCBDb2RpbmdLZXkgeyBjYXNlIHZhbGlkLCBwYXRjaGVzIH0KICAgIGluaXQoZnJvbSBkZWNvZGVyOiBEZWNvZGVyKSB0aHJvd3MgewogICAgICAgIGxldCBjID0gdHJ5IGRlY29kZXIuY29udGFpbmVyKGtleWVkQnk6IENvZGluZ0tleXMuc2VsZikKICAgICAgICB2YWxpZCA9ICh0cnk/IGMuZGVjb2RlKEJvb2wuc2VsZiwgZm9yS2V5OiAudmFsaWQpKSA/PyBmYWxzZQogICAgICAgIHBhdGNoZXMgPSAodHJ5PyBjLmRlY29kZUlmUHJlc2VudChbUHJveHlPbmxpbmVQYXRjaF0uc2VsZiwgZm9yS2V5OiAucGF0Y2hlcykpID8/IFtdCiAgICB9Cn0=").decode()
           p.write_text(s)
           PY
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
