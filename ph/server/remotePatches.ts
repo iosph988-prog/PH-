@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, or, sql } from "drizzle-orm";
 import { remotePatchVersions, remotePatches, licenseKeys } from "../drizzle/schema";
 import { getDb } from "./db";
 import { storagePut, storageGetSignedUrl } from "./storage";
@@ -45,6 +45,11 @@ export function isRemotePatchUpload(value: unknown): value is { slug: string; ti
 export type PatchSection = "patches" | "external";
 
 const normalizeSection = (value: string | undefined): PatchSection => value === "external" ? "external" : "patches";
+const normalizeGame = (value: string) => {
+  const normalized = value.trim().toLowerCase().replace(/\s+/g, "-");
+  return normalized === "freefire" || normalized === "free-fire" ? "free-fire" : "free-fire-max";
+};
+const normalizeInterfaceTab = (value: string | null | undefined) => value?.trim().toUpperCase() || null;
 
 let patchSchemaReady: Promise<void> | null = null;
 async function ensurePatchSchema() {
@@ -78,10 +83,10 @@ export async function publishRemotePatch(input: { createdBy: number; slug: strin
   await ensurePatchSchema();
   const slug = input.slug.trim().toLowerCase();
   const title = input.title.trim();
-  const game = input.game.trim().toLowerCase();
+  const game = normalizeGame(input.game);
   const fileName = input.fileName.trim();
   const section = normalizeSection(input.section);
-  const interfaceTab = input.interfaceTab?.trim() || null;
+  const interfaceTab = normalizeInterfaceTab(input.interfaceTab);
   if (!/^[a-z0-9][a-z0-9_-]{2,95}$/.test(slug)) throw new Error("Slug inválido");
   if (!title || title.length > 160 || !isValidPatchFileName(fileName)) throw new Error("Nome ou título inválido");
   if (section === "external" && (!interfaceTab || interfaceTab.length > 64)) throw new Error("A aba do Online separado é obrigatória");
@@ -100,7 +105,8 @@ export async function listRemotePatches(section?: PatchSection) {
   if (!db) return [];
   await ensurePatchSchema();
   const filters = [eq(remotePatchVersions.status, "published")];
-  if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
+  if (section === "external") filters.push(or(eq(remotePatches.section, "external"), isNotNull(remotePatches.interfaceTab))!);
+  else if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
   const rows = await db.select({ patch: remotePatches, version: remotePatchVersions }).from(remotePatches).innerJoin(remotePatchVersions, eq(remotePatchVersions.id, remotePatches.currentVersionId)).where(and(...filters)).orderBy(remotePatches.game, remotePatches.slug);
   return rows.map(({ patch, version }) => ({ id: patch.id, slug: patch.slug, title: patch.title, game: patch.game, section: patch.section, interfaceTab: patch.interfaceTab, versionId: version.id, version: version.version, fileName: version.fileName, sha256: version.sha256, sizeBytes: version.sizeBytes, status: version.status, publishedAt: version.publishedAt }));
 }
@@ -112,8 +118,8 @@ export async function updateRemotePatch(input: { id: number; updatedBy: number; 
   const patch = (await db.select().from(remotePatches).where(eq(remotePatches.id, input.id)).limit(1))[0];
   if (!patch) throw new Error("Patch não encontrado");
   const title = input.title?.trim() || patch.title;
-  const game = input.game?.trim().toLowerCase() || patch.game;
-  const interfaceTab = input.interfaceTab === undefined ? patch.interfaceTab : input.interfaceTab?.trim() || null;
+  const game = input.game ? normalizeGame(input.game) : patch.game;
+  const interfaceTab = input.interfaceTab === undefined ? patch.interfaceTab : normalizeInterfaceTab(input.interfaceTab);
   if (!title || title.length > 160) throw new Error("Título inválido");
   if (patch.section === "external" && !interfaceTab) throw new Error("A aba do Online separado é obrigatória");
   let currentVersionId = patch.currentVersionId;

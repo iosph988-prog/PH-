@@ -75,6 +75,9 @@ export async function getLocalUser(req: Request) {
   } catch { return null; }
 }
 
-export function logoutLocal(req: Request, res: Response) { res.clearCookie(LOCAL_SESSION_COOKIE, cookieOptions(req)); }
+export function logoutLocal(req: Request, res: Response) {
+  const cookies = parseCookieHeader(req.headers.cookie ?? "");
+  if (cookies[LOCAL_SESSION_COOKIE]) res.clearCookie(LOCAL_SESSION_COOKIE, cookieOptions(req));
+}
 
 export function localAuthConfigured() { return Boolean(adminEmail() && (process.env.ADMIN_PASSWORD_HASH || process.env.ADMIN_PASSWORD)); }
