@@ -19,7 +19,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { KeyRound, LogOut, PanelLeft } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
@@ -57,29 +56,7 @@ export default function DashboardLayout({
     return <DashboardLayoutSkeleton />
   }
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
-          <div className="flex flex-col items-center gap-6">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
-              Sign in to continue
-            </h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Continue to launch the login flow.
-            </p>
-          </div>
-          <Button
-            onClick={() => startLogin()}
-            size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
-          >
-            Sign in
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (!user) return <LocalLogin />;
 
   if (hideSidebar) return <div className="min-h-screen">{children}</div>;
 
@@ -96,6 +73,23 @@ export default function DashboardLayout({
       </DashboardLayoutContent>
     </SidebarProvider>
   );
+}
+
+function LocalLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const [, setLocation] = useLocation();
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault(); setError(""); setPending(true);
+    try {
+      const response = await fetch("/api/auth/local/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
+      if (!response.ok) { const body = await response.json().catch(() => ({})); throw new Error(body.error || "E-mail ou senha inválidos"); }
+      setLocation("/"); window.location.reload();
+    } catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível entrar"); } finally { setPending(false); }
+  };
+  return <div className="flex min-h-screen items-center justify-center bg-[#070812] px-4 text-white"><form onSubmit={submit} className="w-full max-w-md space-y-5 rounded-2xl border border-white/10 bg-[#0b0d18] p-8 shadow-2xl"><div><p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#ef3c75]">License Atelier</p><h1 className="mt-2 text-2xl font-semibold">Login do administrador</h1><p className="mt-2 text-sm text-slate-400">Entre com o e-mail e a senha do administrador.</p></div><div><label className="text-sm text-slate-300">E-mail</label><input type="email" value={email} onChange={event => setEmail(event.target.value)} required autoComplete="username" className="mt-2 h-11 w-full rounded-md border border-white/10 bg-white/5 px-3 text-white outline-none" /></div><div><label className="text-sm text-slate-300">Senha</label><input type="password" value={password} onChange={event => setPassword(event.target.value)} required autoComplete="current-password" className="mt-2 h-11 w-full rounded-md border border-white/10 bg-white/5 px-3 text-white outline-none" /></div>{error && <p className="text-sm text-rose-300">{error}</p>}<Button type="submit" disabled={pending} className="h-11 w-full bg-[#d51b50] text-white hover:bg-[#ee2b65]">{pending ? "Entrando…" : "Entrar"}</Button></form></div>;
 }
 
 type DashboardLayoutContentProps = {

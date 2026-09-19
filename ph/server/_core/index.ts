@@ -12,6 +12,7 @@ import { findScheduledJob } from "../scheduled";
 import { sdk } from "./sdk";
 import { getAuthorizedPatchUrl, listRemotePatchesForLicense } from "../remotePatches";
 import { serveStatic, setupVite } from "./vite";
+import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -40,6 +41,20 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  app.post("/api/auth/local/login", async (req, res) => {
+    if (!localAuthConfigured()) return res.status(503).json({ ok: false, error: "Login local não configurado" });
+    const email = typeof req.body?.email === "string" ? req.body.email : "";
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+    if (!email || !password) return res.status(400).json({ ok: false, error: "E-mail e senha são obrigatórios" });
+    try {
+      const ok = await loginLocalAdmin(req, res, email, password);
+      return ok ? res.status(200).json({ ok: true }) : res.status(401).json({ ok: false, error: "E-mail ou senha inválidos" });
+    } catch (error) {
+      console.error("[Local Auth] Login failed", error);
+      return res.status(503).json({ ok: false, error: "Serviço temporariamente indisponível" });
+    }
+  });
+  app.post("/api/auth/local/logout", (req, res) => { logoutLocal(req, res); return res.status(200).json({ ok: true }); });
   app.post("/api/license/validate", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
     if (typeof key !== "string" || typeof deviceId !== "string" || typeof packageName !== "string" || typeof appVersion !== "string" || !key.trim() || !deviceId.trim() || !packageName.trim() || !appVersion.trim()) {

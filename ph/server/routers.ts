@@ -7,6 +7,7 @@ import { createResellerInvitation, getResellerCapacity, listResellerInvitations,
 import { createLicense, createLicenses, deleteLicense, getLicenseDetails, getLicenseEvents, listLicenses, pauseAllLicenses, resetLicense, resumeAllLicenses, setLicenseStatus, validateCustomKeyRequest, validateLicense } from "./licenses";
 import { isValidPatchFileName, listRemotePatches, publishRemotePatch, setRemotePatchStatus, updateRemotePatch } from "./remotePatches";
 import { getAnnouncement, updateAnnouncement } from "./announcements";
+import { logoutLocal } from "./_core/localAuth";
 
 const licenseInput = z.object({
   key: z.string().trim().min(8).max(200),
@@ -24,6 +25,7 @@ export const appRouter = router({
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
+      logoutLocal(ctx.req, ctx.res);
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
