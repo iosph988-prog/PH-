@@ -549,7 +549,7 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/PwROdoKwikgtkyci.swift -o /tmp/ExternalPanelView.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/NaKHctMIdgIiGkbh.swift -o /tmp/ExternalPanelView.swift
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
       - name: Enforce disabled patches from Railway
         shell: bash
