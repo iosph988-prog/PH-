@@ -546,7 +546,58 @@ jobs:
           from pathlib import Path
           p = Path('/tmp/ExternalPanelView.swift')
           s = p.read_text()
-          s = s.replace("let interfaceTab: String?\n    let version", "let interfaceTab: String?\n    let section: String?\n    let version")
+          old = """private struct ProxyOnlinePatch: Decodable, Identifiable {
+    let id: Int
+    let title: String?
+    let game: String
+    let fileName: String
+    let interfaceTab: String?
+    let version: Int
+    let downloadUrl: String
+    var enabled = false
+}
+
+private struct ProxyOnlineCatalog: Decodable {
+    let valid: Bool
+    let patches: [ProxyOnlinePatch]?
+}"""
+          new = """private struct ProxyOnlinePatch: Decodable, Identifiable {
+    let id: Int
+    let title: String?
+    let game: String
+    let fileName: String
+    let interfaceTab: String?
+    let section: String?
+    let version: Int
+    let downloadUrl: String
+    var enabled = false
+    enum CodingKeys: String, CodingKey { case id, title, game, fileName, interfaceTab, section, version, downloadUrl }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = (try? c.decode(Int.self, forKey: .id)) ?? 0
+        title = try? c.decodeIfPresent(String.self, forKey: .title)
+        game = (try? c.decode(String.self, forKey: .game)) ?? "online-free-fire:other"
+        fileName = (try? c.decode(String.self, forKey: .fileName)) ?? "patch.3105"
+        interfaceTab = try? c.decodeIfPresent(String.self, forKey: .interfaceTab)
+        section = try? c.decodeIfPresent(String.self, forKey: .section)
+        version = (try? c.decode(Int.self, forKey: .version)) ?? 0
+        downloadUrl = (try? c.decode(String.self, forKey: .downloadUrl)) ?? ""
+    }
+}
+
+private struct ProxyOnlineCatalog: Decodable {
+    let valid: Bool
+    let patches: [ProxyOnlinePatch]
+    enum CodingKeys: String, CodingKey { case valid, patches }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        valid = (try? c.decode(Bool.self, forKey: .valid)) ?? false
+        patches = (try? c.decodeIfPresent([ProxyOnlinePatch].self, forKey: .patches)) ?? []
+    }
+}"""
+          if old not in s:
+              raise SystemExit('decoder block not found')
+          s = s.replace(old, new, 1)
           s = s.replace("let filtered = patches.filter { patch in", "let externalPatches = patches.filter { patch in patch.section?.lowercased() == \"external\" || patch.interfaceTab != nil || patch.game.lowercased().contains(\"online-\") }\n        let source = externalPatches.isEmpty ? patches : externalPatches\n        let filtered = source.filter { patch in")
           s = s.replace("return filtered.isEmpty ? patches : filtered", "return filtered.isEmpty ? source : filtered")
           s = s.replace("\"catalog\": \"online\"", "\"catalog\": \"external\"")
