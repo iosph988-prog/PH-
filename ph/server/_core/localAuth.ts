@@ -2,7 +2,7 @@ import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } fr
 import { promisify } from "node:util";
 import type { Request, Response } from "express";
 import { parse as parseCookieHeader } from "cookie";
-import { eq, or } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import { users } from "../../drizzle/schema";
 import { getDb } from "../db";
 
@@ -18,7 +18,7 @@ async function ensureResellerColumns(db: any) {
     "ALTER TABLE users ADD COLUMN passwordHash varchar(255) NULL",
     "ALTER TABLE users ADD COLUMN credits int NOT NULL DEFAULT 0",
     "ALTER TABLE users ADD COLUMN resellerExpiresAt timestamp NULL",
-  ]) { try { await db.execute({ sql: statement, params: [] }); } catch { /* already exists */ } }
+  ]) { try { await db.execute(sql.raw(statement)); } catch { /* already exists */ } }
 }
 function cookieOptions(req: Request) { const forwarded = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0].trim(); return { httpOnly: true, sameSite: "lax" as const, secure: forwarded === "https", path: "/" }; }
 function sign(payload: string) { return createHmac("sha256", tokenSecret()).update(payload).digest("base64url"); }
