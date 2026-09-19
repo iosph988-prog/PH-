@@ -567,6 +567,7 @@ jobs:
           from pathlib import Path
           p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
           text = p.read_text()
+          import base64
           old = """private struct RemotePatchDescriptor: Decodable {
               let id: Int
               let slug: String
