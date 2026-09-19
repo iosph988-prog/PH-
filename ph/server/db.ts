@@ -1,4 +1,4 @@
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, licenseDevices, licenseEvents, licenseKeys, resellerInvitations, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -125,6 +125,14 @@ export async function getResellerCapacity() {
   return calculateResellerCapacity(Number(activeRow?.total ?? 0), Number(pendingRow?.total ?? 0));
 }
 
+export async function consumeResellerCredits(userId: number, quantity: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const amount = Math.max(1, Math.trunc(quantity));
+  const result = await db.update(users).set({ credits: sql`${users.credits} - ${amount}` }).where(and(eq(users.id, userId), eq(users.role, "reseller"), sql`${users.credits} >= ${amount}`));
+  if (!result[0].affectedRows) throw new Error("Créditos insuficientes");
+}
+
 export async function createResellerInvitation(input: { email: string; displayName?: string | null; createdBy: number }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
@@ -164,7 +172,7 @@ export async function revokeResellerInvitation(id: number) {
 export async function listResellers() {
   const db = await getDb();
   if (!db) return [];
-  return db.select({ id: users.id, openId: users.openId, name: users.name, email: users.email, role: users.role, createdAt: users.createdAt, lastSignedIn: users.lastSignedIn })
+  return db.select({ id: users.id, openId: users.openId, username: users.username, name: users.name, email: users.email, role: users.role, credits: users.credits, resellerExpiresAt: users.resellerExpiresAt, createdAt: users.createdAt, lastSignedIn: users.lastSignedIn })
     .from(users).where(eq(users.role, "reseller"));
 }
 

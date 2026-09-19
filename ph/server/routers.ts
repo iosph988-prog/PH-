@@ -3,11 +3,11 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router, staffProcedure } from "./_core/trpc";
-import { createResellerInvitation, getResellerCapacity, listResellerInvitations, listResellers, removeResellerAndLicenses, revokeResellerAccess, revokeResellerInvitation } from "./db";
+import { consumeResellerCredits, createResellerInvitation, getResellerCapacity, listResellerInvitations, listResellers, removeResellerAndLicenses, revokeResellerAccess, revokeResellerInvitation } from "./db";
 import { createLicense, createLicenses, deleteLicense, getLicenseDetails, getLicenseEvents, listLicenses, pauseAllLicenses, resetLicense, resumeAllLicenses, setLicenseStatus, validateCustomKeyRequest, validateLicense } from "./licenses";
 import { isValidPatchFileName, listRemotePatches, publishRemotePatch, setRemotePatchStatus, updateRemotePatch } from "./remotePatches";
 import { getAnnouncement, updateAnnouncement } from "./announcements";
-import { logoutLocal } from "./_core/localAuth";
+import { createLocalReseller, logoutLocal } from "./_core/localAuth";
 
 const licenseInput = z.object({
   key: z.string().trim().min(8).max(200),
@@ -44,6 +44,7 @@ export const appRouter = router({
     details: staffProcedure.input(z.object({ id: z.number().int().positive() })).query(({ input, ctx }) => getLicenseDetails(input.id, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
     // A chave bruta só é retornada aqui, dentro de adminProcedure, uma única vez.
     create: staffProcedure.input(z.object({ quantity: z.number().int().min(1).max(50).default(1), deviceLimit: z.number().int().min(1).max(2000), durationDays: z.number().int().min(1).max(30).default(30), durationMinutes: z.number().int().min(60).max(43200).optional(), customKey: z.string().trim().max(64).optional() })).mutation(async ({ input, ctx }) => {
+      if (ctx.user.role === "reseller") await consumeResellerCredits(ctx.user.id, input.quantity);
       const normalizedCustomKey = validateCustomKeyRequest(input.quantity, input.customKey);
       if (input.quantity === 1) {
         const result = await createLicense({ createdBy: ctx.user.id, deviceLimit: input.deviceLimit, durationDays: input.durationDays, durationMinutes: input.durationMinutes, customKey: normalizedCustomKey ?? undefined });
@@ -54,11 +55,12 @@ export const appRouter = router({
     }),
     reset: staffProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input, ctx }) => resetLicense(input.id, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
     delete: staffProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input, ctx }) => deleteLicense(input.id, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
-    revoke: staffProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input, ctx }) => setLicenseStatus(input.id, "revoked", ctx.user.role === "reseller" ? ctx.user.id : undefined)),
-    reactivate: staffProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input, ctx }) => setLicenseStatus(input.id, "active", ctx.user.role === "reseller" ? ctx.user.id : undefined)),
+    revoke: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => setLicenseStatus(input.id, "revoked")),
+    reactivate: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => setLicenseStatus(input.id, "active")),
     pauseAll: adminProcedure.mutation(() => pauseAllLicenses()),
     resumeAll: adminProcedure.mutation(() => resumeAllLicenses()),
     invitations: router({
+      createAccount: adminProcedure.input(z.object({ username: z.string().trim().min(3).max(64), password: z.string().min(6).max(200), credits: z.number().int().min(0).max(100000), expiresAt: z.string().datetime().nullable().optional(), name: z.string().trim().max(160).optional() })).mutation(({ input }) => createLocalReseller({ username: input.username, password: input.password, credits: input.credits, expiresAt: input.expiresAt ? new Date(input.expiresAt) : null, name: input.name })),
       list: adminProcedure.query(() => listResellerInvitations()),
       active: adminProcedure.query(() => listResellers()),
       capacity: adminProcedure.query(() => getResellerCapacity()),

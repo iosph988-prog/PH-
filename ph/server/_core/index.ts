@@ -43,9 +43,9 @@ async function startServer() {
   registerOAuthRoutes(app);
   app.post("/api/auth/local/login", async (req, res) => {
     if (!localAuthConfigured()) return res.status(503).json({ ok: false, error: "Login local não configurado" });
-    const email = typeof req.body?.email === "string" ? req.body.email : "";
+    const email = typeof req.body?.email === "string" ? req.body.email : (typeof req.body?.username === "string" ? req.body.username : "");
     const password = typeof req.body?.password === "string" ? req.body.password : "";
-    if (!email || !password) return res.status(400).json({ ok: false, error: "E-mail e senha são obrigatórios" });
+    if (!email || !password) return res.status(400).json({ ok: false, error: "Usuário e senha são obrigatórios" });
     try {
       const ok = await loginLocalAdmin(req, res, email, password);
       return ok ? res.status(200).json({ ok: true }) : res.status(401).json({ ok: false, error: "E-mail ou senha inválidos" });
