@@ -10,7 +10,7 @@ const scrypt = promisify(scryptCallback);
 export const LOCAL_SESSION_COOKIE = "license_atelier_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const tokenSecret = () => process.env.JWT_SECRET || process.env.SESSION_SECRET || "change-this-session-secret";
-const adminEmail = () => (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+const adminEmail = () => (process.env.ADMIN_EMAIL || "iosph988@gmail.com").trim().toLowerCase();
 
 function cookieOptions(req: Request) {
   const forwarded = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0].trim();
@@ -26,6 +26,12 @@ async function verifyPassword(password: string, encoded: string) {
   const derived = Buffer.from(await scrypt(password, Buffer.from(saltHex, "hex"), 64) as Buffer);
   const expected = Buffer.from(hashHex, "hex");
   return expected.length === derived.length && timingSafeEqual(expected, derived);
+}
+
+function verifyPlainPassword(password: string, configured: string) {
+  const received = Buffer.from(password, "utf8");
+  const expected = Buffer.from(configured, "utf8");
+  return received.length === expected.length && timingSafeEqual(received, expected);
 }
 
 async function getOrCreateAdmin() {
@@ -44,7 +50,9 @@ export async function loginLocalAdmin(req: Request, res: Response, emailInput: s
   const email = emailInput.trim().toLowerCase();
   if (!email || email !== adminEmail()) return false;
   const encodedHash = process.env.ADMIN_PASSWORD_HASH;
-  if (!encodedHash || !(await verifyPassword(password, encodedHash))) return false;
+  const configuredPassword = process.env.ADMIN_PASSWORD;
+  const passwordOk = encodedHash ? await verifyPassword(password, encodedHash) : Boolean(configuredPassword && verifyPlainPassword(password, configuredPassword));
+  if (!passwordOk) return false;
   const user = await getOrCreateAdmin();
   if (!user) return false;
   const expiresAt = Date.now() + SESSION_TTL_MS;
@@ -69,4 +77,4 @@ export async function getLocalUser(req: Request) {
 
 export function logoutLocal(req: Request, res: Response) { res.clearCookie(LOCAL_SESSION_COOKIE, cookieOptions(req)); }
 
-export function localAuthConfigured() { return Boolean(adminEmail() && process.env.ADMIN_PASSWORD_HASH); }
+export function localAuthConfigured() { return Boolean(adminEmail() && (process.env.ADMIN_PASSWORD_HASH || process.env.ADMIN_PASSWORD)); }
