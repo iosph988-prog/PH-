@@ -542,6 +542,16 @@ jobs:
           }
           SWIFT
           curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/hkBIaUtEGtKlOxiW.swift -o /tmp/ExternalPanelView.swift
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('/tmp/ExternalPanelView.swift')
+          s = p.read_text()
+          s = s.replace("let interfaceTab: String?\n    let version", "let interfaceTab: String?\n    let section: String?\n    let version")
+          s = s.replace("let filtered = patches.filter { patch in", "let externalPatches = patches.filter { patch in patch.section?.lowercased() == \"external\" || patch.interfaceTab != nil || patch.game.lowercased().contains(\"online-\") }\n        let source = externalPatches.isEmpty ? patches : externalPatches\n        let filtered = source.filter { patch in")
+          s = s.replace("return filtered.isEmpty ? patches : filtered", "return filtered.isEmpty ? source : filtered")
+          s = s.replace("\"catalog\": \"online\"", "\"catalog\": \"external\"")
+          p.write_text(s)
+          PY
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
 
       - name: Enforce disabled patches from Railway
