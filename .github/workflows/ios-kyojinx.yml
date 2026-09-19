@@ -556,6 +556,42 @@ jobs:
           p.write_text(s)
           PY
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
+          text = p.read_text()
+          old = """private struct RemotePatchDescriptor: Decodable {
+              let id: Int
+              let slug: String
+              let title: String?
+              let game: String
+              let fileName: String
+              let sha256: String
+              let sizeBytes: Int
+              let downloadUrl: String
+          }"""
+          new = """private struct RemotePatchDescriptor: Decodable {
+              let id: Int
+              let slug: String
+              let title: String?
+              let game: String
+              let fileName: String
+              let sha256: String
+              let sizeBytes: Int
+              let downloadUrl: String
+              let interfaceTab: String?
+              let section: String?
+          }"""
+          if old not in text:
+              raise SystemExit("RemotePatchDescriptor block not found")
+          p.write_text(text.replace(old, new, 1))
+          PY
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
+          text = p.read_text().replace("interfaceTab: nil, section: nil", "interfaceTab: item.interfaceTab, section: item.section")
+          p.write_text(text)
+          PY
 
       - name: Enforce disabled patches from Railway
         shell: bash
