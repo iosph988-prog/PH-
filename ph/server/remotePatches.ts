@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { remotePatchVersions, remotePatches, licenseKeys } from "../drizzle/schema";
 import { getDb } from "./db";
 import { storagePut, storageGetSignedUrl } from "./storage";
@@ -46,6 +46,25 @@ export type PatchSection = "patches" | "external";
 
 const normalizeSection = (value: string | undefined): PatchSection => value === "external" ? "external" : "patches";
 
+let patchSchemaReady: Promise<void> | null = null;
+async function ensurePatchSchema() {
+  if (!patchSchemaReady) {
+    patchSchemaReady = (async () => {
+      const db = await getDb();
+      if (!db) return;
+      for (const statement of [
+        "ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external') NOT NULL DEFAULT 'patches'",
+        "ALTER TABLE remote_patches ADD COLUMN interfaceTab VARCHAR(64) NULL",
+      ]) {
+        try { await db.execute(sql.raw(statement)); } catch (error: any) {
+          if (!String(error?.code || error?.message).includes("duplicate") && !String(error?.message).includes("Duplicate")) throw error;
+        }
+      }
+    })().catch(error => { patchSchemaReady = null; throw error; });
+  }
+  return patchSchemaReady;
+}
+
 async function createVersion(input: { patchId: number; createdBy: number; slug: string; fileName: string; data: Buffer; status?: "draft" | "published" }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
@@ -60,6 +79,7 @@ async function createVersion(input: { patchId: number; createdBy: number; slug: 
 export async function publishRemotePatch(input: { createdBy: number; slug: string; title: string; game: string; fileName: string; data: Buffer; section?: PatchSection; interfaceTab?: string | null }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
+  await ensurePatchSchema();
   const slug = input.slug.trim().toLowerCase();
   const title = input.title.trim();
   const game = input.game.trim().toLowerCase();
@@ -82,6 +102,7 @@ export async function publishRemotePatch(input: { createdBy: number; slug: strin
 export async function listRemotePatches(section?: PatchSection) {
   const db = await getDb();
   if (!db) return [];
+  await ensurePatchSchema();
   const filters = [eq(remotePatchVersions.status, "published")];
   if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
   const rows = await db.select({ patch: remotePatches, version: remotePatchVersions }).from(remotePatches).innerJoin(remotePatchVersions, eq(remotePatchVersions.id, remotePatches.currentVersionId)).where(and(...filters)).orderBy(remotePatches.game, remotePatches.slug);
@@ -91,6 +112,7 @@ export async function listRemotePatches(section?: PatchSection) {
 export async function updateRemotePatch(input: { id: number; updatedBy: number; title?: string; game?: string; fileName?: string; data?: Buffer; interfaceTab?: string | null }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
+  await ensurePatchSchema();
   const patch = (await db.select().from(remotePatches).where(eq(remotePatches.id, input.id)).limit(1))[0];
   if (!patch) throw new Error("Patch não encontrado");
   const title = input.title?.trim() || patch.title;
