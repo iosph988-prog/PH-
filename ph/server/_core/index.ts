@@ -69,6 +69,23 @@ async function startServer() {
     }
   });
 
+  app.post("/api/patches/external/catalog", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
+      return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
+    }
+    try {
+      const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
+      const baseUrl = `${forwardedProto}://${req.get("host")}`;
+      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl });
+      if (!result.valid) return res.status(403).json(result);
+      return res.status(200).json({ ...result, patches: (result.patches ?? []).filter(patch => patch.section === "external" || Boolean(patch.interfaceTab)) });
+    } catch (error) {
+      console.error("[External Patch API] Catalog failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
+  });
+
   app.post("/api/patches/catalog", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
     if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
