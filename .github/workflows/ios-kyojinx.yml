@@ -550,6 +550,9 @@ jobs:
           s = s.replace("let filtered = patches.filter { patch in", "let externalPatches = patches.filter { patch in patch.section?.lowercased() == \"external\" || patch.interfaceTab != nil || patch.game.lowercased().contains(\"online-\") }\n        let source = externalPatches.isEmpty ? patches : externalPatches\n        let filtered = source.filter { patch in")
           s = s.replace("return filtered.isEmpty ? patches : filtered", "return filtered.isEmpty ? source : filtered")
           s = s.replace("\"catalog\": \"online\"", "\"catalog\": \"external\"")
+          s = s.replace("[\"key\": key,", "[\"key\": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(),")
+          s = s.replace("guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }", "guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { let body = String(data: data, encoding: .utf8) ?? \"HTTP \\\(String(describing: (response as? HTTPURLResponse)?.statusCode))\"; throw NSError(domain: \"ExternalCatalog\", code: (response as? HTTPURLResponse)?.statusCode ?? -1, userInfo: [NSLocalizedDescriptionKey: body]) }")
+          s = s.replace("} catch { await MainActor.run { lastError = \"Não foi possível atualizar os recursos online.\" } }", "} catch { await MainActor.run { lastError = \"Catálogo: \\(error.localizedDescription)\" } }")
           p.write_text(s)
           PY
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
