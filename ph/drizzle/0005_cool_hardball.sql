@@ -1,0 +1,1 @@
+ALTER TABLE `license_keys` ADD `durationMinutes` int DEFAULT 43200 NOT NULL;

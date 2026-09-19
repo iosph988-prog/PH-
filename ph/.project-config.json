@@ -1,0 +1,42 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "server",
+    "db",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://46g4JKa6AJJXjmt.root:e12oOdqZYli09Lsw83oW@gateway03.us-east-1.prod.aws.tidbcloud.com:4000/Rhz9AyN4ZcqnDYPjhikfSx?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": [
+    "no_db_push"
+  ],
+  "git_remote": {
+    "repo_url": "https://7f0548f6b28a1758d9bf7be630d36cb4.artifacts.cloudflare.net/git/prod/Rhz9AyN4ZcqnDYPjhikfSx.git",
+    "expiration": "2026-08-27T01:24:41.205Z",
+    "token": "art_v2_x_9c97c3424aff6eaa8e1d3e924019c766662b21a9?expires=1787793881",
+    "backend": "GIT_BACKEND_ARTIFACTS"
+  },
+  "name": "api-key-panel",
+  "path": "/home/ubuntu/api-key-panel",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "D4P7d8cad3W6FMZthp2oqW",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "JWT_SECRET": "T5E6pjGnhsHD2oEYwsyFxr",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Conta007freefire",
+    "OWNER_OPEN_ID": "SLgUJHnkwJk4cti5SH9Ti9",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "1a34aac0-7707-4953-a006-4bc6bcfafadc",
+    "VITE_APP_ID": "Rhz9AyN4ZcqnDYPjhikfSx",
+    "VITE_APP_LOGO": "",
+    "VITE_APP_TITLE": "Painel de Chaves da API",
+    "VITE_FRONTEND_FORGE_API_KEY": "H28QMNxVWtYhkfNjtHUGQv",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}
