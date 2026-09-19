@@ -100,11 +100,11 @@ export async function publishRemotePatch(input: { createdBy: number; slug: strin
   return { patchId, ...created, slug, fileName, section, interfaceTab };
 }
 
-export async function listRemotePatches(section?: PatchSection) {
+export async function listRemotePatches(section?: PatchSection, includeInactive = false) {
   const db = await getDb();
   if (!db) return [];
   await ensurePatchSchema();
-  const filters = [eq(remotePatchVersions.status, "published")];
+  const filters = includeInactive ? [] : [eq(remotePatchVersions.status, "published")];
   if (section === "external") filters.push(or(eq(remotePatches.section, "external"), isNotNull(remotePatches.interfaceTab))!);
   else if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
   const rows = await db.select({ patch: remotePatches, version: remotePatchVersions }).from(remotePatches).innerJoin(remotePatchVersions, eq(remotePatchVersions.id, remotePatches.currentVersionId)).where(and(...filters)).orderBy(remotePatches.game, remotePatches.slug);
@@ -147,7 +147,13 @@ export async function listRemotePatchesForLicense(input: { key: string; deviceId
   if (!validation.valid) return validation;
   const catalog = await listRemotePatches();
   const licenseHash = hash(input.key.trim());
-  return { ...validation, patches: catalog.map(patch => ({ ...patch, downloadUrl: `${input.baseUrl}/api/patches/download?v=${patch.versionId}&t=${encodeURIComponent(createPatchDownloadToken({ versionId: patch.versionId, licenseHash, deviceId: input.deviceId, packageName: input.packageName }))}` })) };
+  const externalTab = (value: string | null) => ({ MIRA: "aim", ESP: "esp", GERAL: "general", "RAIO-X": "xray", OUTROS: "other" } as Record<string, string>)[value || ""] || "other";
+  return { ...validation, patches: catalog.map(patch => {
+    const game = patch.section === "external" || patch.interfaceTab
+      ? `${patch.game.startsWith("online-") ? patch.game.split(":")[0] : patch.game === "free-fire" ? "online-free-fire" : "online-free-fire-max"}:${externalTab(patch.interfaceTab)}`
+      : patch.game;
+    return { ...patch, game, downloadUrl: `${input.baseUrl}/api/patches/download?v=${patch.versionId}&t=${encodeURIComponent(createPatchDownloadToken({ versionId: patch.versionId, licenseHash, deviceId: input.deviceId, packageName: input.packageName }))}` };
+  }) };
 }
 
 export async function getAuthorizedPatchUrl(token: string) {
