@@ -52,14 +52,10 @@ async function ensurePatchSchema() {
     patchSchemaReady = (async () => {
       const db = await getDb();
       if (!db) return;
-      for (const statement of [
-        "ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external') NOT NULL DEFAULT 'patches'",
-        "ALTER TABLE remote_patches ADD COLUMN interfaceTab VARCHAR(64) NULL",
-      ]) {
-        try { await db.execute(sql.raw(statement)); } catch (error: any) {
-          if (!String(error?.code || error?.message).includes("duplicate") && !String(error?.message).includes("Duplicate")) throw error;
-        }
-      }
+      const [columns] = await db.execute(sql.raw("SHOW COLUMNS FROM remote_patches")) as any;
+      const existing = new Set((columns as any[]).map(column => String(column.Field || column.field)));
+      if (!existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external') NOT NULL DEFAULT 'patches'"));
+      if (!existing.has("interfaceTab")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN interfaceTab VARCHAR(64) NULL"));
     })().catch(error => { patchSchemaReady = null; throw error; });
   }
   return patchSchemaReady;
