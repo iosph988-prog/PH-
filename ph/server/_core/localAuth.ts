@@ -41,7 +41,13 @@ async function getOrCreateAdmin() {
   if (!db) throw new Error("Database unavailable");
   const openId = hashOpenId(email);
   const existing = (await db.select().from(users).where(eq(users.openId, openId)).limit(1))[0];
-  if (existing) return existing;
+  if (existing) {
+    if (existing.role !== "admin") {
+      await db.update(users).set({ role: "admin", email, name: existing.name || "Administrador", loginMethod: "local" }).where(eq(users.id, existing.id));
+      return (await db.select().from(users).where(eq(users.id, existing.id)).limit(1))[0];
+    }
+    return existing;
+  }
   await db.insert(users).values({ openId, name: "Administrador", email, loginMethod: "local", role: "admin" });
   return (await db.select().from(users).where(eq(users.openId, openId)).limit(1))[0];
 }
