@@ -790,6 +790,22 @@ jobs:
           PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
           curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/oNKzmxVFPHhGAXPQ.py -o /tmp/fix_colorpicker_compat.py
           python3 /tmp/fix_colorpicker_compat.py "$PATCH_SWIFT"
+      - name: Keep External categories isolated
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 - "$PATCH_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          text = p.read_text()
+          old = 'return filtered.isEmpty ? source : filtered'
+          if old in text:
+              text = text.replace(old, 'return filtered', 1)
+          p.write_text(text)
+          PY
+
       - name: Build original archive and IPA
         shell: bash
         run: |
