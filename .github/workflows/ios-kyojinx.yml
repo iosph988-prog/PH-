@@ -838,7 +838,7 @@ jobs:
           text = p.read_text()
           old = 'return filtered.isEmpty ? source : filtered'
           if old in text:
-              text = text.replace(old, 'return filtered', 1)
+              text = text.replace(old, 'return filtered.isEmpty ? source : filtered', 1)
           p.write_text(text)
           PY
 
