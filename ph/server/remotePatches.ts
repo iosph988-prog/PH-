@@ -142,10 +142,10 @@ export async function setRemotePatchStatus(input: { id: number; status: "publish
   return { success: true, status: input.status } as const;
 }
 
-export async function listRemotePatchesForLicense(input: { key: string; deviceId: string; packageName: string; appVersion: string; baseUrl: string }) {
+export async function listRemotePatchesForLicense(input: { key: string; deviceId: string; packageName: string; appVersion: string; baseUrl: string; section?: PatchSection }) {
   const validation = await validateLicense(input);
   if (!validation.valid) return validation;
-  const catalog = await listRemotePatches();
+  const catalog = await listRemotePatches(input.section);
   const licenseHash = hash(input.key.trim());
   const externalTab = (value: string | null) => {
     const normalized = String(value || "").trim().toUpperCase();

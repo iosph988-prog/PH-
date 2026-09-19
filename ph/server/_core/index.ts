@@ -77,9 +77,9 @@ async function startServer() {
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
-      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl });
+      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl, section: "external" });
       if (!result.valid) return res.status(403).json(result);
-      return res.status(200).json({ ...result, patches: (result.patches ?? []).filter(patch => patch.section === "external" || Boolean(patch.interfaceTab)) });
+      return res.status(200).json(result);
     } catch (error) {
       console.error("[External Patch API] Catalog failed", error);
       return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
