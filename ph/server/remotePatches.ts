@@ -147,10 +147,15 @@ export async function listRemotePatchesForLicense(input: { key: string; deviceId
   if (!validation.valid) return validation;
   const catalog = await listRemotePatches();
   const licenseHash = hash(input.key.trim());
-  const externalTab = (value: string | null) => ({ MIRA: "aim", ESP: "esp", GERAL: "general", "RAIO-X": "xray", OUTROS: "other" } as Record<string, string>)[value || ""] || "other";
+  const externalTab = (value: string | null) => {
+    const normalized = String(value || "").trim().toUpperCase();
+    return ({ MIRA: "aim", AIM: "aim", ESP: "esp", GERAL: "general", GENERAL: "general", "RAIO-X": "xray", XRAY: "xray", OUTROS: "other", OTHER: "other" } as Record<string, string>)[normalized] || "other";
+  };
   return { ...validation, patches: catalog.map(patch => {
+    const rawGame = String(patch.game || "").trim().toLowerCase();
+    const gameBase = rawGame.startsWith("online-") ? rawGame.split(":")[0] : (rawGame === "free-fire" || rawGame === "freefire" ? "online-free-fire" : "online-free-fire-max");
     const game = patch.section === "external" || patch.interfaceTab
-      ? `${patch.game.startsWith("online-") ? patch.game.split(":")[0] : patch.game === "free-fire" ? "online-free-fire" : "online-free-fire-max"}:${externalTab(patch.interfaceTab)}`
+      ? `${gameBase}:${externalTab(patch.interfaceTab)}`
       : patch.game;
     return { ...patch, game, downloadUrl: `${input.baseUrl}/api/patches/download?v=${patch.versionId}&t=${encodeURIComponent(createPatchDownloadToken({ versionId: patch.versionId, licenseHash, deviceId: input.deviceId, packageName: input.packageName }))}` };
   }) };
