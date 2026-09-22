@@ -4,7 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router, staffProcedure } from "./_core/trpc";
 import { consumeResellerCredits, createResellerInvitation, getResellerCapacity, listResellerInvitations, listResellers, removeResellerAndLicenses, revokeResellerAccess, revokeResellerInvitation } from "./db";
-import { createLicense, createLicenses, deleteLicense, getLicenseDetails, getLicenseEvents, listLicenses, pauseAllLicenses, resetLicense, resumeAllLicenses, setLicenseStatus, validateCustomKeyRequest, validateLicense } from "./licenses";
+import { createLicense, createLicenses, deleteLicense, deleteLicensesByKeys, getLicenseDetails, getLicenseEvents, listLicenses, pauseAllLicenses, resetLicense, resumeAllLicenses, setLicenseStatus, validateCustomKeyRequest, validateLicense } from "./licenses";
 import { isValidPatchFileName, listRemotePatches, publishRemotePatch, setRemotePatchStatus, updateRemotePatch } from "./remotePatches";
 import { getAnnouncement, updateAnnouncement } from "./announcements";
 import { createLocalReseller, logoutLocal } from "./_core/localAuth";
@@ -55,6 +55,7 @@ export const appRouter = router({
     }),
     reset: staffProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input, ctx }) => resetLicense(input.id, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
     delete: staffProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input, ctx }) => deleteLicense(input.id, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
+    deleteBatch: staffProcedure.input(z.object({ keys: z.array(z.string().trim().min(1).max(200)).min(1).max(500) })).mutation(({ input, ctx }) => deleteLicensesByKeys(input.keys, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
     revoke: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => setLicenseStatus(input.id, "revoked")),
     reactivate: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => setLicenseStatus(input.id, "active")),
     pauseAll: adminProcedure.mutation(() => pauseAllLicenses()),

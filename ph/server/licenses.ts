@@ -179,6 +179,26 @@ export async function deleteLicense(id: number, ownerId?: number) {
   return { success: true } as const;
 }
 
+export async function deleteLicensesByKeys(rawKeys: string[], ownerId?: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const keys = Array.from(new Set(rawKeys.map(key => key.trim()).filter(Boolean)));
+  if (keys.length === 0) throw new Error("Cole pelo menos uma key");
+  if (keys.length > 500) throw new Error("O lote pode conter no máximo 500 keys");
+  const hashes = keys.map(hashKey);
+  const rows = await db.select({ id: licenseKeys.id }).from(licenseKeys).where(and(
+    inArray(licenseKeys.keyHash, hashes),
+    ownerId ? eq(licenseKeys.createdBy, ownerId) : undefined,
+  ));
+  const ids = rows.map(row => row.id);
+  if (ids.length === 0) return { requested: keys.length, found: 0, deleted: 0 } as const;
+  await db.transaction(async tx => {
+    await tx.delete(licenseEvents).where(inArray(licenseEvents.licenseId, ids));
+    await tx.delete(licenseDevices).where(inArray(licenseDevices.licenseId, ids));
+    await tx.delete(licenseKeys).where(inArray(licenseKeys.id, ids));
+  });
+  return { requested: keys.length, found: ids.length, deleted: ids.length } as const;
+}
 /** Remove somente licenças ativas cujo prazo já terminou; segura para reexecução. */
 export async function deleteExpiredLicenses(now = new Date()) {
   const db = await getDb();
