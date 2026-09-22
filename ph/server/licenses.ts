@@ -31,7 +31,7 @@ const KEY_SUFFIX_LENGTH = 15;
 export function generateRawKey() {
   let suffix = "";
   for (let index = 0; index < KEY_SUFFIX_LENGTH; index += 1) suffix += KEY_ALPHABET[randomInt(KEY_ALPHABET.length)];
-  return `NX-${suffix}`;
+  return `EXTERNAL-${suffix}`;
 }
 
 async function recordEvent(input: typeof licenseEvents.$inferInsert) {
