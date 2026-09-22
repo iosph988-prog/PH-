@@ -43,7 +43,7 @@ export const appRouter = router({
     events: staffProcedure.query(({ ctx }) => getLicenseEvents(40, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
     details: staffProcedure.input(z.object({ id: z.number().int().positive() })).query(({ input, ctx }) => getLicenseDetails(input.id, ctx.user.role === "reseller" ? ctx.user.id : undefined)),
     // A chave bruta só é retornada aqui, dentro de adminProcedure, uma única vez.
-    create: staffProcedure.input(z.object({ quantity: z.number().int().min(1).max(50).default(1), deviceLimit: z.number().int().min(1).max(2000), durationDays: z.number().int().min(1).max(30).default(30), durationMinutes: z.number().int().min(60).max(43200).optional(), customKey: z.string().trim().max(64).optional() })).mutation(async ({ input, ctx }) => {
+    create: staffProcedure.input(z.object({ quantity: z.number().int().min(1).max(500).default(1), deviceLimit: z.number().int().min(1).max(2000), durationDays: z.number().int().min(1).max(30).default(30), durationMinutes: z.number().int().min(60).max(43200).optional(), customKey: z.string().trim().max(64).optional() })).mutation(async ({ input, ctx }) => {
       if (ctx.user.role === "reseller") await consumeResellerCredits(ctx.user.id, input.quantity);
       const normalizedCustomKey = validateCustomKeyRequest(input.quantity, input.customKey);
       if (input.quantity === 1) {

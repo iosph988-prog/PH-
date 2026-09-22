@@ -85,7 +85,7 @@ export async function createLicense(input: { createdBy: number; deviceLimit: num
   return { id: licenseId, key: rawKey, keyPrefix };
 }
 
-export const normalizeLicenseBatchCount = (count: number) => Math.max(1, Math.min(50, Math.trunc(count)));
+export const normalizeLicenseBatchCount = (count: number) => Math.max(1, Math.min(500, Math.trunc(count)));
 
 export async function createLicenses(input: { createdBy: number; count: number; deviceLimit: number; durationDays?: number; durationMinutes?: number; expiresAt?: Date | null }) {
   const db = await getDb();

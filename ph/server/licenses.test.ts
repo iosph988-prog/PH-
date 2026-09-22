@@ -6,10 +6,10 @@ vi.mock("./db", () => ({ getDb }));
 import { calculateActivationExpiry, createLicense, createLicenses, deleteExpiredLicenses, deleteLicense, evaluateLicenseAccess, generateRawKey, isLicenseGranted, isLicensePayload, mergeDeviceCounts, normalizeCustomKey, normalizeDurationDays, normalizeLicenseBatchCount, pauseAllLicenses, resetLicense, resumeAllLicenses, setLicenseStatus, validateCustomKeyRequest, validateLicense } from "./licenses";
 
 describe("short alphanumeric key format", () => {
-  it("generates NX- plus 15 uppercase letters and numbers", () => {
+  it("generates EXTERNAL- plus 15 uppercase letters and numbers", () => {
     const key = generateRawKey();
-    expect(key).toMatch(/^NX-[A-Z0-9]{15}$/);
-    expect(key).toHaveLength(18);
+    expect(key).toMatch(/^EXTERNAL-[A-Z0-9]{15}$/);
+    expect(key).toHaveLength(24);
   });
 });
 
@@ -111,7 +111,7 @@ describe("license activation flow", () => {
   });
 
   it("uses the already committed activation when the conditional update loses a race", async () => {
-    const activatedAt = new Date("2026-08-26T12:00:00.000Z");
+    const activatedAt = new Date("2026-10-01T12:00:00.000Z");
     const state: any = { id: 10, status: "active", activatedAt, expiresAt: calculateActivationExpiry(activatedAt, 7), durationDays: 7, deviceLimit: 1 };
     const query = (result: any) => { const chain: any = { limit: vi.fn().mockResolvedValue(result), then: (resolve: any, reject: any) => Promise.resolve(result).then(resolve, reject) }; return { from: vi.fn(() => ({ where: vi.fn(() => chain) })) }; };
     const tx: any = { select: vi.fn().mockImplementationOnce(() => query([state])).mockImplementationOnce(() => query([])).mockImplementationOnce(() => query([{ count: 0 }])).mockImplementationOnce(() => query([{ activatedAt, expiresAt: state.expiresAt }])), update: vi.fn(() => ({ set: vi.fn(() => ({ where: vi.fn().mockResolvedValue([{ affectedRows: 0 }]) })) })), insert: vi.fn(() => ({ values: vi.fn().mockResolvedValue(undefined) })) };
@@ -280,7 +280,7 @@ describe("license administration", () => {
     getDb.mockResolvedValue(db);
     const result = await createLicense({ createdBy: 7, deviceLimit: 2, expiresAt: null });
     expect(result.id).toBe(42);
-    expect(result.key).toMatch(/^NX-[A-Z0-9_-]+$/);
+    expect(result.key).toMatch(/^EXTERNAL-[A-Z0-9_-]+$/);
     expect(values).toHaveBeenCalled();
     const firstInsert = values.mock.calls[0][0];
     expect(firstInsert.keyHash).toHaveLength(64);
@@ -317,20 +317,20 @@ describe("license administration", () => {
     expect(db.insert).toHaveBeenCalledTimes(2);
   });
 
-  it("generates a requested batch and clamps it to 50 items", async () => {
+  it("generates a requested batch and clamps it to 500 items", async () => {
     const values = vi.fn().mockResolvedValue([{ insertId: 42 }]);
     const tx = { insert: vi.fn(() => ({ values })) };
     const db = { transaction: vi.fn(async callback => callback(tx)) };
     getDb.mockResolvedValue(db);
     const batch = await createLicenses({ createdBy: 7, count: 52, deviceLimit: 1, expiresAt: null });
-    expect(batch.keys).toHaveLength(50);
-    expect(new Set(batch.keys.map(item => item.key)).size).toBe(50);
-    expect(values).toHaveBeenCalledTimes(100);
+    expect(batch.keys).toHaveLength(52);
+    expect(new Set(batch.keys.map(item => item.key)).size).toBe(52);
+    expect(values).toHaveBeenCalledTimes(104);
     expect(values.mock.calls[0][0].keyHash).toHaveLength(64);
     expect(values.mock.calls[0][0]).not.toHaveProperty("key");
     expect(normalizeLicenseBatchCount(0)).toBe(1);
-    expect(normalizeLicenseBatchCount(50)).toBe(50);
-    expect(normalizeLicenseBatchCount(51)).toBe(50);
+    expect(normalizeLicenseBatchCount(500)).toBe(500);
+    expect(normalizeLicenseBatchCount(501)).toBe(500);
   });
 
   it("rolls back the whole batch when one insert fails", async () => {
