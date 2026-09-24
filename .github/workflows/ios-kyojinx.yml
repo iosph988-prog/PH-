@@ -145,13 +145,19 @@ jobs:
           import sys
           nav, content = map(Path, sys.argv[1:])
           n = nav.read_text()
-          n = n.replace("    case patches\n", "    case patches\n    case external\n", 1)
+          if "    case patches\n" not in n:
+              n = n.replace("    case installed\n", "    case patches\n    case external\n", 1)
+          else:
+              n = n.replace("    case patches\n", "    case patches\n    case external\n", 1)
           n = n.replace("case .home, .files, .patches:", "case .home, .files, .patches, .external:", 1)
           nav.write_text(n)
           c = content.read_text()
+          c = c.replace("AppSection.installed", "AppSection.patches")
+          c = c.replace("case .installed:", "case .patches:", 1)
+          c = c.replace("case .patches:\n            PatchProjectsView(\n                onOpenSettings: openSettings,\n                onOpenLogs: openLogs\n            )", "case .patches:\n            PatchProjectsView()", 1)
           c = c.replace("        case .patches:\n            PatchProjectsView()", "        case .patches:\n            PatchProjectsView()\n        case .external:\n            ExternalPanelView()", 1)
-          c = c.replace("        case .patches: return \"tab.patches\"", "        case .patches: return \"Online\"\n        case .external: return \"External\"", 1)
-          c = c.replace("        case .patches: return \"shippingbox.fill\"", "        case .patches: return \"gamecontroller.fill\"\n        case .external: return \"gamecontroller.fill\"", 1)
+          c = c.replace("        case .installed: return \"tab.installed\"", "        case .patches: return \"Online\"\n        case .external: return \"External\"", 1)
+          c = c.replace("        case .installed: return \"tray.full.fill\"", "        case .patches: return \"scope\"\n        case .external: return \"gamecontroller.fill\"", 1)
           content.write_text(c)
           PY
 
