@@ -612,6 +612,69 @@ jobs:
           p.write_text(text)
           PY
 
+      - name: Add license status to Início
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 - "$PATCH_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          t = p.read_text()
+          t = t.replace('              @State private var logoURLs: [String: String] = [:]\n', '              @State private var logoURLs: [String: String] = [:]\n              @State private var licenseRemainingUses: Int?\n              @State private var licenseExpiresAt: String?\n', 1)
+          t = t.replace('                              header\n                              sectionTitle("SELECIONE O JOGO", top: 30)', '                              header\n                              licenseStatusCard\n                              sectionTitle("SELECIONE O JOGO", top: 30)', 1)
+          t = t.replace('                      logoURLs = await logos\n                  }', '                      logoURLs = await logos\n                      await refreshLicenseStatus()\n                  }', 1)
+          anchor = '              private var fg: Color { darkMode ? .white : .black }'
+          card = '''              private var licenseStatusCard: some View {
+                  HStack(spacing: 12) {
+                      Image(systemName: "key.fill")
+                          .font(.system(size: 22, weight: .semibold))
+                          .foregroundStyle(.orange)
+                          .frame(width: 42, height: 42)
+                          .background(Color.orange.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                      VStack(alignment: .leading, spacing: 4) {
+                          Text("STATUS DA LICENÇA")
+                              .font(.system(size: 11, weight: .bold))
+                              .foregroundStyle(muted)
+                          HStack(spacing: 12) {
+                              Text(licenseRemainingUses.map { "\\($0) keys restantes" } ?? "Consultando keys...")
+                                  .font(.system(size: 14, weight: .bold))
+                                  .foregroundStyle(fg)
+                              if let licenseExpiresAt {
+                                  Text("Expira: \\(licenseExpiresAt)")
+                                      .font(.system(size: 11, weight: .medium))
+                                      .foregroundStyle(muted)
+                                      .lineLimit(1)
+                              }
+                          }
+                          Text("Compatível com iOS 17, 18, 26 e 27")
+                              .font(.system(size: 11, weight: .medium))
+                              .foregroundStyle(muted)
+                      }
+                      Spacer(minLength: 0)
+                  }
+                  .padding(12)
+                  .background(panel, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(fg.opacity(0.12), lineWidth: 1))
+                  .padding(.top, 14)
+              }
+
+              private func refreshLicenseStatus() async {
+                  guard let key = LicenseStore.storedKey else { return }
+                  guard let response = try? await LicenseAPI.validate(key: key), response.valid else { return }
+                  await MainActor.run {
+                      licenseRemainingUses = response.remainingUses
+                      licenseExpiresAt = response.expiresAt.map { String($0.prefix(10)) }
+                  }
+              }
+
+'''
+          if anchor not in t:
+              raise SystemExit('home status insertion anchor not found')
+          t = t.replace(anchor, card + anchor, 1)
+          p.write_text(t)
+          PY
       - name: Enforce disabled patches from Railway
         shell: bash
         run: |
