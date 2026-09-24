@@ -671,6 +671,8 @@ jobs:
 
           '''
           if anchor not in t:
+              anchor = 'private var fg: Color { darkMode ? .white : .black }'
+          if anchor not in t:
               raise SystemExit('home status insertion anchor not found')
           t = t.replace(anchor, card + anchor, 1)
           p.write_text(t)
