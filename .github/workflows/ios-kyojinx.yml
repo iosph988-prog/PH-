@@ -952,6 +952,26 @@ jobs:
           p.write_text(text)
           PY
 
+      - name: Remove home screen definitively
+        shell: bash
+        run: |
+          set -euo pipefail
+          NAV_SWIFT=source/3105-1.1.1/ThreeOneOSFive/helpers/AppTabNavigationState.swift
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" <<'PY'
+          from pathlib import Path
+          import re, sys
+          nav, content = map(Path, sys.argv[1:])
+          n = nav.read_text()
+          n = re.sub(r'(?s)(var visibleSections: \[AppSection\] \{).*?\n    \}', r'\1\n        [.installed, .external].filter(isVisible)\n    }', n, count=1)
+          n = re.sub(r'(init\(\s*\n\s*selectedTab: Int = )0(,)', r'\1AppSection.installed.rawValue\2', n, count=1)
+          n = n.replace('selectedTab = AppSection.home.rawValue', 'selectedTab = AppSection.installed.rawValue')
+          nav.write_text(n)
+          c = content.read_text()
+          c = c.replace('} ?? .home', '} ?? .installed')
+          c = c.replace('initialTab = 0', 'initialTab = AppSection.installed.rawValue')
+          content.write_text(c)
+          PY
       - name: Build original archive and IPA
         shell: bash
         run: |
