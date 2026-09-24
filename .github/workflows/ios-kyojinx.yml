@@ -152,10 +152,6 @@ jobs:
           n = n.replace("case .home, .files, .patches:", "case .home, .files, .patches, .external:", 1)
           nav.write_text(n)
           c = content.read_text()
-          import re
-          c, home_count = re.subn(r'(?s)        case \.home:.*?(?=        case \.new:)', '        case .home:\n            LicenseProfileView()\n', c, count=1)
-          if home_count != 1:
-              raise SystemExit('home section anchor not found')
           c = c.replace("AppSection.installed", "AppSection.patches")
           c = c.replace("case .installed:", "case .patches:", 1)
           c = c.replace("case .patches:\n            PatchProjectsView(\n                onOpenSettings: openSettings,\n                onOpenLogs: openLogs\n            )", "case .patches:\n            PatchProjectsView()", 1)
