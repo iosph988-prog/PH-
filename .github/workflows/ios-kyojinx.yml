@@ -680,6 +680,29 @@ jobs:
           t = t.replace(anchor, card + anchor, 1)
           p.write_text(t)
           PY
+      - name: Keep only PROXY and External tabs
+        shell: bash
+        run: |
+          set -euo pipefail
+          NAV_SWIFT=source/3105-1.1.1/ThreeOneOSFive/helpers/AppTabNavigationState.swift
+          CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" "$PATCH_SWIFT" <<'PY'
+          from pathlib import Path
+          import re, sys
+          nav, content, patch = map(Path, sys.argv[1:])
+          n = nav.read_text()
+          n = n.replace('return [.home, .patches, .external].filter(isVisible)', 'return [.patches, .external].filter(isVisible)', 1)
+          n = n.replace('selectedTab: Int = 0', 'selectedTab: Int = AppSection.patches.rawValue', 1)
+          n = n.replace('selectedTab = AppSection.home.rawValue', 'selectedTab = AppSection.patches.rawValue', 1)
+          nav.write_text(n)
+          c = content.read_text()
+          c = c.replace('initialTab = 0', 'initialTab = AppSection.patches.rawValue', 1)
+          content.write_text(c)
+          p = patch.read_text()
+          p = p.replace('                      bottomNav\n', '', 1)
+          patch.write_text(p)
+          PY
       - name: Enforce disabled patches from Railway
         shell: bash
         run: |
