@@ -619,10 +619,13 @@ jobs:
           PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
           python3 - "$PATCH_SWIFT" <<'PY'
           from pathlib import Path
+          import re
           import sys
           p = Path(sys.argv[1])
           t = p.read_text()
-          t = t.replace('              @State private var logoURLs: [String: String] = [:]\n', '              @State private var logoURLs: [String: String] = [:]\n              @State private var licenseRemainingUses: Int?\n              @State private var licenseExpiresAt: String?\n', 1)
+          t, state_count = re.subn(r'(?m)^(\s*)@State private var logoURLs: \[String: String\] = \[:\]$', r'\1@State private var logoURLs: [String: String] = [:]\n\1@State private var licenseRemainingUses: Int?\n\1@State private var licenseExpiresAt: String?', t, count=1)
+          if state_count != 1:
+              raise SystemExit('license state insertion anchor not found')
           t = t.replace('                              header\n                              sectionTitle("SELECIONE O JOGO", top: 30)', '                              header\n                              licenseStatusCard\n                              sectionTitle("SELECIONE O JOGO", top: 30)', 1)
           t = t.replace('                      logoURLs = await logos\n                  }', '                      logoURLs = await logos\n                      await refreshLicenseStatus()\n                  }', 1)
           anchor = '              private var fg: Color { darkMode ? .white : .black }'
