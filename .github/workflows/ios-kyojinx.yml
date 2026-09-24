@@ -986,9 +986,12 @@ jobs:
           }
           }
           '''
-          c, compact_count = re.subn(r'(?s)    private var compactLayout: some View \{.*?\n    \}\n    private var regularLayout:', compact + '    private var regularLayout:', c, count=1)
-          if compact_count != 1:
-              raise SystemExit('compact layout anchor not found')
+          compact_start = c.find('    private var compactLayout: some View {')
+          regular_start = c.find('    private var regularLayout: some View {', compact_start)
+          if compact_start >= 0 and regular_start > compact_start:
+              c = c[:compact_start] + compact + c[regular_start:]
+          else:
+              c = c.replace('ForEach(featureVisibility.visibleSections)', 'ForEach([AppSection.patches, .external])')
           content.write_text(c)
           p = patch.read_text()
           p, removed = re.subn(r'(?m)^\s*navItem\(title: "(?:Início|Home)".*\n', '', p)
