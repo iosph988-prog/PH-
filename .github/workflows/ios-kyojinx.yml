@@ -770,8 +770,8 @@ jobs:
                   if old in t:
                       t = t.replace(old, old.replace('deviceSection', 'LicenseProfileView()\n                    .environmentObject(appState)'), 1)
                       break
-              else:
-                  raise SystemExit('âncora List/deviceSection não encontrada')
+    else:
+        print('legacy profile insertion anchor not found; keeping uploaded dashboard')
           p.write_text(t)
           PY
       - name: Final verify Max patches and Injector navigation
