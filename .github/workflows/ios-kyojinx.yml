@@ -181,13 +181,7 @@ jobs:
               let replacementCount: Int
           }
           
-          private let patchCatalog: [PreloadedPatch] = [
-              PreloadedPatch(id: "hs-alto", title: "HS ALTO", fileName: "ALTO(3).3105", replacementCount: 1),
-              PreloadedPatch(id: "hs-peito", title: "HS PEITO", fileName: "PEITO(3).3105", replacementCount: 1),
-              PreloadedPatch(id: "hs-pescoco", title: "HS PESCOÇO", fileName: "PESÇOCO(3).3105", replacementCount: 1),
-              PreloadedPatch(id: "fps-120", title: "120 FPS", fileName: "120FPS(2).3105", replacementCount: 1),
-              PreloadedPatch(id: "hs-peito-antena", title: "HS PEITO + ANTENA", fileName: "PEITO-ANTENA.3105", replacementCount: 1)
-          ]
+          private let patchCatalog: [PreloadedPatch] = []
           
           private let freeFirePatchCatalog: [PreloadedPatch] = [
               PreloadedPatch(id: "free-fire-0", title: "BALA MAGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
