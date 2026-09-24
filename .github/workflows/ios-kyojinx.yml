@@ -974,6 +974,7 @@ jobs:
           c = c.replace('?? .home', '?? .patches')
           c = c.replace('initialTab = 0', 'initialTab = AppSection.patches.rawValue')
           c = c.replace('AppSection.allCases.filter(isVisible)', '[.patches, .external].filter(isVisible)')
+          c = c.replace('ForEach(featureVisibility.visibleSections)', 'ForEach([AppSection.patches, .external])')
           content.write_text(c)
           p = patch.read_text()
           p, removed = re.subn(r'(?m)^\s*navItem\(title: "(?:Início|Home)".*\n', '', p)
