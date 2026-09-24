@@ -958,10 +958,11 @@ jobs:
           set -euo pipefail
           NAV_SWIFT=source/3105-1.1.1/ThreeOneOSFive/helpers/AppTabNavigationState.swift
           CONTENT_SWIFT=source/3105-1.1.1/ThreeOneOSFive/ContentView.swift
-          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" <<'PY'
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" "$PATCH_SWIFT" <<'PY'
           from pathlib import Path
           import re, sys
-          nav, content = map(Path, sys.argv[1:])
+          nav, content, patch = map(Path, sys.argv[1:])
           n = nav.read_text()
           n = re.sub(r'(?s)(var visibleSections: \[AppSection\] \{).*?\n    \}', r'\1\n        [.patches, .external].filter(isVisible)\n    }', n, count=1)
           n = re.sub(r'(init\(\s*\n\s*selectedTab: Int = )0(,)', r'\1AppSection.patches.rawValue\2', n, count=1)
@@ -971,6 +972,11 @@ jobs:
           c = c.replace('} ?? .home', '} ?? .patches')
           c = c.replace('initialTab = 0', 'initialTab = AppSection.patches.rawValue')
           content.write_text(c)
+          p = patch.read_text()
+          p, removed = re.subn(r'(?m)^\s*navItem\(title: "(?:Início|Home)".*\n', '', p)
+          if removed == 0:
+              p = p.replace('house.fill', 'gamecontroller.fill')
+          patch.write_text(p)
           PY
       - name: Build original archive and IPA
         shell: bash
