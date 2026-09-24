@@ -669,7 +669,7 @@ jobs:
                   }
               }
 
-'''
+          '''
           if anchor not in t:
               raise SystemExit('home status insertion anchor not found')
           t = t.replace(anchor, card + anchor, 1)
