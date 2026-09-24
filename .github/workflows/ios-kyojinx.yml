@@ -158,6 +158,7 @@ jobs:
           c = c.replace("        case .patches:\n            PatchProjectsView()", "        case .patches:\n            PatchProjectsView()\n        case .external:\n            ExternalPanelView()", 1)
           c = c.replace("        case .installed: return \"tab.installed\"", "        case .patches: return \"Online\"\n        case .external: return \"External\"", 1)
           c = c.replace("        case .installed: return \"tray.full.fill\"", "        case .patches: return \"scope\"\n        case .external: return \"gamecontroller.fill\"", 1)
+          c = c.replace("        .patchStorePresentation(patchStore)\n", "", 1)
           content.write_text(c)
           PY
 
