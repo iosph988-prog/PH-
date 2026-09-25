@@ -64,7 +64,7 @@ jobs:
         run: |
           set -euo pipefail
           APP_SWIFT=source/3105-1.1.1/ThreeOneOSFive/App.swift
-          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/MqDqdHMBhVldplki.swift -o /tmp/CalculatorGateView.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/PJYKDangaYHdchQi.swift -o /tmp/CalculatorGateView.swift
           python3 - "$APP_SWIFT" /tmp/CalculatorGateView.swift <<'PY'
           from pathlib import Path
           import sys
