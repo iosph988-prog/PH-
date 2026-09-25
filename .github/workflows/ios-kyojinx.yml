@@ -1024,6 +1024,109 @@ jobs:
           for old, new in replacements.items():
               if old in t:
                   t = t.replace(old, new)
+          import re
+          header = '''              private var header: some View {
+                  VStack(spacing: 4) {
+                      HStack(alignment: .center, spacing: 8) {
+                          Image(systemName: "shield.lefthalf.filled")
+                              .font(.system(size: 34, weight: .bold))
+                              .foregroundStyle(fg)
+                          VStack(alignment: .leading, spacing: -2) {
+                              Text("PROXY")
+                                  .font(.system(size: 31, weight: .black, design: .rounded))
+                                  .italic()
+                                  .foregroundStyle(fg)
+                              Text("CHEATS")
+                                  .font(.system(size: 15, weight: .black, design: .rounded))
+                                  .italic()
+                                  .foregroundStyle(fg)
+                          }
+                          Spacer()
+                          Button { darkMode.toggle() } label: {
+                              Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
+                                  .font(.system(size: 16, weight: .bold))
+                                  .foregroundStyle(fg)
+                                  .frame(width: 38, height: 38)
+                                  .background(panel, in: Circle())
+                          }
+                      }
+                      Text("MAIS ESTABILIDADE   •   MAIS DESEMPENHO   •   SEM LIMITES")
+                          .font(.system(size: 7, weight: .medium, design: .rounded))
+                          .tracking(0.7)
+                          .foregroundStyle(muted)
+                  }
+                  .frame(maxWidth: .infinity)
+                  .padding(.top, 4)
+              .padding(.bottom, 2)
+          }
+          '''
+          t, count = re.subn(r'              private var header: some View \{.*?              private func sectionTitle', header + '              private func sectionTitle', t, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('header block not found')
+          section = '''              private func sectionTitle(_ title: String, top: CGFloat) -> some View {
+                  HStack(spacing: 8) {
+                      Image(systemName: title.contains("JOGO") ? "gamecontroller.fill" : "gearshape.fill")
+                          .font(.system(size: 17, weight: .bold))
+                          .foregroundStyle(fg)
+                      Text(title)
+                          .font(.system(size: 15, weight: .black, design: .rounded))
+                          .foregroundStyle(fg)
+                      Spacer()
+                  }
+                  .padding(.top, top)
+              }
+          '''
+          t, count = re.subn(r'              private func sectionTitle\(_ title: String, top: CGFloat\) -> some View \{.*?              private var gameCards', section + '              private var gameCards', t, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('section title block not found')
+          cards = '''              private var gameCards: some View {
+                  GeometryReader { proxy in
+                      let width = max(145, (proxy.size.width - 10) / 2)
+                      HStack(spacing: 10) {
+                          ForEach(preloadedGames) { game in
+                              Button { withAnimation(.easeInOut(duration: 0.18)) { selectedGameID = game.id } } label: {
+                                  VStack(alignment: .leading, spacing: 6) {
+                                      ZStack(alignment: .topTrailing) {
+                                          remoteLogo(url: logoURLs[game.id])
+                                              .frame(width: 45, height: 45)
+                                              .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                          if selectedGameID == game.id {
+                                              Image(systemName: "checkmark.circle.fill")
+                                                  .font(.system(size: 18, weight: .bold))
+                                                  .foregroundStyle(fg)
+                                                  .background(panel, in: Circle())
+                                                  .offset(x: 5, y: -5)
+                                          }
+                                      }
+                                      Text(game.title)
+                                          .font(.system(size: 12, weight: .black, design: .rounded))
+                                          .foregroundStyle(fg)
+                                          .lineLimit(1)
+                                      HStack(spacing: 4) {
+                                          Image(systemName: selectedGameID == game.id ? "checkmark.circle.fill" : "circle")
+                                              .font(.system(size: 11, weight: .bold))
+                                          Text(selectedGameID == game.id ? "Selecionado" : "Toque para selecionar")
+                                              .font(.system(size: 9, weight: .medium))
+                                      }
+                                      .foregroundStyle(selectedGameID == game.id ? fg : muted)
+                                  }
+                                  .frame(maxWidth: .infinity, alignment: .leading)
+                                  .padding(12)
+                                  .frame(width: width, height: 112, alignment: .topLeading)
+                                  .background(panel, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                  .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(selectedGameID == game.id ? fg.opacity(0.9) : fg.opacity(0.16), lineWidth: selectedGameID == game.id ? 1.5 : 1))
+                              }
+                              .buttonStyle(.plain)
+                          }
+                      }
+                  }
+                  .frame(height: 112)
+                  .padding(.top, 12)
+              }
+          '''
+          t, count = re.subn(r'              private var gameCards: some View \{.*?              private var featureList', cards + '              private var featureList', t, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('game cards block not found')
           p.write_text(t)
           PY
       - name: Build original archive and IPA
