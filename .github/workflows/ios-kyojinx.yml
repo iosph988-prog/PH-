@@ -59,6 +59,38 @@ jobs:
           p.write_text(t)
           PY
 
+      - name: Add calculator unlock screen before API
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_SWIFT=source/3105-1.1.1/ThreeOneOSFive/App.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/fElTFdgvyLSgfCwS.swift -o /tmp/CalculatorGateView.swift
+          python3 - "$APP_SWIFT" /tmp/CalculatorGateView.swift <<'PY'
+          from pathlib import Path
+          import sys
+          app = Path(sys.argv[1])
+          component = Path(sys.argv[2]).read_text()
+          t = app.read_text()
+          if 'private var calculatorUnlocked = false' not in t:
+              t = t.replace('    @State private var isLicensed = false\n', '    @State private var isLicensed = false\n    @State private var calculatorUnlocked = false\n', 1)
+          t = t.replace('.opacity(showOnboarding || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && isLicensed)', '.opacity(showOnboarding || !calculatorUnlocked || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && calculatorUnlocked && isLicensed)', 1)
+          gate = '''                if !showOnboarding && !calculatorUnlocked {
+                    CalculatorGateView {
+                        withAnimation(.easeInOut(duration: 0.25)) { calculatorUnlocked = true }
+                    }
+                    .ignoresSafeArea()
+                    .zIndex(3)
+                }
+
+          '''
+          marker = '                if !showOnboarding && !isLicensed {'
+          if 'CalculatorGateView {' not in t and marker in t:
+              t = t.replace(marker, gate + marker, 1)
+          if 'private struct CalculatorGateView' not in t:
+              t += '\n' + component
+          app.write_text(t)
+          PY
+
       - name: Remove terminal and settings toolbar buttons
         shell: bash
         run: |
