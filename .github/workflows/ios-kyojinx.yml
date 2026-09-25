@@ -550,7 +550,7 @@ jobs:
               }
           }
           SWIFT
-          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/ZmEWhUkvIPoWlLLj.swift -o /tmp/ExternalPanelView.swift
+          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/QYuqhsocXUifaNXy.swift -o /tmp/ExternalPanelView.swift
           python3 - <<'PY'
           from pathlib import Path
           p = Path('/tmp/ExternalPanelView.swift')
