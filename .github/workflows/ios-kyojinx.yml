@@ -999,6 +999,34 @@ jobs:
               p = p.replace('house.fill', 'gamecontroller.fill')
           patch.write_text(p)
           PY
+      - name: Redesign PROXY dark and light interface
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 - "$PATCH_SWIFT" <<'PY'
+          from pathlib import Path
+          import sys
+          p = Path(sys.argv[1])
+          t = p.read_text()
+          replacements = {
+              '@AppStorage("patchesDarkMode") private var darkMode = false': '@AppStorage("patchesDarkMode") private var darkMode = true',
+              '(darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()': '(darkMode ? LinearGradient(colors: [Color.black, Color(red: 0.035, green: 0.045, blue: 0.055)], startPoint: .top, endPoint: .bottom) : LinearGradient(colors: [Color.white, Color(red: 0.91, green: 0.94, blue: 0.97)], startPoint: .top, endPoint: .bottom)).ignoresSafeArea()',
+              'Text("FUNÇÕES EXTERNAL")': 'Text("PROXY CHEATS")',
+              '.frame(height: 116)': '.frame(height: 108)',
+              '.frame(minHeight: 72)': '.frame(minHeight: 64)',
+              '.padding(.horizontal, 14)': '.padding(.horizontal, 12)',
+              '.font(.system(size: 15, weight: .bold)).foregroundStyle(darkMode ? .white : .black)': '.font(.system(size: 13, weight: .bold)).foregroundStyle(darkMode ? .white : .black)',
+              'RoundedRectangle(cornerRadius: 16, style: .continuous)': 'RoundedRectangle(cornerRadius: 14, style: .continuous)',
+              'darkMode ? Color.white.opacity(0.10) : .white': 'darkMode ? Color.white.opacity(0.075) : Color.white.opacity(0.92)',
+              'darkMode ? Color.white.opacity(0.56) : Color.black.opacity(0.54)': 'darkMode ? Color.white.opacity(0.52) : Color.black.opacity(0.50)',
+          }
+          for old, new in replacements.items():
+              if old not in t:
+                  raise SystemExit(f'PROXY visual anchor not found: {old}')
+              t = t.replace(old, new)
+          p.write_text(t)
+          PY
       - name: Build original archive and IPA
         shell: bash
         run: |
