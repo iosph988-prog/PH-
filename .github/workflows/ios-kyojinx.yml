@@ -276,7 +276,7 @@ jobs:
                       remoteCatalog = await catalog
                       logoURLs = await logos
                       logoURLs["free-fire"] = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/EZqbvtgDYsGIkKZX.png"
-                      logoURLs["free-fire-max"] = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/YFUtKaqaeIhqYQzU.png"
+                      logoURLs["free-fire-max"] = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/WLLuKDdqFnxonorm.png"
                   }
               }
           
