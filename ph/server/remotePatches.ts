@@ -149,7 +149,7 @@ export async function listRemotePatchesForLicense(input: { key: string; deviceId
   const licenseHash = hash(input.key.trim());
   const externalTab = (value: string | null) => {
     const normalized = String(value || "").trim().toUpperCase();
-    return ({ MIRA: "aim", AIM: "aim", ESP: "esp", GERAL: "general", GENERAL: "general", "RAIO-X": "xray", XRAY: "xray", OUTROS: "other", OTHER: "other" } as Record<string, string>)[normalized] || "other";
+    return ({ MIRA: "aim", AIM: "aim", "FUNÇÕES": "aim", FUNCTIONS: "aim", ESP: "esp", GERAL: "general", GENERAL: "general", "EXTRAS/FERRAMENTAS": "general", EXTRAS: "general", FERRAMENTAS: "general", TOOLS: "general", "RAIO-X": "xray", XRAY: "xray", OUTROS: "other", OTHER: "other", PERFIL: "profile", PROFILE: "profile" } as Record<string, string>)[normalized] || "other";
   };
   return { ...validation, patches: catalog.map(patch => {
     const rawGame = String(patch.game || "").trim().toLowerCase();
