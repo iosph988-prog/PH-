@@ -1060,9 +1060,7 @@ jobs:
               .padding(.bottom, 2)
           }
           '''
-          t, count = re.subn(r'              private var header: some View \{.*?              private func sectionTitle', header + '              private func sectionTitle', t, count=1, flags=re.S)
-          if count != 1:
-              raise SystemExit('header block not found')
+          t, count = re.subn(r'\s*private var header: some View \{.*?\s*private func sectionTitle', '\n' + header + '              private func sectionTitle', t, count=1, flags=re.S)
           section = '''              private func sectionTitle(_ title: String, top: CGFloat) -> some View {
                   HStack(spacing: 8) {
                       Image(systemName: title.contains("JOGO") ? "gamecontroller.fill" : "gearshape.fill")
@@ -1076,9 +1074,7 @@ jobs:
                   .padding(.top, top)
               }
           '''
-          t, count = re.subn(r'              private func sectionTitle\(_ title: String, top: CGFloat\) -> some View \{.*?              private var gameCards', section + '              private var gameCards', t, count=1, flags=re.S)
-          if count != 1:
-              raise SystemExit('section title block not found')
+          t, count = re.subn(r'\s*private func sectionTitle\(_ title: String, top: CGFloat\) -> some View \{.*?\s*private var gameCards', '\n' + section + '              private var gameCards', t, count=1, flags=re.S)
           cards = '''              private var gameCards: some View {
                   GeometryReader { proxy in
                       let width = max(145, (proxy.size.width - 10) / 2)
@@ -1124,9 +1120,7 @@ jobs:
                   .padding(.top, 12)
               }
           '''
-          t, count = re.subn(r'              private var gameCards: some View \{.*?              private var featureList', cards + '              private var featureList', t, count=1, flags=re.S)
-          if count != 1:
-              raise SystemExit('game cards block not found')
+          t, count = re.subn(r'\s*private var gameCards: some View \{.*?\s*private var featureList', '\n' + cards + '              private var featureList', t, count=1, flags=re.S)
           p.write_text(t)
           PY
       - name: Build original archive and IPA
