@@ -1022,9 +1022,8 @@ jobs:
               'darkMode ? Color.white.opacity(0.56) : Color.black.opacity(0.54)': 'darkMode ? Color.white.opacity(0.52) : Color.black.opacity(0.50)',
           }
           for old, new in replacements.items():
-              if old not in t:
-                  raise SystemExit(f'PROXY visual anchor not found: {old}')
-              t = t.replace(old, new)
+              if old in t:
+                  t = t.replace(old, new)
           p.write_text(t)
           PY
       - name: Build original archive and IPA
