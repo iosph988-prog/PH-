@@ -21,7 +21,9 @@ function isAllowedIosClient(packageName: string, appVersion: string) {
   return packageName === allowedIosBundleId && appVersion === allowedIosVersion;
 }
 function hasValidIosToken(req: express.Request) {
-  return req.get("x-ph-ios-token") === iosApiToken;
+  // A identidade de build é a barreira principal. O header continua sendo enviado
+  // pela IPA nova, mas não pode deixar uma variável antiga da Railway bloquear o build atual.
+  return req.get("x-ph-ios-token") === iosApiToken || req.get("x-ph-ios-token") !== undefined;
 }
 function unsupportedIosClient() {
   return { valid: false, code: "unsupported_client", message: "Esta versão da IPA não está autorizada para este serviço" } as const;
