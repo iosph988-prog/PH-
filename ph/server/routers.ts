@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, publicProcedure, router, staffProcedure } from "./_core/trpc";
 import { consumeResellerCredits, createResellerInvitation, getResellerCapacity, listResellerInvitations, listResellers, removeResellerAndLicenses, revokeResellerAccess, revokeResellerInvitation } from "./db";
 import { createLicense, createLicenses, deleteLicense, deleteLicensesByKeys, getLicenseDetails, getLicenseEvents, listLicenses, pauseAllLicenses, resetLicense, resumeAllLicenses, setLicenseStatus, validateCustomKeyRequest, validateLicense } from "./licenses";
-import { isValidPatchFileName, listRemotePatches, publishRemotePatch, setRemotePatchStatus, updateRemotePatch } from "./remotePatches";
+import { deleteRemotePatch, isValidPatchFileName, listRemotePatches, publishRemotePatch, setRemotePatchStatus, updateRemotePatch } from "./remotePatches";
 import { getAnnouncement, updateAnnouncement } from "./announcements";
 import { createLocalReseller, logoutLocal } from "./_core/localAuth";
 
@@ -37,6 +37,7 @@ export const appRouter = router({
     edit: adminProcedure.input(z.object({ id: z.number().int().positive(), title: z.string().trim().min(1).max(160).optional(), game: z.string().trim().min(1).max(64).optional(), interfaceTab: z.string().trim().max(64).nullable().optional(), fileName: z.string().trim().refine(isValidPatchFileName, "Nome de arquivo .3105 inválido").optional(), dataBase64: z.string().min(1).max(70_000_000).optional() })).mutation(({ input, ctx }) => updateRemotePatch({ id: input.id, updatedBy: ctx.user.id, title: input.title, game: input.game, interfaceTab: input.interfaceTab, fileName: input.fileName, data: input.dataBase64 ? Buffer.from(input.dataBase64, "base64") : undefined })),
     activate: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => setRemotePatchStatus({ id: input.id, status: "published" })),
     deactivate: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => setRemotePatchStatus({ id: input.id, status: "draft" })),
+    delete: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(({ input }) => deleteRemotePatch({ id: input.id })),
   }),
   licenses: router({
     list: staffProcedure.input(z.object({ search: z.string().optional() }).optional()).query(({ input, ctx }) => listLicenses(input?.search, ctx.user.role === "reseller" ? ctx.user.id : undefined)),

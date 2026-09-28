@@ -142,6 +142,16 @@ export async function setRemotePatchStatus(input: { id: number; status: "publish
   return { success: true, status: input.status } as const;
 }
 
+export async function deleteRemotePatch(input: { id: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const patch = (await db.select({ id: remotePatches.id }).from(remotePatches).where(eq(remotePatches.id, input.id)).limit(1))[0];
+  if (!patch) throw new Error("Patch não encontrado");
+  await db.delete(remotePatchVersions).where(eq(remotePatchVersions.patchId, input.id));
+  await db.delete(remotePatches).where(eq(remotePatches.id, input.id));
+  return { success: true, id: input.id } as const;
+}
+
 export async function listRemotePatchesForLicense(input: { key: string; deviceId: string; packageName: string; appVersion: string; baseUrl: string; section?: PatchSection }) {
   const validation = await validateLicense(input);
   if (!validation.valid) return validation;
