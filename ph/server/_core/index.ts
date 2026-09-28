@@ -14,6 +14,19 @@ import { getAuthorizedPatchUrl, listRemotePatchesForLicense } from "../remotePat
 import { serveStatic, setupVite } from "./vite";
 import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
+const allowedIosBundleId = process.env.PH_ALLOWED_IOS_BUNDLE_ID || "com.apple.mobile.MobileHouseArrest";
+const allowedIosVersion = process.env.PH_ALLOWED_IOS_VERSION || "2026.09.28";
+const iosApiToken = process.env.PH_IOS_API_TOKEN || "ph_cPPHXq0gagi9fy8TN3XyOJuDpw0XbNk_xFBfOlx6Mmk";
+function isAllowedIosClient(packageName: string, appVersion: string) {
+  return packageName === allowedIosBundleId && appVersion === allowedIosVersion;
+}
+function hasValidIosToken(req: express.Request) {
+  return req.get("x-ph-ios-token") === iosApiToken;
+}
+function unsupportedIosClient() {
+  return { valid: false, code: "unsupported_client", message: "Esta versão da IPA não está autorizada para este serviço" } as const;
+}
+
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -57,9 +70,11 @@ async function startServer() {
   app.post("/api/auth/local/logout", (req, res) => { logoutLocal(req, res); return res.status(200).json({ ok: true }); });
   app.post("/api/license/validate", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
     if (typeof key !== "string" || typeof deviceId !== "string" || typeof packageName !== "string" || typeof appVersion !== "string" || !key.trim() || !deviceId.trim() || !packageName.trim() || !appVersion.trim()) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
     }
+    if (!isAllowedIosClient(packageName, appVersion)) return res.status(403).json(unsupportedIosClient());
     try {
       const result = await validateLicense({ key, deviceId, packageName, appVersion, ipAddress: req.ip });
       return res.status(200).json(result);
@@ -71,9 +86,11 @@ async function startServer() {
 
   app.post("/api/patches/external/catalog", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
     if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
     }
+    if (!isAllowedIosClient(packageName, appVersion)) return res.status(403).json(unsupportedIosClient());
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
@@ -88,9 +105,11 @@ async function startServer() {
 
   app.post("/api/patches/catalog", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
     if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
     }
+    if (!isAllowedIosClient(packageName, appVersion)) return res.status(403).json(unsupportedIosClient());
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;

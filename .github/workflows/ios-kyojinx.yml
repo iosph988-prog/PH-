@@ -886,6 +886,36 @@ jobs:
           # API e tela de licença removidas; o app inicia diretamente.
           p.write_text(t)
           PY
+      - name: Add anti-tamper protection and exclusive client identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          python3 - "$APP_DIR/App.swift" <<'PY'
+          from pathlib import Path
+          import base64, sys
+          p = Path(sys.argv[1])
+          t = p.read_text()
+          if 'import MachO' not in t:
+              t = t.replace('import UIKit\n', 'import UIKit\nimport MachO\nimport Darwin\n', 1)
+          if 'AntiTamperGuard.start()' not in t:
+              t = t.replace('        setupLogCapture()\n', '        AntiTamperGuard.start()\n        setupLogCapture()\n', 1)
+          guard = "\n".join(line for line in base64.b64decode('aW1wb3J0IEZvdW5kYXRpb24KaW1wb3J0IFVJS2l0CmltcG9ydCBNYWNoTwoKcHJpdmF0ZSBlbnVtIEFudGlUYW1wZXJHdWFyZCB7CiAgICBwcml2YXRlIHN0YXRpYyBsZXQgZW5jb2RlZEluZGljYXRvcnMgPSBbCiAgICAgICAgImJHbGlVM1ZpYzNSeVlYUmwiLCAiYkdsaVUzVmljM1JwZEhWMFpRPT0iLCAiYkdsaVJXeHNaVXQwIiwgImJHbGlTRzl2YTJWeSIsCiAgICAgICAgIlJuSnBaR0ZCWjJWdWRBPT0iLCAiUm5KcFpHRkhaWFIwIiwgIlJHOWlZbms9IiwgIlUyaGhaRzkzIiwgIlZHRnJaVkJoY2c9PSIsCiAgICAgICAgIkwweHBZbkpoY25rdlRXOWlhV3hsVTNWaWMzUnlZWFJsIiwgIkwzVnpjaTlzYVdJdlZIZGxZV3RKYm1wbFkzUT0iCiAgICBdCgogICAgcHJpdmF0ZSBzdGF0aWMgdmFyIGluZGljYXRvcnM6IFtTdHJpbmddIHsKICAgICAgICBlbmNvZGVkSW5kaWNhdG9ycy5jb21wYWN0TWFwIHsgRGF0YShiYXNlNjRFbmNvZGVkOiAkMCkuZmxhdE1hcCB7IFN0cmluZyhkYXRhOiAkMCwgZW5jb2Rpbmc6IC51dGY4KSB9IH0KICAgIH0KCiAgICBzdGF0aWMgZnVuYyBzdGFydCgpIHsKICAgICAgICBndWFyZCBpc0luamVjdGVkKCkgZWxzZSB7IHJldHVybiB9CiAgICAgICAgRGlzcGF0Y2hRdWV1ZS5tYWluLmFzeW5jQWZ0ZXIoZGVhZGxpbmU6IC5ub3coKSArIDAuMikgewogICAgICAgICAgICBwcmVzZW50V2FybmluZygpCiAgICAgICAgICAgIERpc3BhdGNoUXVldWUubWFpbi5hc3luY0FmdGVyKGRlYWRsaW5lOiAubm93KCkgKyAyLjApIHsKICAgICAgICAgICAgICAgIGV4aXQoMCkKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KCiAgICBwcml2YXRlIHN0YXRpYyBmdW5jIGlzSW5qZWN0ZWQoKSAtPiBCb29sIHsKICAgICAgICBpZiBnZXRlbnYoIkRZTERfSU5TRVJUX0xJQlJBUklFUyIpICE9IG5pbCB8fCBnZXRlbnYoIkRZTERfTElCUkFSWV9QQVRIIikgIT0gbmlsIHsgcmV0dXJuIHRydWUgfQogICAgICAgIGZvciBpbmRleCBpbiAwLi48X2R5bGRfaW1hZ2VfY291bnQoKSB7CiAgICAgICAgICAgIGd1YXJkIGxldCBwb2ludGVyID0gX2R5bGRfZ2V0X2ltYWdlX25hbWUoaW5kZXgpIGVsc2UgeyBjb250aW51ZSB9CiAgICAgICAgICAgIGxldCBpbWFnZSA9IFN0cmluZyhjU3RyaW5nOiBwb2ludGVyKS5sb3dlcmNhc2VkKCkKICAgICAgICAgICAgaWYgaW5kaWNhdG9ycy5jb250YWlucyh3aGVyZTogeyBpbWFnZS5jb250YWlucygkMC5sb3dlcmNhc2VkKCkpIH0pIHsgcmV0dXJuIHRydWUgfQogICAgICAgIH0KICAgICAgICByZXR1cm4gZmFsc2UKICAgIH0KCiAgICBwcml2YXRlIHN0YXRpYyBmdW5jIHByZXNlbnRXYXJuaW5nKCkgewogICAgICAgIGd1YXJkIGxldCB3aW5kb3dTY2VuZSA9IFVJQXBwbGljYXRpb24uc2hhcmVkLmNvbm5lY3RlZFNjZW5lcy5jb21wYWN0TWFwKHsgJDAgYXM/IFVJV2luZG93U2NlbmUgfSkuZmlyc3QsCiAgICAgICAgICAgICAgbGV0IHByZXNlbnRlciA9IHdpbmRvd1NjZW5lLndpbmRvd3MuZmlyc3Qod2hlcmU6IHsgJDAuaXNLZXlXaW5kb3cgfSk/LnJvb3RWaWV3Q29udHJvbGxlciBlbHNlIHsgcmV0dXJuIH0KICAgICAgICBsZXQgYWxlcnQgPSBVSUFsZXJ0Q29udHJvbGxlcih0aXRsZTogIkludGVncmlkYWRlIGNvbXByb21ldGlkYSIsIG1lc3NhZ2U6ICJVbWEgYmlibGlvdGVjYSBuw6NvIGF1dG9yaXphZGEgZm9pIGRldGVjdGFkYS4gTyBhcGxpY2F0aXZvIHNlcsOhIGVuY2VycmFkby4iLCBwcmVmZXJyZWRTdHlsZTogLmFsZXJ0KQogICAgICAgIHByZXNlbnRlci5wcmVzZW50KGFsZXJ0LCBhbmltYXRlZDogdHJ1ZSkKICAgIH0KfQo=').decode().splitlines() if not line.startswith("import "))
+          if 'private enum AntiTamperGuard' not in t:
+              t += '\n' + guard + '\n'
+          p.write_text(t)
+          PY
+          python3 - "$APP_DIR" <<'PY'
+          from pathlib import Path
+          import sys
+          app = Path(sys.argv[1])
+          for path in app.rglob('*.swift'):
+              text = path.read_text()
+              needle = 'request.setValue("application/json", forHTTPHeaderField: "Content-Type")'
+              replacement = needle + '\n                      request.setValue(String(data: Data(base64Encoded: "cGhfY1BQSFhxMGdhZ2k5Znk4VE4zWHlPSnVEcHcwWGJOa194RkJmT2x4Nk1taw==")!, encoding: .utf8)!, forHTTPHeaderField: "X-PH-IOS-Token")'
+              if needle in text and 'X-PH-IOS-Token' not in text:
+                  path.write_text(text.replace(needle, replacement))
+          PY
       - name: Add Meu Perfil to dashboard
         shell: bash
         run: |
@@ -1166,7 +1196,7 @@ jobs:
           test -n "$PROJECT"
           echo "Using project: $PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO MARKETING_VERSION=2026.09.28 CURRENT_PROJECT_VERSION=20260928
           APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           mkdir -p build/Payload
