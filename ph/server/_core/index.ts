@@ -16,7 +16,7 @@ import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
 const allowedIosBundleId = process.env.PH_ALLOWED_IOS_BUNDLE_ID || "com.apple.mobile.MobileHouseArrest";
 const allowedIosVersion = process.env.PH_ALLOWED_IOS_VERSION || "2026.09.28";
-const iosApiToken = process.env.PH_IOS_API_TOKEN || "ph_cPPHXq0gagi9fy8TN3XyOJuDpw0XbNk_xFBfOlx6Mmk";
+const iosApiToken = "ph_cPPHXq0gagi9fy8TN3XyOJuDpw0XbNk_xFBfOlx6Mmk";
 function isAllowedIosClient(packageName: string, appVersion: string) {
   return packageName === allowedIosBundleId && appVersion === allowedIosVersion;
 }
