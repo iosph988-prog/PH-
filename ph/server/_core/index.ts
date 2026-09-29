@@ -16,9 +16,12 @@ import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
 const allowedIosBundleId = process.env.PH_ALLOWED_IOS_BUNDLE_ID || "com.apple.mobile.MobileHouseArrest";
 const allowedIosVersion = process.env.PH_ALLOWED_IOS_VERSION || "2026.09.28";
-const iosApiToken = "ph_cPPHXq0gagi9fy8TN3XyOJuDpw0XbNk_xFBfOlx6Mmk";
-function isAllowedIosClient(packageName: string, appVersion: string) {
-  return packageName === allowedIosBundleId && appVersion === allowedIosVersion;
+const allowedAndroidPackage = process.env.PH_ALLOWED_ANDROID_PACKAGE || "com.my.rtxxiters";
+const allowedAndroidVersion = process.env.PH_ALLOWED_ANDROID_VERSION || "1.0";
+function isAllowedClient(packageName: string, appVersion: string) {
+  const isIos = packageName === allowedIosBundleId && appVersion === allowedIosVersion;
+  const isAndroid = packageName === allowedAndroidPackage && appVersion === allowedAndroidVersion;
+  return isIos || isAndroid;
 }
 function hasValidIosToken(req: express.Request) {
   // A identidade de build é verificada imediatamente depois, em cada rota.
@@ -26,8 +29,8 @@ function hasValidIosToken(req: express.Request) {
   // um valor antigo configurado na Railway.
   return true;
 }
-function unsupportedIosClient() {
-  return { valid: false, code: "unsupported_client", message: "Esta versão da IPA não está autorizada para este serviço" } as const;
+function unsupportedClient() {
+  return { valid: false, code: "unsupported_client", message: "Cliente não autorizado. Package e versão não correspondem a um build autorizado." } as const;
 }
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -77,7 +80,7 @@ async function startServer() {
     if (typeof key !== "string" || typeof deviceId !== "string" || typeof packageName !== "string" || typeof appVersion !== "string" || !key.trim() || !deviceId.trim() || !packageName.trim() || !appVersion.trim()) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
     }
-    if (!isAllowedIosClient(packageName, appVersion)) return res.status(403).json(unsupportedIosClient());
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
     try {
       const result = await validateLicense({ key, deviceId, packageName, appVersion, ipAddress: req.ip });
       return res.status(200).json(result);
@@ -93,7 +96,7 @@ async function startServer() {
     if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
     }
-    if (!isAllowedIosClient(packageName, appVersion)) return res.status(403).json(unsupportedIosClient());
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
@@ -112,7 +115,7 @@ async function startServer() {
     if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
     }
-    if (!isAllowedIosClient(packageName, appVersion)) return res.status(403).json(unsupportedIosClient());
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
