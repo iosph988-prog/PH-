@@ -849,7 +849,15 @@ jobs:
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
           PBX="$APP_DIR.xcodeproj/project.pbxproj"
           echo "aW1wb3J0IFN3aWZ0VUkKaW1wb3J0IEZvdW5kYXRpb24KCkBNYWluQWN0b3IKZmluYWwgY2xhc3MgTGljZW5zZU1hbmFnZXI6IE9ic2VydmFibGVPYmplY3QgewogICAgZW51bSBTdGF0ZTogRXF1YXRhYmxlIHsKICAgICAgICBjYXNlIGxvYWRpbmcKICAgICAgICBjYXNlIG5lZWRzS2V5CiAgICAgICAgY2FzZSB2YWxpZGF0aW5nCiAgICAgICAgY2FzZSB2YWxpZGF0ZWQKICAgICAgICBjYXNlIGZhaWxlZChTdHJpbmcpCiAgICB9CiAgICBAUHVibGlzaGVkIHByaXZhdGUoc2V0KSB2YXIgc3RhdGU6IFN0YXRlID0gLnZhbGlkYXRlZAogICAgQFB1Ymxpc2hlZCB2YXIgYXBpS2V5ID0gIiIKICAgIHZhciBpc1ZhbGlkYXRlZDogQm9vbCB7IHRydWUgfQogICAgaW5pdCgpIHt9CiAgICBmdW5jIHN1Ym1pdEtleSgpIHsgc3RhdGUgPSAudmFsaWRhdGVkIH0KfQ==" | base64 --decode > "$APP_DIR/LicenseManager.swift"
-          cat >> "$APP_DIR/LicenseManager.swift" <<'SWIFT'
+          python3 - "$APP_DIR/App.swift" <<'PY3'
+          from pathlib import Path
+          p = Path(__import__("sys").argv[1])
+          t = p.read_text()
+          if "import CryptoKit" not in t:
+              t = t.replace("import Foundation\n", "import Foundation\nimport CryptoKit\n", 1)
+          p.write_text(t)
+          PY3
+          cat >> "$APP_DIR/App.swift" <<'SWIFT'
 
           private enum Branding { static let appName = "Nubank" }
           private extension AppTheme { static var cardBackground: Color { Color(.secondarySystemBackground) } }
@@ -953,9 +961,16 @@ jobs:
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
           # AES-256-GCM payloads are produced in this build step; plaintext URLs
           # are never written as Swift literals in the final generated sources.
-          cat >> "$APP_DIR/LicenseManager.swift" <<'SWIFT'
+          python3 - "$APP_DIR/App.swift" <<'PY3'
+          from pathlib import Path
+          p = Path(__import__("sys").argv[1])
+          t = p.read_text()
+          if "import CryptoKit" not in t:
+              t = t.replace("import Foundation\n", "import Foundation\nimport CryptoKit\n", 1)
+          p.write_text(t)
+          PY3
+          cat >> "$APP_DIR/App.swift" <<'SWIFT'
 
-          import CryptoKit
           enum PHEncryptedString {
               private static let key = SymmetricKey(data: Data([123, 166, 243, 253, 235, 163, 70, 1, 158, 192, 113, 214, 181, 204, 157, 64, 199, 174, 67, 177, 13, 146, 152, 201, 171, 190, 42, 231, 189, 209, 152, 166]))
               private static let boxes: [String: (String, String, String)] = [
