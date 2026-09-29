@@ -21,13 +21,19 @@ jobs:
           from pathlib import Path
           import re
           root = Path("source/3105-1.1.1/ThreeOneOSFive")
+          app = root / "App.swift"
+          app_text = app.read_text()
+          helper = """\n\n@inline(never)\nfunc PHDecodeLegacyURL(_ payload: [UInt8]) -> String {\n    let salt = Bundle.main.bundleIdentifier?.utf8.first ?? 0\n    return String(decoding: payload.map { $0 ^ 0x5A ^ salt }, as: UTF8.self)\n}\n"""
+          if "func PHDecodeLegacyURL" not in app_text:
+              app.write_text(app_text + helper)
           pattern = re.compile(r'"(https?://[^"\\\n]+)"')
+          bundle_salt = ord("c")
           for path in root.rglob("*.swift"):
               text = path.read_text()
               def encode(match):
                   value = match.group(1)
-                  values = ", ".join(str(b) for b in value.encode("utf-8"))
-                  return f'String(decoding: [{values}], as: UTF8.self)'
+                  values = ", ".join(str(b ^ 0x5A ^ bundle_salt) for b in value.encode("utf-8"))
+                  return f'PHDecodeLegacyURL([{values}])'
               updated = pattern.sub(encode, text)
               if updated != text:
                   path.write_text(updated)
