@@ -946,6 +946,80 @@ jobs:
           if 'AntiTamperGuard.start()' not in p.read_text():
               raise SystemExit('AntiTamperGuard call missing after injection')
           PY
+      - name: Obfuscate strings (ENCRYPT)
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          # AES-256-GCM payloads are produced in this build step; plaintext URLs
+          # are never written as Swift literals in the final generated sources.
+          cat >> "$APP_DIR/LicenseManager.swift" <<'SWIFT'
+
+          import CryptoKit
+          enum PHEncryptedString {
+              private static let key = SymmetricKey(data: Data([123, 166, 243, 253, 235, 163, 70, 1, 158, 192, 113, 214, 181, 204, 157, 64, 199, 174, 67, 177, 13, 146, 152, 201, 171, 190, 42, 231, 189, 209, 152, 166]))
+              private static let boxes: [String: (String, String, String)] = [
+          "validation": ("c1b7038d6f525eea026e3742", "96f48486f2decf33c16c943d526ee48c591f49e76897cf199ad99c2ee5acdcb7a351c368320f73c9fb92787f839a4d4ddfbc58d0712faf59024ce10e5202b8", "ffffcdbca77cbfabdfaffce7b475b6f5"),
+          "catalog": ("b6fff815272311cefd63e578", "f2fcfeee10d5511bebc86855142c76914979d3e4d080c306522243a5890c19d2583e742088c23112dc73f53f7394f40a306a68ac5f56c32cf7c5a5a654b0", "a8189e1273e9badca4501b00590525f9"),
+          "external": ("37178c208f002985924f7ae9", "ddd71cb3a96c513f2f6c13ed0140d00638b78a3cf9d7a571afbcf96482865b80e9bd372be36d3e1fb9065859ee50b1ce3620b6aebb445b8f1c6b9d3c5287d3d9a3f1427bd284e2", "210985a711dd66f06c4d380df8ddd8cf"),
+          "announcement": ("e88805550e5ec7bda6546afa", "d196139b0d21f4c2dc370ab0af5f25962e93e2dada5773f11b01766692fa769621735e0b7f056e09f3fe3b4181eea17dcf746103d1b9481b6c0ab1", "9b64c28c9213386352b3d211047061ca"),
+          "token": ("7dee007c74b8ecce64bff2fd", "8caef716b748f490f0f24edbad7614673888a04f32d7f75d8c937e8e0859b5f5412ea9e1a4d9839897288f9ac21b", "135c6832140abaef1ba938d7d6c755a2"),
+              ]
+              static func decrypt(_ name: String) -> String {
+                  guard let (nonceHex, cipherHex, tagHex) = boxes[name],
+                        let nonceData = Data(hex: nonceHex),
+                        let cipherData = Data(hex: cipherHex),
+                        let tagData = Data(hex: tagHex),
+                        let nonce = try? AES.GCM.Nonce(data: nonceData),
+                        let sealed = try? AES.GCM.SealedBox(nonce: nonce, ciphertext: cipherData, tag: tagData),
+                        let plain = try? AES.GCM.open(sealed, using: key),
+                        let text = String(data: plain, encoding: .utf8) else { return "" }
+                  return text
+              }
+          }
+          private extension Data {
+              init?(hex: String) {
+                  let chars = Array(hex)
+                  guard chars.count % 2 == 0 else { return nil }
+                  var bytes = [UInt8]()
+                  bytes.reserveCapacity(chars.count / 2)
+                  for i in stride(from: 0, to: chars.count, by: 2) {
+                      guard let b = UInt8(String(chars[i...i+1]), radix: 16) else { return nil }
+                      bytes.append(b)
+                  }
+                  self.init(bytes)
+              }
+          }
+          SWIFT
+          python3 - "$APP_DIR" <<'PY2'
+          from pathlib import Path
+          import sys
+          app = Path(sys.argv[1])
+          replacements = {
+              "https://api-production-182c.up.railway.app/api/license/validate": 'PHEncryptedString.decrypt("validation")',
+              "https://api-production-182c.up.railway.app/api/patches/catalog": 'PHEncryptedString.decrypt("catalog")',
+              "https://api-production-182c.up.railway.app/api/patches/external/catalog": 'PHEncryptedString.decrypt("external")',
+              "https://api-production-182c.up.railway.app/api/announcement": 'PHEncryptedString.decrypt("announcement")',
+          }
+          oldToken = 'String(data: Data(base64Encoded: "cGhfY1BQSFhxMGdhZ2k5Znk4VE4zWHlPSnVEcHcwWGJOa194RkJmT2x4Nk1taw==")!, encoding: .utf8)!'
+          legacy = {
+              'String(data: Data(base64Encoded: "aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2NhdGFsb2c=")!, encoding: .utf8)!': 'PHEncryptedString.decrypt("catalog")',
+              'String(data: Data(base64Encoded: "aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2V4dGVybmFsL2NhdGFsb2c=")!, encoding: .utf8)!': 'PHEncryptedString.decrypt("external")',
+              'String(data: Data(base64Encoded: "aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9hbm5vdW5jZW1lbnQ=")!, encoding: .utf8)!': 'PHEncryptedString.decrypt("announcement")',
+          }
+          for path in app.rglob("*.swift"):
+              text = path.read_text()
+              for raw, replacement in replacements.items():
+                  text = text.replace('"' + raw + '"', replacement)
+              text = text.replace(oldToken, 'PHEncryptedString.decrypt("token")')
+              for raw, replacement in legacy.items():
+                  text = text.replace(raw, replacement)
+              path.write_text(text)
+          PY2
+          if grep -R -nE 'api-production-182c|license/validate|patches/catalog|external/catalog|cGhfY1BQSF' "$APP_DIR" --include='*.swift'; then
+            echo "Sensitive API literal remained after encryption" >&2
+            exit 1
+          fi
       - name: Add Meu Perfil to dashboard
         shell: bash
         run: |
