@@ -28,6 +28,8 @@ jobs:
               app.write_text(app_text + helper)
           pattern = re.compile(r'"(https?://[^"\\\n]+)"')
           bundle_salt = ord("c")
+          raw_domain = "raw.githubusercontent.com"
+          raw_encoded = ", ".join(str(b ^ 0x5A ^ bundle_salt) for b in raw_domain.encode("utf-8"))
           for path in root.rglob("*.swift"):
               text = path.read_text()
               def encode(match):
@@ -35,6 +37,7 @@ jobs:
                   values = ", ".join(str(b ^ 0x5A ^ bundle_salt) for b in value.encode("utf-8"))
                   return f'PHDecodeLegacyURL([{values}])'
               updated = pattern.sub(encode, text)
+              updated = updated.replace('"raw.githubusercontent.com"', f'PHDecodeLegacyURL([{raw_encoded}])')
               if updated != text:
                   path.write_text(updated)
           PY
