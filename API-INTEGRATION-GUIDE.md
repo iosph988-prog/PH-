@@ -162,10 +162,10 @@ Não coloque a senha do administrador, o cookie de sessão ou o segredo do servi
 
 ## Documentação completa
 
-[Documentação completa da API](https://github.com/iosph988-prog/PH-/blob/main/API-DOCUMENTATION.md)
+[Documentação completa da API](/blob/main/API-DOCUMENTATION.md)
 
 ## Referências
 
-[1]: https://github.com/iosph988-prog/PH- "Repositório do projeto PH-"
+[1]:  "Repositório do projeto PH-"
 
 [2]: https://api-production-182c.up.railway.app "API pública implantada"

@@ -10,7 +10,7 @@ A URL pública atual da API é:
 https://api-production-182c.up.railway.app
 ```
 
-O código-fonte está no repositório [PH-](https://github.com/iosph988-prog/PH-). O backend fica no diretório `ph/`.
+O código-fonte está no repositório [PH-](). O backend fica no diretório `ph/`.
 
 ## Autenticação administrativa e de subrevendedores
 
@@ -136,7 +136,7 @@ pnpm run build
 
 O Railway está conectado ao repositório `iosph988-prog/PH-` e usa `ph` como diretório raiz. Um push na branch `main` dispara a implantação configurada.
 
-O workflow iOS é [ios-kyojinx.yml](https://github.com/iosph988-prog/PH-/blob/main/.github/workflows/ios-kyojinx.yml). Ele injeta as correções da interface e compila o artefato IPA por meio do GitHub Actions.
+O workflow iOS é [ios-kyojinx.yml](/blob/main/.github/workflows/ios-kyojinx.yml). Ele injeta as correções da interface e compila o artefato IPA por meio do GitHub Actions.
 
 ## Diagnóstico rápido
 
@@ -148,15 +148,15 @@ Se um patch não aparecer no External, confirme que a publicação está ativa, 
 
 ## Referências
 
-[1]: https://github.com/iosph988-prog/PH- "Repositório do projeto PH-"
+[1]:  "Repositório do projeto PH-"
 
-[2]: https://github.com/iosph988-prog/PH-/blob/main/.github/workflows/ios-kyojinx.yml "Workflow de compilação da IPA"
+[2]: /blob/main/.github/workflows/ios-kyojinx.yml "Workflow de compilação da IPA"
 
 [3]: https://api-production-182c.up.railway.app "API pública implantada"
 
-[4]: https://github.com/iosph988-prog/PH-/blob/main/ph/server/_core/index.ts "Rotas HTTP da API"
+[4]: /blob/main/ph/server/_core/index.ts "Rotas HTTP da API"
 
-[5]: https://github.com/iosph988-prog/PH-/blob/main/ph/server/remotePatches.ts "Catálogo e download de patches"
+[5]: /blob/main/ph/server/remotePatches.ts "Catálogo e download de patches"
 
 
 ## Atualização de segurança — build autorizado 2026.09.28
