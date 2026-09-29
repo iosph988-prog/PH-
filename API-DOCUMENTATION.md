@@ -157,3 +157,62 @@ Se um patch não aparecer no External, confirme que a publicação está ativa, 
 [4]: https://github.com/iosph988-prog/PH-/blob/main/ph/server/_core/index.ts "Rotas HTTP da API"
 
 [5]: https://github.com/iosph988-prog/PH-/blob/main/ph/server/remotePatches.ts "Catálogo e download de patches"
+
+
+## Atualização de segurança — build autorizado 2026.09.28
+
+A versão de cliente atualmente autorizada pelo backend é:
+
+```text
+Bundle ID: com.apple.mobile.MobileHouseArrest
+Versão:   2026.09.28
+```
+
+As rotas móveis `/api/license/validate`, `/api/patches/catalog` e `/api/patches/external/catalog` recusam clientes que não correspondam simultaneamente ao Bundle ID e à versão configurados por `PH_ALLOWED_IOS_BUNDLE_ID` e `PH_ALLOWED_IOS_VERSION`.
+
+O header reservado para o cliente iOS é:
+
+```http
+X-PH-IOS-Token: <token-do-cliente>
+```
+
+Na revisão atual do código, o header é mantido no protocolo para compatibilidade, mas a função `hasValidIosToken()` não compara o valor recebido. Portanto, o header não deve ser tratado como fator de autenticação isolado. A autorização efetiva continua sendo feita pela licença, dispositivo, Bundle ID e versão. Para exigir o token também no servidor, configure `PH_IOS_API_TOKEN` no Railway e implemente a comparação do header usando comparação em tempo constante; não coloque o segredo em documentação pública.
+
+O catálogo do External aceita as categorias administrativas `MIRA`, `ESP`, `GERAL`, `RAIO-X`, `OUTROS`, `FUNÇÕES`, `EXTRAS/FERRAMENTAS` e `PERFIL`, convertendo-as para identificadores de cliente. Publicações External sem `interfaceTab` são rejeitadas.
+
+O workflow iOS atualizado também bloqueia a entrega de uma IPA que contenha um arquivo `.dylib` independente ou uma pasta singular `Framework/` no bundle. A pasta padrão `Frameworks/` continua reservada a dependências legítimas reconhecidas pelo aplicativo.
+
+### Códigos de resposta do cliente móvel
+
+| HTTP | Código | Ação recomendada |
+|---:|---|---|
+| 200 | `valid` | Continuar e usar o catálogo retornado. |
+| 400 | `invalid_request` | Corrigir campos obrigatórios. |
+| 403 | `unsupported_client` | Atualizar para o build autorizado. |
+| 403 | `invalid_key`, `revoked`, `expired`, `device_limit` | Exibir acesso negado e não tentar baixar. |
+| 403 | `download_forbidden` | Solicitar um novo catálogo/token. |
+| 503 | `service_unavailable` | Tratar como indisponibilidade temporária. |
+
+### Exemplo mínimo de integração
+
+```swift
+struct LicenseRequest: Encodable {
+    let key: String
+    let device_id: String
+    let package: String
+    let app_version: String
+}
+
+var request = URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/patches/catalog")!)
+request.httpMethod = "POST"
+request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.setValue("<token-do-cliente>", forHTTPHeaderField: "X-PH-IOS-Token")
+request.httpBody = try JSONEncoder().encode(LicenseRequest(
+    key: licenseKey,
+    device_id: deviceIdentifier,
+    package: "com.apple.mobile.MobileHouseArrest",
+    app_version: "2026.09.28"
+))
+```
+
+Nunca confie apenas na IPA para autorização: o backend deve continuar sendo a autoridade final para licenças, catálogo, status de publicação e downloads.
