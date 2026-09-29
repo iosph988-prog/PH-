@@ -14,6 +14,24 @@ jobs:
           tar -xzf 3105-1.1.1-original.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+      - name: Hide legacy URLs from executable
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root = Path("source/3105-1.1.1/ThreeOneOSFive")
+          pattern = re.compile(r'"(https?://[^"\\\n]+)"')
+          for path in root.rglob("*.swift"):
+              text = path.read_text()
+              def encode(match):
+                  value = match.group(1)
+                  values = ", ".join(str(b) for b in value.encode("utf-8"))
+                  return f'String(decoding: [{values}], as: UTF8.self)'
+              updated = pattern.sub(encode, text)
+              if updated != text:
+                  path.write_text(updated)
+          PY
       - name: Apply app startup and navigation changes
         shell: bash
         run: |
