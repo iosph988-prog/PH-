@@ -1229,6 +1229,16 @@ jobs:
           xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO MARKETING_VERSION=2026.09.28 CURRENT_PROJECT_VERSION=20260928 SWIFT_OPTIMIZATION_LEVEL=-O STRIP_INSTALLED_PRODUCT=YES COPY_PHASE_STRIP=YES DEAD_CODE_STRIPPING=YES GCC_GENERATE_DEBUGGING_SYMBOLS=NO
           APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
+          if find "$APP" -type f -name '*.dylib' -print -quit | grep -q .; then
+            echo 'Unauthorized standalone dylib found in app bundle'
+            find "$APP" -type f -name '*.dylib' -print
+            exit 1
+          fi
+          if find "$APP" -type d -path '*/Framework' -print -quit | grep -q .; then
+            echo 'Unauthorized singular Framework directory found in app bundle'
+            find "$APP" -type d -path '*/Framework' -print
+            exit 1
+          fi
           mkdir -p build/Payload
           cp -R "$APP" build/Payload/
           (cd build && zip -qry "$GITHUB_WORKSPACE/dist/nubank-preloaded-cards.ipa" Payload)
