@@ -7,7 +7,7 @@ O projeto reúne a API Railway, o painel administrativo web, o sistema de autent
 A URL pública atual da API é:
 
 ```text
-https://api-production-182c.up.railway.app
+https://api-key-external.up.railway.app
 ```
 
 O código-fonte está no repositório [PH-](). O backend fica no diretório `ph/`.
@@ -152,7 +152,7 @@ Se um patch não aparecer no External, confirme que a publicação está ativa, 
 
 [2]: /blob/main/.github/workflows/ios-kyojinx.yml "Workflow de compilação da IPA"
 
-[3]: https://api-production-182c.up.railway.app "API pública implantada"
+[3]: https://api-key-external.up.railway.app "API pública implantada"
 
 [4]: /blob/main/ph/server/_core/index.ts "Rotas HTTP da API"
 
@@ -203,7 +203,7 @@ struct LicenseRequest: Encodable {
     let app_version: String
 }
 
-var request = URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/patches/catalog")!)
+var request = URLRequest(url: URL(string: "https://api-key-external.up.railway.app/api/patches/catalog")!)
 request.httpMethod = "POST"
 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 request.setValue("<token-do-cliente>", forHTTPHeaderField: "X-PH-IOS-Token")

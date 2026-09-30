@@ -3,7 +3,7 @@
 Depois de publicar este painel, use a URL HTTPS atribuída pelo Railway como base. O endpoint público de validação é:
 
 ```text
-https://api-production-182c.up.railway.app/api/license/validate
+https://api-key-external.up.railway.app/api/license/validate
 ```
 
 O app deve enviar uma requisição `POST` com `Content-Type: application/json` e este corpo:

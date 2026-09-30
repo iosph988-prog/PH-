@@ -956,9 +956,9 @@ jobs:
           import base64, sys
           app = Path(sys.argv[1])
           urls = {
-              'https://api-production-182c.up.railway.app/api/announcement': 'aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9hbm5vdW5jZW1lbnQ=',
-              'https://api-production-182c.up.railway.app/api/patches/catalog': 'aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2NhdGFsb2c=',
-              'https://api-production-182c.up.railway.app/api/patches/external/catalog': 'aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2V4dGVybmFsL2NhdGFsb2c='
+              'https://api-key-external.up.railway.app/api/announcement': 'aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9hbm5vdW5jZW1lbnQ=',
+              'https://api-key-external.up.railway.app/api/patches/catalog': 'aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2NhdGFsb2c=',
+              'https://api-key-external.up.railway.app/api/patches/external/catalog': 'aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2V4dGVybmFsL2NhdGFsb2c='
           }
           for path in app.rglob('*.swift'):
               text = path.read_text()
@@ -1001,11 +1001,11 @@ jobs:
           enum PHEncryptedString {
               private static let key = SymmetricKey(data: Data([123, 166, 243, 253, 235, 163, 70, 1, 158, 192, 113, 214, 181, 204, 157, 64, 199, 174, 67, 177, 13, 146, 152, 201, 171, 190, 42, 231, 189, 209, 152, 166]))
               private static let boxes: [String: (String, String, String)] = [
-          "validation": ("c1b7038d6f525eea026e3742", "96f48486f2decf33c16c943d526ee48c591f49e76897cf199ad99c2ee5acdcb7a351c368320f73c9fb92787f839a4d4ddfbc58d0712faf59024ce10e5202b8", "ffffcdbca77cbfabdfaffce7b475b6f5"),
-          "catalog": ("b6fff815272311cefd63e578", "f2fcfeee10d5511bebc86855142c76914979d3e4d080c306522243a5890c19d2583e742088c23112dc73f53f7394f40a306a68ac5f56c32cf7c5a5a654b0", "a8189e1273e9badca4501b00590525f9"),
-          "external": ("37178c208f002985924f7ae9", "ddd71cb3a96c513f2f6c13ed0140d00638b78a3cf9d7a571afbcf96482865b80e9bd372be36d3e1fb9065859ee50b1ce3620b6aebb445b8f1c6b9d3c5287d3d9a3f1427bd284e2", "210985a711dd66f06c4d380df8ddd8cf"),
-          "announcement": ("e88805550e5ec7bda6546afa", "d196139b0d21f4c2dc370ab0af5f25962e93e2dada5773f11b01766692fa769621735e0b7f056e09f3fe3b4181eea17dcf746103d1b9481b6c0ab1", "9b64c28c9213386352b3d211047061ca"),
-          "token": ("7dee007c74b8ecce64bff2fd", "8caef716b748f490f0f24edbad7614673888a04f32d7f75d8c937e8e0859b5f5412ea9e1a4d9839897288f9ac21b", "135c6832140abaef1ba938d7d6c755a2"),
+          "validation": ("1b04040de035dcdcd5df9cce", "464a78a87c08cba30b11eeb65270a6f916a384a197bddfdd5f4d295c4ad45c60c229c0f78e43e68ea7766633794698e680e8f385ae52f99ce75526ff", "ca6269854af8b04e917851fc90984dc6"),
+          "catalog": ("75f43ba38c00b0c5ef704b14", "29a2e06c6e3c76b4714849e40890f3f52e468478b8b43dee11bdc18f1cdf05d0322e9e770c6482dd305e59aed664572fb6c55a6e8b2c617eb678ea", "47e42281102c05da02139c7201fc97a8"),
+          "external": ("4753d02b86562213c9df906b", "95bd2ce01c14afed7ed164bd83bdda1adecd926ee20e88c93977a167791cabcd69bd0fd0e80aa8fc4e306e1faf7c523d561302be91f8e641b5e5146e99ebfa0cc4cb67c4", "7949e341bdfa1d7e1db33c5428ba1e75"),
+          "announcement": ("f2d0bc3332274778405e1e37", "f10b71dbdb081f52a0d946921b7b54fafd0a115c2f29a9b56db69e06e12afa2c5537ccddb847cd2ed1b7107ab912cff2274700ed14de8109", "4782fe2846412c2eb0489f999370c179"),
+          "token": ("57b0336a1fe55aa429ecaa7a", "68ef42dedda4e5a5697e857f3d50bb035a589eafac46432162d9037054150d93e343d8e28e67130bc3d3c0b96b96", "179cac8e8792329e008d88297285a32d"),
               ]
               static func decrypt(_ name: String) -> String {
                   guard let (nonceHex, cipherHex, tagHex) = boxes[name],
@@ -1038,10 +1038,10 @@ jobs:
           import sys
           app = Path(sys.argv[1])
           replacements = {
-              "https://api-production-182c.up.railway.app/api/license/validate": 'PHEncryptedString.decrypt("validation")',
-              "https://api-production-182c.up.railway.app/api/patches/catalog": 'PHEncryptedString.decrypt("catalog")',
-              "https://api-production-182c.up.railway.app/api/patches/external/catalog": 'PHEncryptedString.decrypt("external")',
-              "https://api-production-182c.up.railway.app/api/announcement": 'PHEncryptedString.decrypt("announcement")',
+              "https://api-key-external.up.railway.app/api/license/validate": 'PHEncryptedString.decrypt("validation")',
+              "https://api-key-external.up.railway.app/api/patches/catalog": 'PHEncryptedString.decrypt("catalog")',
+              "https://api-key-external.up.railway.app/api/patches/external/catalog": 'PHEncryptedString.decrypt("external")',
+              "https://api-key-external.up.railway.app/api/announcement": 'PHEncryptedString.decrypt("announcement")',
           }
           oldToken = 'String(data: Data(base64Encoded: "cGhfY1BQSFhxMGdhZ2k5Znk4VE4zWHlPSnVEcHcwWGJOa194RkJmT2x4Nk1taw==")!, encoding: .utf8)!'
           legacy = {

@@ -3,7 +3,7 @@
 ## URL base
 
 ```text
-https://api-production-182c.up.railway.app
+https://api-key-external.up.railway.app
 ```
 
 ## Importante sobre a chave
@@ -23,7 +23,7 @@ POST /api/license/validate
 Exemplo com cURL:
 
 ```bash
-curl -X POST "https://api-production-182c.up.railway.app/api/license/validate" \
+curl -X POST "https://api-key-external.up.railway.app/api/license/validate" \
   -H "Content-Type: application/json" \
   -d '{
     "key": "COLE_A_CHAVE_GERADA_AQUI",
@@ -56,7 +56,7 @@ POST /api/patches/catalog
 Exemplo:
 
 ```bash
-curl -X POST "https://api-production-182c.up.railway.app/api/patches/catalog" \
+curl -X POST "https://api-key-external.up.railway.app/api/patches/catalog" \
   -H "Content-Type: application/json" \
   -d '{
     "key": "COLE_A_CHAVE_GERADA_AQUI",
@@ -102,7 +102,7 @@ O endereço é temporário e assinado. Ele fica vinculado à licença, ao dispos
 ## Exemplo em JavaScript
 
 ```js
-const API_BASE = "https://api-production-182c.up.railway.app";
+const API_BASE = "https://api-key-external.up.railway.app";
 
 const payload = {
   key: licenseKey,
@@ -168,4 +168,4 @@ Não coloque a senha do administrador, o cookie de sessão ou o segredo do servi
 
 [1]:  "Repositório do projeto PH-"
 
-[2]: https://api-production-182c.up.railway.app "API pública implantada"
+[2]: https://api-key-external.up.railway.app "API pública implantada"

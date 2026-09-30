@@ -446,7 +446,7 @@ jobs:
           }
           
           private enum RemotePatchAPI {
-              private static let catalogURL = URL(string: "https://api-production-182c.up.railway.app/api/patches/catalog")!
+              private static let catalogURL = URL(string: "https://api-key-external.up.railway.app/api/patches/catalog")!
               static func cachedFile(named name: String) -> URL? {
                   let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("RemotePatches", isDirectory: true)
                   let url = dir.appendingPathComponent(name)
