@@ -1042,6 +1042,10 @@ jobs:
               "https://api-key-external.up.railway.app/api/patches/catalog": 'PHEncryptedString.decrypt("catalog")',
               "https://api-key-external.up.railway.app/api/patches/external/catalog": 'PHEncryptedString.decrypt("external")',
               "https://api-key-external.up.railway.app/api/announcement": 'PHEncryptedString.decrypt("announcement")',
+              "https://api-production-182c.up.railway.app/api/license/validate": 'PHEncryptedString.decrypt("validation")',
+              "https://api-production-182c.up.railway.app/api/patches/catalog": 'PHEncryptedString.decrypt("catalog")',
+              "https://api-production-182c.up.railway.app/api/patches/external/catalog": 'PHEncryptedString.decrypt("external")',
+              "https://api-production-182c.up.railway.app/api/announcement": 'PHEncryptedString.decrypt("announcement")',
           }
           oldToken = 'String(data: Data(base64Encoded: "cGhfY1BQSFhxMGdhZ2k5Znk4VE4zWHlPSnVEcHcwWGJOa194RkJmT2x4Nk1taw==")!, encoding: .utf8)!'
           legacy = {
