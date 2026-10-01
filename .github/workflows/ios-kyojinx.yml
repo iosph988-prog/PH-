@@ -672,6 +672,15 @@ jobs:
           text = p.read_text().replace("interfaceTab: nil, section: nil", "interfaceTab: item.interfaceTab, section: item.section")
           p.write_text(text)
           PY
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
+          lines = p.read_text().splitlines(keepends=True)
+          removed = [line for line in lines if "Text(patch.fileName)" in line]
+          if len(removed) != 1:
+              raise SystemExit(f"expected one External filename label, found {len(removed)}")
+          p.write_text("".join(line for line in lines if "Text(patch.fileName)" not in line))
+          PY
 
       - name: Add license status to Início
         shell: bash
