@@ -552,6 +552,8 @@ jobs:
               let sha256: String
               let sizeBytes: Int
               let downloadUrl: String
+              let interfaceTab: String?
+              let section: String?
           }
           
           private struct RemoteAnnouncement: Decodable {
@@ -1074,18 +1076,6 @@ jobs:
           B64
           base64 -d /tmp/external-panel.b64 > /tmp/ExternalPanelView.swift
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
-          text = p.read_text()
-          pattern = r"(private struct RemotePatchDescriptor: Decodable \{.*?let downloadUrl: String\n)"
-          replacement = r"\1    let interfaceTab: String?\n    let section: String?\n"
-          text, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
-          if count != 1:
-              raise SystemExit("RemotePatchDescriptor block not found")
-          p.write_text(text)
-          PY
           python3 - <<'PY'
           from pathlib import Path
           p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
