@@ -20,7 +20,7 @@ export const appRouter = router({
   system: systemRouter,
   announcement: router({
     get: publicProcedure.query(() => getAnnouncement()),
-    update: adminProcedure.input(z.object({ announcement: z.string().trim().max(5000), url: z.string().trim().max(512).nullable().optional(), freeFireLogoUrl: z.string().trim().max(1024).nullable().optional(), freeFireMaxLogoUrl: z.string().trim().max(1024).nullable().optional() })).mutation(({ input }) => updateAnnouncement(input)),
+    update: adminProcedure.input(z.object({ announcement: z.string().trim().max(5000), url: z.string().trim().max(512).nullable().optional(), freeFireLogoUrl: z.string().trim().max(1024).nullable().optional(), freeFireMaxLogoUrl: z.string().trim().max(1024).nullable().optional(), targetResellerId: z.number().int().positive().nullable().optional() })).mutation(({ input }) => updateAnnouncement(input)),
   }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),

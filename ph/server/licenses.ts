@@ -19,7 +19,14 @@ export function evaluateLicenseAccess(input: { status: "active" | "revoked"; exp
   return { valid: true, code: "valid", message: "Chave válida" } as const;
 }
 
-const hashKey = (value: string) => createHash("sha256").update(value.trim()).digest("hex");
+export const hashKey = (value: string) => createHash("sha256").update(value.trim()).digest("hex");
+
+export async function getLicenseCreatorId(rawKey: string): Promise<number | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select({ createdBy: licenseKeys.createdBy }).from(licenseKeys).where(eq(licenseKeys.keyHash, hashKey(rawKey))).limit(1);
+  return rows[0]?.createdBy ?? null;
+}
 
 export const LICENSE_SUPPORT_URL = "https://whatsapp.com/channel/0029VbD6Arm8kyyQAho7UP2t";
 type InvalidLicenseCode = "service_unavailable" | "invalid_key" | "revoked" | "expired" | "device_limit";

@@ -11,6 +11,8 @@ import { deleteExpiredLicenses, validateLicense } from "../licenses";
 import { findScheduledJob } from "../scheduled";
 import { sdk } from "./sdk";
 import { getAuthorizedPatchUrl, listRemotePatchesForLicense } from "../remotePatches";
+import { getAnnouncement } from "../announcements";
+import { getLicenseCreatorId } from "../licenses";
 import { serveStatic, setupVite } from "./vite";
 import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
@@ -74,6 +76,27 @@ async function startServer() {
     }
   });
   app.post("/api/auth/local/logout", (req, res) => { logoutLocal(req, res); return res.status(200).json({ ok: true }); });
+  app.post("/api/announcement", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
+    try {
+      const validation = await validateLicense({ key, deviceId, packageName, appVersion, ipAddress: req.ip });
+      if (!validation.valid) return res.status(403).json(validation);
+      const creatorId = await getLicenseCreatorId(key);
+      const announcement = await getAnnouncement(creatorId);
+      return res.status(200).json(announcement ?? { announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" });
+    } catch (error) {
+      console.error("[Announcement API] Failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
+  });
+
+  app.get("/api/announcement", async (_req, res) => {
+    try { return res.status(200).json((await getAnnouncement()) ?? { announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" }); }
+    catch { return res.status(503).json({ announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" }); }
+  });
+
   app.post("/api/license/validate", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
     if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
