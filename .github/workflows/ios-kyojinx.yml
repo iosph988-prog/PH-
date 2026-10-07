@@ -16,18 +16,6 @@ jobs:
           mkdir -p source build dist
           tar -xzf 3105-1.1.1-original.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
-          cat > source/3105-1.1.1/ThreeOneOSFive/NetworkExtension.entitlements <<'EOF'
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>com.apple.developer.networking.networkextension</key>
-              <array>
-                  <string>dns-settings</string>
-              </array>
-          </dict>
-          </plist>
-          EOF
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Hide legacy URLs from executable
         shell: bash
@@ -695,33 +683,6 @@ jobs:
           if len(removed) != 1:
               raise SystemExit(f"expected one External filename label, found {len(removed)}")
           p.write_text("".join(line for line in lines if "Text(patch.fileName)" not in line))
-          PY
-
-      - name: Add experimental DNS profile controller
-        shell: bash
-        run: |
-          set -euo pipefail
-          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
-          python3 - "$PATCH_SWIFT" <<'PY'
-          from pathlib import Path
-          import base64
-          import sys
-          p=Path(sys.argv[1])
-          t=p.read_text()
-          if 'import NetworkExtension' not in t:
-              t=t.replace('import SwiftUI\n', 'import SwiftUI\nimport NetworkExtension\n', 1)
-          anchor='    @StateObject private var fpsMonitor = ExternalFPSMonitor()'
-          if anchor not in t:
-              raise SystemExit('External FPS state anchor not found')
-          t=t.replace(anchor, anchor+'\n    @StateObject private var dnsProfile = DNSProfileController()', 1)
-          anchor2='                Text(languageEnglish ? "Device & performance" : "Dispositivo e desempenho")'
-          if anchor2 not in t:
-              raise SystemExit('External profile content anchor not found')
-          t=t.replace(anchor2, '                dnsProfileCard\n'+anchor2, 1)
-          code=base64.b64decode('aW1wb3J0IE5ldHdvcmtFeHRlbnNpb24KCkBNYWluQWN0b3IKcHJpdmF0ZSBmaW5hbCBjbGFzcyBETlNQcm9maWxlQ29udHJvbGxlcjogT2JzZXJ2YWJsZU9iamVjdCB7CiAgICBAUHVibGlzaGVkIHZhciBpc0FjdGl2ZSA9IGZhbHNlCiAgICBAUHVibGlzaGVkIHZhciBpc1dvcmtpbmcgPSBmYWxzZQogICAgQFB1Ymxpc2hlZCB2YXIgc3RhdHVzID0gIkROUyBzZWd1cm8gcHJvbnRvIgogICAgQFB1Ymxpc2hlZCB2YXIgZXJyb3JNZXNzYWdlOiBTdHJpbmc/CiAgICBwcml2YXRlIGxldCBtYW5hZ2VyID0gTkVETlNTZXR0aW5nc01hbmFnZXIuc2hhcmVkKCkKCiAgICBmdW5jIHJlZnJlc2goKSB7CiAgICAgICAgbWFuYWdlci5sb2FkRnJvbVByZWZlcmVuY2VzIHsgW3dlYWsgc2VsZl0gZXJyb3IgaW4KICAgICAgICAgICAgVGFzayB7IEBNYWluQWN0b3IgaW4KICAgICAgICAgICAgICAgIGd1YXJkIGxldCBzZWxmIGVsc2UgeyByZXR1cm4gfQogICAgICAgICAgICAgICAgaWYgbGV0IGVycm9yIHsKICAgICAgICAgICAgICAgICAgICBzZWxmLnN0YXR1cyA9ICJETlMgc2VndXJvIGRpc3BvbsOtdmVsIgogICAgICAgICAgICAgICAgICAgIHNlbGYuZXJyb3JNZXNzYWdlID0gZXJyb3IubG9jYWxpemVkRGVzY3JpcHRpb24KICAgICAgICAgICAgICAgICAgICByZXR1cm4KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIHNlbGYuaXNBY3RpdmUgPSBzZWxmLm1hbmFnZXIuaXNFbmFibGVkCiAgICAgICAgICAgICAgICBzZWxmLnN0YXR1cyA9IHNlbGYuaXNBY3RpdmUgPyAiRE5TIGF0aXZvIiA6ICJETlMgZGVzYXRpdmFkbyIKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KCiAgICBmdW5jIHRvZ2dsZSgpIHsKICAgICAgICBpZiBpc0FjdGl2ZSB7IHN0b3AoKSB9IGVsc2UgeyBzdGFydCgpIH0KICAgIH0KCiAgICBwcml2YXRlIGZ1bmMgc3RhcnQoKSB7CiAgICAgICAgaXNXb3JraW5nID0gdHJ1ZQogICAgICAgIGVycm9yTWVzc2FnZSA9IG5pbAogICAgICAgIGxldCBzZXR0aW5ncyA9IE5FRE5TU2V0dGluZ3Moc2VydmVyczogWyIxLjEuMS4xIiwgIjEuMC4wLjEiXSkKICAgICAgICBzZXR0aW5ncy5tYXRjaERvbWFpbnMgPSBbIiJdCiAgICAgICAgbWFuYWdlci5sb2NhbGl6ZWREZXNjcmlwdGlvbiA9ICJETlMgU2VndXJvIgogICAgICAgIG1hbmFnZXIuZG5zU2V0dGluZ3MgPSBzZXR0aW5ncwogICAgICAgIG1hbmFnZXIuc2F2ZVRvUHJlZmVyZW5jZXMgeyBbd2VhayBzZWxmXSBlcnJvciBpbgogICAgICAgICAgICBUYXNrIHsgQE1haW5BY3RvciBpbgogICAgICAgICAgICAgICAgZ3VhcmQgbGV0IHNlbGYgZWxzZSB7IHJldHVybiB9CiAgICAgICAgICAgICAgICBzZWxmLmlzV29ya2luZyA9IGZhbHNlCiAgICAgICAgICAgICAgICBpZiBsZXQgZXJyb3IgewogICAgICAgICAgICAgICAgICAgIHNlbGYuaXNBY3RpdmUgPSBmYWxzZQogICAgICAgICAgICAgICAgICAgIHNlbGYuc3RhdHVzID0gIk7Do28gZm9pIHBvc3PDrXZlbCBhdGl2YXIiCiAgICAgICAgICAgICAgICAgICAgc2VsZi5lcnJvck1lc3NhZ2UgPSAiTyBpT1MgcmVjdXNvdSBvIEROUzogXChlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbikuIEEgSVBBIHByZWNpc2Egc2VyIGFzc2luYWRhIGNvbSBhIGNhcGFjaWRhZGUgTmV0d29yayBFeHRlbnNpb24uIgogICAgICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgICAgICBzZWxmLmlzQWN0aXZlID0gc2VsZi5tYW5hZ2VyLmlzRW5hYmxlZAogICAgICAgICAgICAgICAgICAgIHNlbGYuc3RhdHVzID0gIkROUyBzYWx2byDigJQgY29uZmlybWUgZW0gQWp1c3RlcyIKICAgICAgICAgICAgICAgICAgICBzZWxmLmVycm9yTWVzc2FnZSA9ICJPIGlPUyBleGlnZSBxdWUgdm9jw6ogYXRpdmUgZXN0ZSBETlMgZW0gQWp1c3RlcyBhcMOzcyBzYWx2YXIgYSBjb25maWd1cmHDp8Ojby4iCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9CgogICAgcHJpdmF0ZSBmdW5jIHN0b3AoKSB7CiAgICAgICAgaXNXb3JraW5nID0gdHJ1ZQogICAgICAgIG1hbmFnZXIucmVtb3ZlRnJvbVByZWZlcmVuY2VzIHsgW3dlYWsgc2VsZl0gZXJyb3IgaW4KICAgICAgICAgICAgVGFzayB7IEBNYWluQWN0b3IgaW4KICAgICAgICAgICAgICAgIGd1YXJkIGxldCBzZWxmIGVsc2UgeyByZXR1cm4gfQogICAgICAgICAgICAgICAgc2VsZi5pc1dvcmtpbmcgPSBmYWxzZQogICAgICAgICAgICAgICAgc2VsZi5pc0FjdGl2ZSA9IGZhbHNlCiAgICAgICAgICAgICAgICBzZWxmLnN0YXR1cyA9IGVycm9yID09IG5pbCA/ICJETlMgcmVtb3ZpZG8iIDogIk7Do28gZm9pIHBvc3PDrXZlbCByZW1vdmVyIgogICAgICAgICAgICAgICAgc2VsZi5lcnJvck1lc3NhZ2UgPSBlcnJvcj8ubG9jYWxpemVkRGVzY3JpcHRpb24KICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQoKcHJpdmF0ZSBleHRlbnNpb24gRXh0ZXJuYWxQYW5lbFZpZXcgewogICAgdmFyIGRuc1Byb2ZpbGVDYXJkOiBzb21lIFZpZXcgewogICAgICAgIFZTdGFjayhhbGlnbm1lbnQ6IC5sZWFkaW5nLCBzcGFjaW5nOiAxMikgewogICAgICAgICAgICBIU3RhY2soc3BhY2luZzogMTApIHsKICAgICAgICAgICAgICAgIEltYWdlKHN5c3RlbU5hbWU6ICJuZXR3b3JrIikKICAgICAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDIwLCB3ZWlnaHQ6IC5zZW1pYm9sZCkpCiAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShhY2NlbnQpCiAgICAgICAgICAgICAgICAgICAgLmZyYW1lKHdpZHRoOiAzNiwgaGVpZ2h0OiAzNikKICAgICAgICAgICAgICAgICAgICAuYmFja2dyb3VuZChhY2NlbnQub3BhY2l0eSgwLjE0KSwgaW46IFJvdW5kZWRSZWN0YW5nbGUoY29ybmVyUmFkaXVzOiAxMCwgc3R5bGU6IC5jb250aW51b3VzKSkKICAgICAgICAgICAgICAgIFZTdGFjayhhbGlnbm1lbnQ6IC5sZWFkaW5nLCBzcGFjaW5nOiAzKSB7CiAgICAgICAgICAgICAgICAgICAgVGV4dCgiRE5TIFNlZ3VybyIpCiAgICAgICAgICAgICAgICAgICAgICAgIC5mb250KC5zeXN0ZW0oc2l6ZTogMTQsIHdlaWdodDogLmJvbGQpKQogICAgICAgICAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKHByaW1hcnlUZXh0KQogICAgICAgICAgICAgICAgICAgIFRleHQoIk1lbGhvcmF3aWZpLmJwZiDCtyAxLjEuMS4xIikKICAgICAgICAgICAgICAgICAgICAgICAgLmZvbnQoLnN5c3RlbShzaXplOiAxMCwgd2VpZ2h0OiAubWVkaXVtLCBkZXNpZ246IC5tb25vc3BhY2VkKSkKICAgICAgICAgICAgICAgICAgICAgICAgLmZvcmVncm91bmRTdHlsZShzZWNvbmRhcnlUZXh0KQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgU3BhY2VyKCkKICAgICAgICAgICAgICAgIFRvZ2dsZSgiIiwgaXNPbjogQmluZGluZyhnZXQ6IHsgZG5zUHJvZmlsZS5pc0FjdGl2ZSB9LCBzZXQ6IHsgXyBpbiBkbnNQcm9maWxlLnRvZ2dsZSgpIH0pKQogICAgICAgICAgICAgICAgICAgIC5sYWJlbHNIaWRkZW4oKQogICAgICAgICAgICAgICAgICAgIC50aW50KGFjY2VudCkKICAgICAgICAgICAgICAgICAgICAuZGlzYWJsZWQoZG5zUHJvZmlsZS5pc1dvcmtpbmcpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgVGV4dChkbnNQcm9maWxlLnN0YXR1cykKICAgICAgICAgICAgICAgIC5mb250KC5zeXN0ZW0oc2l6ZTogMTEsIHdlaWdodDogLm1lZGl1bSkpCiAgICAgICAgICAgICAgICAuZm9yZWdyb3VuZFN0eWxlKHNlY29uZGFyeVRleHQpCiAgICAgICAgICAgIGlmIGxldCBlcnJvck1lc3NhZ2UgPSBkbnNQcm9maWxlLmVycm9yTWVzc2FnZSB7CiAgICAgICAgICAgICAgICBUZXh0KGVycm9yTWVzc2FnZSkKICAgICAgICAgICAgICAgICAgICAuZm9udCguc3lzdGVtKHNpemU6IDEwLCB3ZWlnaHQ6IC5tZWRpdW0pKQogICAgICAgICAgICAgICAgICAgIC5mb3JlZ3JvdW5kU3R5bGUoLm9yYW5nZSkKICAgICAgICAgICAgICAgICAgICAuZml4ZWRTaXplKGhvcml6b250YWw6IGZhbHNlLCB2ZXJ0aWNhbDogdHJ1ZSkKICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICAucGFkZGluZygxNCkKICAgICAgICAuYmFja2dyb3VuZChjYXJkQmFja2dyb3VuZCwgaW46IFJvdW5kZWRSZWN0YW5nbGUoY29ybmVyUmFkaXVzOiAxNiwgc3R5bGU6IC5jb250aW51b3VzKSkKICAgICAgICAub3ZlcmxheShSb3VuZGVkUmVjdGFuZ2xlKGNvcm5lclJhZGl1czogMTYsIHN0eWxlOiAuY29udGludW91cykuc3Ryb2tlKGFjY2VudC5vcGFjaXR5KDAuMzUpLCBsaW5lV2lkdGg6IDEpKQogICAgfQp9Cg==').decode()
-          if 'private final class DNSProfileController' not in t:
-              t += '\n\n' + code + '\n'
-          p.write_text(t)
           PY
 
       - name: Add license status to Início
@@ -1397,7 +1358,7 @@ jobs:
           test -n "$PROJECT"
           echo "Using project: $PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_ENTITLEMENTS=ThreeOneOSFive/NetworkExtension.entitlements MARKETING_VERSION=2026.09.28 CURRENT_PROJECT_VERSION=20260928 SWIFT_OPTIMIZATION_LEVEL=-O STRIP_INSTALLED_PRODUCT=YES COPY_PHASE_STRIP=YES DEAD_CODE_STRIPPING=YES GCC_GENERATE_DEBUGGING_SYMBOLS=NO
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO MARKETING_VERSION=2026.09.28 CURRENT_PROJECT_VERSION=20260928 SWIFT_OPTIMIZATION_LEVEL=-O STRIP_INSTALLED_PRODUCT=YES COPY_PHASE_STRIP=YES DEAD_CODE_STRIPPING=YES GCC_GENERATE_DEBUGGING_SYMBOLS=NO
           APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           if find "$APP" -type f -name '*.dylib' -print -quit | grep -q .; then
