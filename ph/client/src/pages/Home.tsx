@@ -43,6 +43,8 @@ const dateLabel = (value: Date | string | null | undefined) =>
         year: "numeric",
       })
     : "Sem expiração";
+const dateInputValue = (value: Date | string | null | undefined) =>
+  value ? new Date(value).toISOString().slice(0, 10) : "";
 export const formatLicenseDuration = (row: any) => {
   const minutes = Number(
     row.durationMinutes ?? Number(row.durationDays ?? 30) * 24 * 60
@@ -143,6 +145,11 @@ function AdminPanel() {
   const [resellerCredits, setResellerCredits] = useState("10");
   const [resellerExpiresAt, setResellerExpiresAt] = useState("");
   const [resellerSearch, setResellerSearch] = useState("");
+  const [editingResellerId, setEditingResellerId] = useState<number | null>(
+    null
+  );
+  const [editingResellerCredits, setEditingResellerCredits] = useState("");
+  const [editingResellerExpiresAt, setEditingResellerExpiresAt] = useState("");
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementUrl, setAnnouncementUrl] = useState("");
   const [announcementTarget, setAnnouncementTarget] = useState("");
@@ -257,6 +264,15 @@ function AdminPanel() {
   const revokeAccess = trpc.licenses.invitations.revokeAccess.useMutation({
     onSuccess: () => {
       toast.success("Acesso do revendedor revogado");
+      void activeResellers.refetch();
+      void resellerCapacity.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const editReseller = trpc.licenses.invitations.edit.useMutation({
+    onSuccess: () => {
+      toast.success("Dados do subrevendedor atualizados");
+      setEditingResellerId(null);
       void activeResellers.refetch();
       void resellerCapacity.refetch();
     },
@@ -818,33 +834,122 @@ function AdminPanel() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                revokeAccess.mutate({ id: reseller.id })
-                              }
-                            >
-                              Revogar acesso
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="border-rose-200 text-rose-700 hover:bg-rose-50"
-                              disabled={removeReseller.isPending}
-                              onClick={() => {
-                                if (
-                                  window.confirm(
-                                    `Remover ${reseller.name || reseller.email || "este revendedor"}? Todas as keys criadas por ele, dispositivos vinculados e histórico serão apagados permanentemente.`
+                          <div className="flex min-w-[320px] flex-col gap-2">
+                            {editingResellerId === reseller.id && (
+                              <div className="rounded-lg border border-emerald-200 bg-white p-3 shadow-sm">
+                                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                  Editar créditos e validade
+                                </p>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <label className="text-xs text-slate-600">
+                                    Créditos
+                                    <Input
+                                      type="number"
+                                      min="0"
+                                      max="1000000"
+                                      value={editingResellerCredits}
+                                      onChange={event =>
+                                        setEditingResellerCredits(
+                                          event.target.value
+                                        )
+                                      }
+                                      className="mt-1 h-9"
+                                    />
+                                  </label>
+                                  <label className="text-xs text-slate-600">
+                                    Data de expiração
+                                    <Input
+                                      type="date"
+                                      value={editingResellerExpiresAt}
+                                      onChange={event =>
+                                        setEditingResellerExpiresAt(
+                                          event.target.value
+                                        )
+                                      }
+                                      className="mt-1 h-9"
+                                    />
+                                  </label>
+                                </div>
+                                <div className="mt-2 flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    disabled={
+                                      editReseller.isPending ||
+                                      !editingResellerCredits.trim()
+                                    }
+                                    onClick={() =>
+                                      editReseller.mutate({
+                                        id: reseller.id,
+                                        credits: Number(editingResellerCredits),
+                                        expiresAt: editingResellerExpiresAt
+                                          ? new Date(
+                                              `${editingResellerExpiresAt}T23:59:59.000Z`
+                                            ).toISOString()
+                                          : null,
+                                      })
+                                    }
+                                  >
+                                    Salvar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setEditingResellerId(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                            <div className="flex flex-wrap gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingResellerId(reseller.id);
+                                  setEditingResellerCredits(
+                                    String(reseller.credits ?? 0)
+                                  );
+                                  setEditingResellerExpiresAt(
+                                    dateInputValue(reseller.resellerExpiresAt)
+                                  );
+                                }}
+                              >
+                                <Pencil className="mr-1 h-4 w-4" /> Editar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `Revogar o acesso de ${reseller.name || reseller.email || "este subrevendedor"}? Ele não poderá mais entrar, mas as keys permanecerão no histórico.`
+                                    )
                                   )
-                                )
-                                  removeReseller.mutate({ id: reseller.id });
-                              }}
-                            >
-                              <Trash2 className="mr-1 h-4 w-4" />
-                              Remover e apagar keys
-                            </Button>
+                                    revokeAccess.mutate({ id: reseller.id });
+                                }}
+                              >
+                                <PowerOff className="mr-1 h-4 w-4" /> Revogar
+                                acesso
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-rose-200 text-rose-700 hover:bg-rose-50"
+                                disabled={removeReseller.isPending}
+                                onClick={() => {
+                                  if (
+                                    window.confirm(
+                                      `Remover ${reseller.name || reseller.email || "este subrevendedor"}? Todas as keys criadas por ele, dispositivos vinculados e histórico serão apagados permanentemente.`
+                                    )
+                                  )
+                                    removeReseller.mutate({ id: reseller.id });
+                                }}
+                              >
+                                <Trash2 className="mr-1 h-4 w-4" /> Remover e
+                                apagar keys
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       );

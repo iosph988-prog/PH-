@@ -1,7 +1,14 @@
 import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, licenseDevices, licenseEvents, licenseKeys, resellerInvitations, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  InsertUser,
+  licenseDevices,
+  licenseEvents,
+  licenseKeys,
+  resellerInvitations,
+  users,
+} from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -36,8 +43,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     const updateSet: Record<string, unknown> = {};
     let invitedReseller = false;
     if (user.email && user.openId !== ENV.ownerOpenId) {
-      const pendingInvite = await db.select({ id: resellerInvitations.id }).from(resellerInvitations)
-        .where(and(eq(resellerInvitations.email, user.email.trim().toLowerCase()), eq(resellerInvitations.status, "pending")))
+      const pendingInvite = await db
+        .select({ id: resellerInvitations.id })
+        .from(resellerInvitations)
+        .where(
+          and(
+            eq(resellerInvitations.email, user.email.trim().toLowerCase()),
+            eq(resellerInvitations.status, "pending")
+          )
+        )
         .limit(1);
       invitedReseller = pendingInvite.length > 0;
       if (invitedReseller) {
@@ -67,8 +81,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
+      values.role = "admin";
+      updateSet.role = "admin";
     }
 
     if (!values.lastSignedIn) {
@@ -83,9 +97,15 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       set: updateSet,
     });
     if (invitedReseller && user.email) {
-      await db.update(resellerInvitations)
+      await db
+        .update(resellerInvitations)
         .set({ status: "accepted", acceptedAt: new Date() })
-        .where(and(eq(resellerInvitations.email, user.email.trim().toLowerCase()), eq(resellerInvitations.status, "pending")));
+        .where(
+          and(
+            eq(resellerInvitations.email, user.email.trim().toLowerCase()),
+            eq(resellerInvitations.status, "pending")
+          )
+        );
     }
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
@@ -100,7 +120,11 @@ export async function getUserByOpenId(openId: string) {
     return undefined;
   }
 
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
 }
@@ -109,99 +133,207 @@ export async function getUserByOpenId(openId: string) {
 
 export const MAX_RESELLERS = 500;
 
-export function calculateResellerCapacity(active: number, pending: number, limit = MAX_RESELLERS) {
+export function calculateResellerCapacity(
+  active: number,
+  pending: number,
+  limit = MAX_RESELLERS
+) {
   const normalizedActive = Math.max(0, Math.floor(active));
   const normalizedPending = Math.max(0, Math.floor(pending));
   const normalizedLimit = Math.max(0, Math.floor(limit));
   const total = normalizedActive + normalizedPending;
-  return { active: normalizedActive, pending: normalizedPending, total, limit: normalizedLimit, available: Math.max(0, normalizedLimit - total) };
+  return {
+    active: normalizedActive,
+    pending: normalizedPending,
+    total,
+    limit: normalizedLimit,
+    available: Math.max(0, normalizedLimit - total),
+  };
 }
 
 export async function getResellerCapacity() {
   const db = await getDb();
   if (!db) return calculateResellerCapacity(0, 0);
-  const [activeRow] = await db.select({ total: count() }).from(users).where(eq(users.role, "reseller"));
-  const [pendingRow] = await db.select({ total: count() }).from(resellerInvitations).where(eq(resellerInvitations.status, "pending"));
-  return calculateResellerCapacity(Number(activeRow?.total ?? 0), Number(pendingRow?.total ?? 0));
+  const [activeRow] = await db
+    .select({ total: count() })
+    .from(users)
+    .where(eq(users.role, "reseller"));
+  const [pendingRow] = await db
+    .select({ total: count() })
+    .from(resellerInvitations)
+    .where(eq(resellerInvitations.status, "pending"));
+  return calculateResellerCapacity(
+    Number(activeRow?.total ?? 0),
+    Number(pendingRow?.total ?? 0)
+  );
 }
 
 export async function consumeResellerCredits(userId: number, quantity: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const amount = Math.max(1, Math.trunc(quantity));
-  const result = await db.update(users).set({ credits: sql`${users.credits} - ${amount}` }).where(and(eq(users.id, userId), eq(users.role, "reseller"), sql`${users.credits} >= ${amount}`));
+  const result = await db
+    .update(users)
+    .set({ credits: sql`${users.credits} - ${amount}` })
+    .where(
+      and(
+        eq(users.id, userId),
+        eq(users.role, "reseller"),
+        sql`${users.credits} >= ${amount}`
+      )
+    );
   if (!result[0].affectedRows) throw new Error("Créditos insuficientes");
 }
 
-export async function createResellerInvitation(input: { email: string; displayName?: string | null; createdBy: number }) {
+export async function createResellerInvitation(input: {
+  email: string;
+  displayName?: string | null;
+  createdBy: number;
+}) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const email = input.email.trim().toLowerCase();
   if (!email) throw new Error("E-mail obrigatório");
-  const existingInvite = await db.select({ id: resellerInvitations.id }).from(resellerInvitations)
-    .where(and(eq(resellerInvitations.email, email), eq(resellerInvitations.status, "pending"))).limit(1);
+  const existingInvite = await db
+    .select({ id: resellerInvitations.id })
+    .from(resellerInvitations)
+    .where(
+      and(
+        eq(resellerInvitations.email, email),
+        eq(resellerInvitations.status, "pending")
+      )
+    )
+    .limit(1);
   if (existingInvite.length === 0) {
     const capacity = await getResellerCapacity();
-    if (capacity.total >= MAX_RESELLERS) throw new Error(`Limite de ${MAX_RESELLERS} revendedores atingido`);
+    if (capacity.total >= MAX_RESELLERS)
+      throw new Error(`Limite de ${MAX_RESELLERS} revendedores atingido`);
   }
-  const result = await db.insert(resellerInvitations).values({
-    email,
-    displayName: input.displayName?.trim() || null,
-    createdBy: input.createdBy,
-    status: "pending",
-  }).onDuplicateKeyUpdate({
-    set: { displayName: input.displayName?.trim() || null, createdBy: input.createdBy, status: "pending", revokedAt: null, acceptedAt: null },
-  });
+  const result = await db
+    .insert(resellerInvitations)
+    .values({
+      email,
+      displayName: input.displayName?.trim() || null,
+      createdBy: input.createdBy,
+      status: "pending",
+    })
+    .onDuplicateKeyUpdate({
+      set: {
+        displayName: input.displayName?.trim() || null,
+        createdBy: input.createdBy,
+        status: "pending",
+        revokedAt: null,
+        acceptedAt: null,
+      },
+    });
   return { id: Number(result[0].insertId), email };
 }
 
 export async function listResellerInvitations() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(resellerInvitations).orderBy(resellerInvitations.createdAt);
+  return db
+    .select()
+    .from(resellerInvitations)
+    .orderBy(resellerInvitations.createdAt);
 }
 
 export async function revokeResellerInvitation(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.update(resellerInvitations).set({ status: "revoked", revokedAt: new Date() }).where(eq(resellerInvitations.id, id));
+  await db
+    .update(resellerInvitations)
+    .set({ status: "revoked", revokedAt: new Date() })
+    .where(eq(resellerInvitations.id, id));
   return { success: true } as const;
 }
-
 
 export async function listResellers() {
   const db = await getDb();
   if (!db) return [];
-  return db.select({ id: users.id, openId: users.openId, username: users.username, name: users.name, email: users.email, role: users.role, credits: users.credits, resellerExpiresAt: users.resellerExpiresAt, createdAt: users.createdAt, lastSignedIn: users.lastSignedIn })
-    .from(users).where(eq(users.role, "reseller"));
+  return db
+    .select({
+      id: users.id,
+      openId: users.openId,
+      username: users.username,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      credits: users.credits,
+      resellerExpiresAt: users.resellerExpiresAt,
+      createdAt: users.createdAt,
+      lastSignedIn: users.lastSignedIn,
+    })
+    .from(users)
+    .where(eq(users.role, "reseller"));
 }
 
 export async function revokeResellerAccess(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  await db.update(users).set({ role: "user" }).where(and(eq(users.id, id), eq(users.role, "reseller")));
+  await db
+    .update(users)
+    .set({ role: "user" })
+    .where(and(eq(users.id, id), eq(users.role, "reseller")));
   return { success: true } as const;
+}
+
+export async function updateResellerAccount(input: {
+  id: number;
+  credits: number;
+  expiresAt: Date | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const credits = Math.max(0, Math.min(1_000_000, Math.trunc(input.credits)));
+  const result = await db
+    .update(users)
+    .set({ credits, resellerExpiresAt: input.expiresAt })
+    .where(and(eq(users.id, input.id), eq(users.role, "reseller")));
+  if (!result[0].affectedRows)
+    throw new Error("Subrevendedor não encontrado ou já revogado");
+  return { success: true, credits, expiresAt: input.expiresAt } as const;
 }
 
 export async function removeResellerAndLicenses(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
-  const [reseller] = await db.select({ id: users.id, email: users.email }).from(users)
-    .where(and(eq(users.id, id), eq(users.role, "reseller"))).limit(1);
+  const [reseller] = await db
+    .select({ id: users.id, email: users.email })
+    .from(users)
+    .where(and(eq(users.id, id), eq(users.role, "reseller")))
+    .limit(1);
   if (!reseller) throw new Error("Revendedor não encontrado ou já removido");
-  const ownedLicenses = await db.select({ id: licenseKeys.id }).from(licenseKeys).where(eq(licenseKeys.createdBy, id));
+  const ownedLicenses = await db
+    .select({ id: licenseKeys.id })
+    .from(licenseKeys)
+    .where(eq(licenseKeys.createdBy, id));
   const licenseIds = ownedLicenses.map(license => license.id);
   await db.transaction(async tx => {
     if (licenseIds.length > 0) {
-      await tx.delete(licenseEvents).where(inArray(licenseEvents.licenseId, licenseIds));
-      await tx.delete(licenseDevices).where(inArray(licenseDevices.licenseId, licenseIds));
+      await tx
+        .delete(licenseEvents)
+        .where(inArray(licenseEvents.licenseId, licenseIds));
+      await tx
+        .delete(licenseDevices)
+        .where(inArray(licenseDevices.licenseId, licenseIds));
       await tx.delete(licenseKeys).where(inArray(licenseKeys.id, licenseIds));
     }
     if (reseller.email) {
-      await tx.update(resellerInvitations).set({ status: "revoked", revokedAt: new Date() })
-        .where(and(eq(resellerInvitations.email, reseller.email), eq(resellerInvitations.status, "accepted")));
+      await tx
+        .update(resellerInvitations)
+        .set({ status: "revoked", revokedAt: new Date() })
+        .where(
+          and(
+            eq(resellerInvitations.email, reseller.email),
+            eq(resellerInvitations.status, "accepted")
+          )
+        );
     }
-    await tx.update(users).set({ role: "user" }).where(and(eq(users.id, id), eq(users.role, "reseller")));
+    await tx
+      .update(users)
+      .set({ role: "user" })
+      .where(and(eq(users.id, id), eq(users.role, "reseller")));
   });
   return { success: true, deletedKeys: licenseIds.length } as const;
 }
