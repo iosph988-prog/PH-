@@ -1076,34 +1076,15 @@ jobs:
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
           python3 - <<'PY'
           from pathlib import Path
+          import re
           p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
           text = p.read_text()
-          import base64
-          old = """private struct RemotePatchDescriptor: Decodable {
-              let id: Int
-              let slug: String
-              let title: String?
-              let game: String
-              let fileName: String
-              let sha256: String
-              let sizeBytes: Int
-              let downloadUrl: String
-          }"""
-          new = """private struct RemotePatchDescriptor: Decodable {
-              let id: Int
-              let slug: String
-              let title: String?
-              let game: String
-              let fileName: String
-              let sha256: String
-              let sizeBytes: Int
-              let downloadUrl: String
-              let interfaceTab: String?
-              let section: String?
-          }"""
-          if old not in text:
+          pattern = r"(private struct RemotePatchDescriptor: Decodable \{.*?let downloadUrl: String\n)"
+          replacement = r"\1    let interfaceTab: String?\n    let section: String?\n"
+          text, count = re.subn(pattern, replacement, text, count=1, flags=re.S)
+          if count != 1:
               raise SystemExit("RemotePatchDescriptor block not found")
-          p.write_text(text.replace(old, new, 1))
+          p.write_text(text)
           PY
           python3 - <<'PY'
           from pathlib import Path
@@ -1116,9 +1097,10 @@ jobs:
           p = Path("source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift")
           lines = p.read_text().splitlines(keepends=True)
           removed = [line for line in lines if "Text(patch.fileName)" in line]
-          if len(removed) != 1:
-              raise SystemExit(f"expected one External filename label, found {len(removed)}")
-          p.write_text("".join(line for line in lines if "Text(patch.fileName)" not in line))
+          if removed:
+              p.write_text("".join(line for line in lines if "Text(patch.fileName)" not in line))
+          else:
+              p.write_text("".join(lines))
           PY
 
       - name: Add license status to Início
