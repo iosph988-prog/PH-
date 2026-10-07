@@ -1074,7 +1074,7 @@ jobs:
           YXN0RXJyb3IgPSBlcnJvci5sb2NhbGl6ZWREZXNjcmlwdGlvbiB9CiAgICAgICAgfQogICAgfQp9
           Cg==
           B64
-          base64 -d /tmp/external-panel.b64 > /tmp/ExternalPanelView.swift
+          base64 -D -i /tmp/external-panel.b64 -o /tmp/ExternalPanelView.swift
           cat /tmp/ExternalPanelView.swift >> "$APP_DIR/views/PatchProjectsView.swift"
           python3 - <<'PY'
           from pathlib import Path
