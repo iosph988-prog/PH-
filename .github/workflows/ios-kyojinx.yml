@@ -1,3 +1,6 @@
+permissions:
+  contents: write
+
 name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
 jobs: 
@@ -1404,3 +1407,11 @@ jobs:
         with:
           name: nubank-preloaded-cards-home-patches
           path: dist/nubank-preloaded-cards.ipa
+      - name: Publish IPA fallback to GitHub Release
+        if: ${{ always() && hashFiles('dist/nubank-preloaded-cards.ipa') != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="ipa-${GITHUB_RUN_ID}"
+          gh release create "$TAG" dist/nubank-preloaded-cards.ipa --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "IPA Melhorawifi ${GITHUB_RUN_NUMBER}" --notes "Build experimental com perfil Melhorawifi.bpf."
