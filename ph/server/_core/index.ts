@@ -17,7 +17,7 @@ import { serveStatic, setupVite } from "./vite";
 import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
 const allowedIosBundleId = process.env.PH_ALLOWED_IOS_BUNDLE_ID || "com.apple.mobile.MobileHouseArrest";
-const allowedIosVersion = process.env.PH_ALLOWED_IOS_VERSION || "2026.09.28";
+const allowedIosVersion = "2026.10.07"; // Cutover: all older iOS IPAs are rejected by the API.
 const allowedAndroidPackage = process.env.PH_ALLOWED_ANDROID_PACKAGE || "com.my.rtxxiters";
 const allowedAndroidVersion = process.env.PH_ALLOWED_ANDROID_VERSION || "1.0";
 function isAllowedClient(packageName: string, appVersion: string) {
