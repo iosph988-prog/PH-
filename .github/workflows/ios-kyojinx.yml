@@ -16,6 +16,18 @@ jobs:
           mkdir -p source build dist
           tar -xzf 3105-1.1.1-original.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
+          cat > source/3105-1.1.1/ThreeOneOSFive/NetworkExtension.entitlements <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>com.apple.developer.networking.networkextension</key>
+              <array>
+                  <string>dns-settings</string>
+              </array>
+          </dict>
+          </plist>
+          EOF
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
       - name: Hide legacy URLs from executable
         shell: bash
@@ -1385,7 +1397,7 @@ jobs:
           test -n "$PROJECT"
           echo "Using project: $PROJECT"
           SCHEME=$(xcodebuild -list -json -project "$PROJECT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["project"]["schemes"][0])')
-          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO MARKETING_VERSION=2026.09.28 CURRENT_PROJECT_VERSION=20260928 SWIFT_OPTIMIZATION_LEVEL=-O STRIP_INSTALLED_PRODUCT=YES COPY_PHASE_STRIP=YES DEAD_CODE_STRIPPING=YES GCC_GENERATE_DEBUGGING_SYMBOLS=NO
+          xcodebuild -project "$PROJECT" -scheme "$SCHEME" -sdk iphoneos -configuration Release -destination 'generic/platform=iOS' -archivePath "$PWD/build/nubank-preloaded-cards.xcarchive" archive LIBRARY_SEARCH_PATHS="$PWD/source/3105-1.1.1/ThreeOneOSFive/SDK" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_ENTITLEMENTS=ThreeOneOSFive/NetworkExtension.entitlements MARKETING_VERSION=2026.09.28 CURRENT_PROJECT_VERSION=20260928 SWIFT_OPTIMIZATION_LEVEL=-O STRIP_INSTALLED_PRODUCT=YES COPY_PHASE_STRIP=YES DEAD_CODE_STRIPPING=YES GCC_GENERATE_DEBUGGING_SYMBOLS=NO
           APP=$(find build/nubank-preloaded-cards.xcarchive/Products/Applications -maxdepth 1 -type d -name '*.app' -print -quit)
           test -n "$APP"
           if find "$APP" -type f -name '*.dylib' -print -quit | grep -q .; then
