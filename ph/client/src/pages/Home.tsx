@@ -1,6 +1,28 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { calculateRemainingLicenseTime } from "../../../shared/license-time";
-import { Copy, ExternalLink, FileUp, Filter, KeyRound, LayoutDashboard, Loader2, LockKeyhole, Pencil, Plus, Power, PowerOff, RefreshCw, RotateCcw, Search, ShieldCheck, ShieldOff, Trash2, UserPlus, Users, X } from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  FileUp,
+  Filter,
+  KeyRound,
+  LayoutDashboard,
+  Loader2,
+  LockKeyhole,
+  Pencil,
+  Plus,
+  Power,
+  PowerOff,
+  RefreshCw,
+  RotateCcw,
+  Search,
+  ShieldCheck,
+  ShieldOff,
+  Trash2,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -13,16 +35,51 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/lib/trpc";
 
-const dateLabel = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }) : "Sem expiração";
-export const formatLicenseDuration = (row: any) => { const minutes = Number(row.durationMinutes ?? Number(row.durationDays ?? 30) * 24 * 60); if (minutes === 60) return "1 hora"; if (minutes % (24 * 60) === 0) { const days = minutes / (24 * 60); return `${days} ${days === 1 ? "dia" : "dias"}`; } if (minutes % 60 === 0) return `${minutes / 60} horas`; return `${minutes} minutos`; };
-const licenseExpirationLabel = (row: any) => row.activatedAt ? `Vence em ${dateLabel(row.expiresAt)}` : `Aguardando ativação · ${formatLicenseDuration(row)}`;
-export const licenseCreatorLabel = (creator: any) => { const name = creator?.creatorName ?? creator?.name; const email = creator?.creatorEmail ?? creator?.email; const role = creator?.creatorRole ?? creator?.role; if (name && email) return `${name} · ${email}`; if (name) return name; if (email) return email; return role === "admin" ? "Administrador" : "Usuário não identificado"; };
+const dateLabel = (value: Date | string | null | undefined) =>
+  value
+    ? new Date(value).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "Sem expiração";
+export const formatLicenseDuration = (row: any) => {
+  const minutes = Number(
+    row.durationMinutes ?? Number(row.durationDays ?? 30) * 24 * 60
+  );
+  if (minutes === 60) return "1 hora";
+  if (minutes % (24 * 60) === 0) {
+    const days = minutes / (24 * 60);
+    return `${days} ${days === 1 ? "dia" : "dias"}`;
+  }
+  if (minutes % 60 === 0) return `${minutes / 60} horas`;
+  return `${minutes} minutos`;
+};
+const licenseExpirationLabel = (row: any) =>
+  row.activatedAt
+    ? `Vence em ${dateLabel(row.expiresAt)}`
+    : `Aguardando ativação · ${formatLicenseDuration(row)}`;
+export const licenseCreatorLabel = (creator: any) => {
+  const name = creator?.creatorName ?? creator?.name;
+  const email = creator?.creatorEmail ?? creator?.email;
+  const role = creator?.creatorRole ?? creator?.role;
+  if (name && email) return `${name} · ${email}`;
+  if (name) return name;
+  if (email) return email;
+  return role === "admin" ? "Administrador" : "Usuário não identificado";
+};
 
 export function getRemainingTimeLabel(row: any, now = new Date()) {
   if (!row.activatedAt || !row.expiresAt) return "Aguardando ativação";
   const remaining = calculateRemainingLicenseTime(row.expiresAt, now);
   if (!remaining || remaining.expired) return "Expirada";
-  const parts = [remaining.days > 0 ? `${remaining.days} ${remaining.days === 1 ? "dia" : "dias"}` : "", `${remaining.hours}h`, `${remaining.minutes}min`].filter(Boolean);
+  const parts = [
+    remaining.days > 0
+      ? `${remaining.days} ${remaining.days === 1 ? "dia" : "dias"}`
+      : "",
+    `${remaining.hours}h`,
+    `${remaining.minutes}min`,
+  ].filter(Boolean);
   return `Restam ${parts.join(" ")}`;
 }
 
@@ -34,16 +91,25 @@ export function RemainingTime({ row }: { row: any }) {
     return () => window.clearInterval(timer);
   }, [row.activatedAt, row.expiresAt]);
   const label = getRemainingTimeLabel(row, now);
-  const className = label === "Aguardando ativação" ? "text-amber-300" : label === "Expirada" ? "font-semibold text-rose-300" : "font-semibold text-emerald-300";
+  const className =
+    label === "Aguardando ativação"
+      ? "text-amber-300"
+      : label === "Expirada"
+        ? "font-semibold text-rose-300"
+        : "font-semibold text-emerald-300";
   return <span className={className}>{label}</span>;
 }
 
 function AdminPanel() {
   const { user } = useAuth();
-  const [activeView, setActiveView] = useState<"home" | "generate" | "keys" | "patches" | "external">("home");
+  const [activeView, setActiveView] = useState<
+    "home" | "generate" | "keys" | "patches" | "external"
+  >("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "pending" | "blocked">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "pending" | "blocked"
+  >("all");
   const [deviceLimit, setDeviceLimit] = useState("1");
   const [quantity, setQuantity] = useState("1");
   const [durationUnit, setDurationUnit] = useState<"hours" | "days">("days");
@@ -56,10 +122,20 @@ function AdminPanel() {
   const utils = trpc.useUtils();
   const licenses = trpc.licenses.list.useQuery({ search: search || undefined });
   const events = trpc.licenses.events.useQuery();
-  const details = trpc.licenses.details.useQuery({ id: selectedId ?? 0 }, { enabled: selectedId !== null });
-  const invitations = trpc.licenses.invitations.list.useQuery(undefined, { enabled: user?.role === "admin" });
-  const activeResellers = trpc.licenses.invitations.active.useQuery(undefined, { enabled: user?.role === "admin" });
-  const resellerCapacity = trpc.licenses.invitations.capacity.useQuery(undefined, { enabled: user?.role === "admin" });
+  const details = trpc.licenses.details.useQuery(
+    { id: selectedId ?? 0 },
+    { enabled: selectedId !== null }
+  );
+  const invitations = trpc.licenses.invitations.list.useQuery(undefined, {
+    enabled: user?.role === "admin",
+  });
+  const activeResellers = trpc.licenses.invitations.active.useQuery(undefined, {
+    enabled: user?.role === "admin",
+  });
+  const resellerCapacity = trpc.licenses.invitations.capacity.useQuery(
+    undefined,
+    { enabled: user?.role === "admin" }
+  );
   const [resellerEmail, setResellerEmail] = useState("");
   const [resellerName, setResellerName] = useState("");
   const [resellerUsername, setResellerUsername] = useState("");
@@ -71,97 +147,1667 @@ function AdminPanel() {
   const [announcementUrl, setAnnouncementUrl] = useState("");
   const [announcementTarget, setAnnouncementTarget] = useState("");
   const create = trpc.licenses.create.useMutation({
-    onSuccess: result => { setCreatedKeys(result.keys.map(item => item.key)); setCustomKey(""); toast.success(`${result.keys.length} ${result.keys.length === 1 ? "chave criada" : "chaves criadas"} com segurança`); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); },
+    onSuccess: result => {
+      setCreatedKeys(result.keys.map(item => item.key));
+      setCustomKey("");
+      toast.success(
+        `${result.keys.length} ${result.keys.length === 1 ? "chave criada" : "chaves criadas"} com segurança`
+      );
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
     onError: error => toast.error(error.message),
   });
-  const reset = trpc.licenses.reset.useMutation({ onSuccess: () => { toast.success("Key resetada; dispositivos desvinculados"); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); void utils.licenses.details.invalidate(); }, onError: error => toast.error(error.message) });
-  const deleteKey = trpc.licenses.delete.useMutation({ onSuccess: () => { setSelectedId(null); toast.success("Key apagada"); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); }, onError: error => toast.error(error.message) });
-  const deleteBatch = trpc.licenses.deleteBatch.useMutation({ onSuccess: result => { setBatchDeleteInput(""); setSelectedId(null); toast.success(`${result.deleted} ${result.deleted === 1 ? "key apagada" : "keys apagadas"}`); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); }, onError: error => toast.error(error.message) });
-  const revoke = trpc.licenses.revoke.useMutation({ onSuccess: () => { toast.success("Chave revogada"); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); } });
-  const reactivate = trpc.licenses.reactivate.useMutation({ onSuccess: () => { toast.success("Chave reativada"); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); } });
-  const pauseAll = trpc.licenses.pauseAll.useMutation({ onSuccess: result => { toast.success(result.paused === 0 ? "Nenhuma key ativa para pausar" : `${result.paused} ${result.paused === 1 ? "key pausada" : "keys pausadas"}`); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); }, onError: error => toast.error(error.message) });
-  const resumeAll = trpc.licenses.resumeAll.useMutation({ onSuccess: result => { toast.success(result.resumed === 0 ? "Nenhuma key pausada para despausar" : `${result.resumed} ${result.resumed === 1 ? "key despausada" : "keys despausadas"}`); void utils.licenses.list.invalidate(); void utils.licenses.events.invalidate(); }, onError: error => toast.error(error.message) });
-  const inviteReseller = trpc.licenses.invitations.create.useMutation({ onSuccess: () => { toast.success("Convite criado"); setResellerEmail(""); setResellerName(""); void invitations.refetch(); void resellerCapacity.refetch(); }, onError: error => toast.error(error.message) });
-  const createResellerAccount = trpc.licenses.invitations.createAccount.useMutation({ onSuccess: () => { toast.success("Subrevendedor criado"); setResellerUsername(""); setResellerPassword(""); void activeResellers.refetch(); }, onError: error => toast.error(error.message) });
-  const revokeInvitation = trpc.licenses.invitations.revoke.useMutation({ onSuccess: () => { toast.success("Convite revogado"); void invitations.refetch(); void resellerCapacity.refetch(); }, onError: error => toast.error(error.message) });
-  const revokeAccess = trpc.licenses.invitations.revokeAccess.useMutation({ onSuccess: () => { toast.success("Acesso do revendedor revogado"); void activeResellers.refetch(); void resellerCapacity.refetch(); }, onError: error => toast.error(error.message) });
-  const removeReseller = trpc.licenses.invitations.remove.useMutation({ onSuccess: result => { toast.success(`Revendedor removido; ${result.deletedKeys} ${result.deletedKeys === 1 ? "key apagada" : "keys apagadas"}`); void invitations.refetch(); void activeResellers.refetch(); void resellerCapacity.refetch(); void licenses.refetch(); void events.refetch(); }, onError: error => toast.error(error.message) });
-  const updateAnnouncement = trpc.announcement.update.useMutation({ onSuccess: () => toast.success("Link de atualização publicado"), onError: error => toast.error(error.message) });
+  const reset = trpc.licenses.reset.useMutation({
+    onSuccess: () => {
+      toast.success("Key resetada; dispositivos desvinculados");
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+      void utils.licenses.details.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const deleteKey = trpc.licenses.delete.useMutation({
+    onSuccess: () => {
+      setSelectedId(null);
+      toast.success("Key apagada");
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const deleteBatch = trpc.licenses.deleteBatch.useMutation({
+    onSuccess: result => {
+      setBatchDeleteInput("");
+      setSelectedId(null);
+      toast.success(
+        `${result.deleted} ${result.deleted === 1 ? "key apagada" : "keys apagadas"}`
+      );
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const revoke = trpc.licenses.revoke.useMutation({
+    onSuccess: () => {
+      toast.success("Chave revogada");
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
+  });
+  const reactivate = trpc.licenses.reactivate.useMutation({
+    onSuccess: () => {
+      toast.success("Chave reativada");
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
+  });
+  const pauseAll = trpc.licenses.pauseAll.useMutation({
+    onSuccess: result => {
+      toast.success(
+        result.paused === 0
+          ? "Nenhuma key ativa para pausar"
+          : `${result.paused} ${result.paused === 1 ? "key pausada" : "keys pausadas"}`
+      );
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const resumeAll = trpc.licenses.resumeAll.useMutation({
+    onSuccess: result => {
+      toast.success(
+        result.resumed === 0
+          ? "Nenhuma key pausada para despausar"
+          : `${result.resumed} ${result.resumed === 1 ? "key despausada" : "keys despausadas"}`
+      );
+      void utils.licenses.list.invalidate();
+      void utils.licenses.events.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const inviteReseller = trpc.licenses.invitations.create.useMutation({
+    onSuccess: () => {
+      toast.success("Convite criado");
+      setResellerEmail("");
+      setResellerName("");
+      void invitations.refetch();
+      void resellerCapacity.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const createResellerAccount =
+    trpc.licenses.invitations.createAccount.useMutation({
+      onSuccess: () => {
+        toast.success("Subrevendedor criado");
+        setResellerUsername("");
+        setResellerPassword("");
+        void activeResellers.refetch();
+      },
+      onError: error => toast.error(error.message),
+    });
+  const revokeInvitation = trpc.licenses.invitations.revoke.useMutation({
+    onSuccess: () => {
+      toast.success("Convite revogado");
+      void invitations.refetch();
+      void resellerCapacity.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const revokeAccess = trpc.licenses.invitations.revokeAccess.useMutation({
+    onSuccess: () => {
+      toast.success("Acesso do revendedor revogado");
+      void activeResellers.refetch();
+      void resellerCapacity.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const removeReseller = trpc.licenses.invitations.remove.useMutation({
+    onSuccess: result => {
+      toast.success(
+        `Revendedor removido; ${result.deletedKeys} ${result.deletedKeys === 1 ? "key apagada" : "keys apagadas"}`
+      );
+      void invitations.refetch();
+      void activeResellers.refetch();
+      void resellerCapacity.refetch();
+      void licenses.refetch();
+      void events.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const updateAnnouncement = trpc.announcement.update.useMutation({
+    onSuccess: () => toast.success("Link de atualização publicado"),
+    onError: error => toast.error(error.message),
+  });
   const rows = licenses.data ?? [];
   const filteredResellers = useMemo(() => {
     const query = resellerSearch.trim().toLowerCase();
     return (activeResellers.data ?? []).filter(reseller => {
       if (!query) return true;
-      return [reseller.name, reseller.email, reseller.username].filter(Boolean).some(value => String(value).toLowerCase().includes(query));
+      return [reseller.name, reseller.email, reseller.username]
+        .filter(Boolean)
+        .some(value => String(value).toLowerCase().includes(query));
     });
   }, [activeResellers.data, resellerSearch]);
-  const filteredRows = useMemo(() => rows.filter(row => statusFilter === "all" || (statusFilter === "active" && row.status === "active" && Boolean(row.activatedAt)) || (statusFilter === "pending" && row.status === "active" && !row.activatedAt) || (statusFilter === "blocked" && row.status !== "active")), [rows, statusFilter]);
+  const filteredRows = useMemo(
+    () =>
+      rows.filter(
+        row =>
+          statusFilter === "all" ||
+          (statusFilter === "active" &&
+            row.status === "active" &&
+            Boolean(row.activatedAt)) ||
+          (statusFilter === "pending" &&
+            row.status === "active" &&
+            !row.activatedAt) ||
+          (statusFilter === "blocked" && row.status !== "active")
+      ),
+    [rows, statusFilter]
+  );
   const PAGE_SIZE = 50;
   const pageCount = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
-  const visibleRows = filteredRows.slice(licensePage * PAGE_SIZE, (licensePage + 1) * PAGE_SIZE);
-  useEffect(() => { setLicensePage(0); setSelectedId(null); }, [search, statusFilter]);
+  const visibleRows = filteredRows.slice(
+    licensePage * PAGE_SIZE,
+    (licensePage + 1) * PAGE_SIZE
+  );
+  useEffect(() => {
+    setLicensePage(0);
+    setSelectedId(null);
+  }, [search, statusFilter]);
   const selectLicense = (rawId: unknown) => {
     const id = Number(rawId);
     if (!Number.isInteger(id) || id <= 0) {
       toast.error("Não foi possível identificar esta key");
       return;
     }
-    setSelectedId(current => current === id ? null : id);
+    setSelectedId(current => (current === id ? null : id));
   };
-  const stats = useMemo(() => ({ total: rows.length, active: rows.filter(row => row.status === "active").length, devices: rows.reduce((sum, row) => sum + Number(row.deviceCount ?? 0), 0), paused: rows.filter(row => row.status !== "active" && row.pausedAt).length }), [rows]);
+  const stats = useMemo(
+    () => ({
+      total: rows.length,
+      active: rows.filter(row => row.status === "active").length,
+      devices: rows.reduce((sum, row) => sum + Number(row.deviceCount ?? 0), 0),
+      paused: rows.filter(row => row.status !== "active" && row.pausedAt)
+        .length,
+    }),
+    [rows]
+  );
 
-  const copyKeys = async () => { if (createdKeys.length === 0) return; await navigator.clipboard.writeText(createdKeys.join("\n")); toast.success("Lote copiado"); };
+  const copyKeys = async () => {
+    if (createdKeys.length === 0) return;
+    await navigator.clipboard.writeText(createdKeys.join("\n"));
+    toast.success("Lote copiado");
+  };
 
-  if (user && !["admin", "reseller"].includes(user.role)) return <div className="flex min-h-[70vh] items-center justify-center"><Card className="max-w-md border-0 text-center shadow-sm"><CardContent className="space-y-3 p-8"><ShieldOff className="mx-auto h-10 w-10 text-rose-500" /><h1 className="text-xl font-semibold">Acesso restrito</h1><p className="text-sm text-slate-500">Sua conta não possui permissão para acessar este painel.</p></CardContent></Card></div>;
-  if (licenses.isError) return <div className="flex min-h-[70vh] items-center justify-center"><Card className="max-w-md border-0 text-center shadow-sm"><CardContent className="space-y-3 p-8"><ShieldOff className="mx-auto h-10 w-10 text-rose-500" /><h1 className="text-xl font-semibold">Não foi possível carregar</h1><p className="text-sm text-slate-500">Verifique sua permissão e tente novamente.</p><Button variant="outline" onClick={() => void licenses.refetch()}>Tentar novamente</Button></CardContent></Card></div>;
+  if (user && !["admin", "reseller"].includes(user.role))
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Card className="max-w-md border-0 text-center shadow-sm">
+          <CardContent className="space-y-3 p-8">
+            <ShieldOff className="mx-auto h-10 w-10 text-rose-500" />
+            <h1 className="text-xl font-semibold">Acesso restrito</h1>
+            <p className="text-sm text-slate-500">
+              Sua conta não possui permissão para acessar este painel.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  if (licenses.isError)
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center">
+        <Card className="max-w-md border-0 text-center shadow-sm">
+          <CardContent className="space-y-3 p-8">
+            <ShieldOff className="mx-auto h-10 w-10 text-rose-500" />
+            <h1 className="text-xl font-semibold">Não foi possível carregar</h1>
+            <p className="text-sm text-slate-500">
+              Verifique sua permissão e tente novamente.
+            </p>
+            <Button variant="outline" onClick={() => void licenses.refetch()}>
+              Tentar novamente
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
-  return <div className="admin-shell min-h-screen bg-[#070812] text-slate-100">
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-0 lg:flex-row">
-      <aside className={`admin-sidebar w-full shrink-0 border-b border-white/10 bg-[#0b0d18] p-3 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:border-b-0 lg:border-r ${sidebarOpen ? "block" : "hidden lg:block"}`}><div className="mb-8 flex items-center gap-3 px-3 pt-2"><div className="grid h-9 w-9 place-items-center rounded-xl bg-[#d51b50] text-white"><KeyRound className="h-5 w-5" /></div><div><p className="text-sm font-semibold text-white">License Atelier</p><p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Admin console</p></div></div><p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">Principal</p><div className="space-y-1"><Button variant="ghost" className={`w-full justify-start ${activeView === "home" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`} onClick={() => { setActiveView("home"); setSidebarOpen(false); }}><LayoutDashboard className="mr-2 h-4 w-4" />Início</Button><Button variant="ghost" className={`w-full justify-start ${activeView === "generate" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`} onClick={() => { setActiveView("generate"); setSidebarOpen(false); }}><Plus className="mr-2 h-4 w-4" />Gerar key</Button><Button variant="ghost" className={`w-full justify-start ${activeView === "keys" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`} onClick={() => { setActiveView("keys"); setSidebarOpen(false); }}><KeyRound className="mr-2 h-4 w-4" />Ver keys</Button>{user?.role === "admin" && <Button variant="ghost" className={`w-full justify-start ${activeView === "patches" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`} onClick={() => { setActiveView("patches"); setSidebarOpen(false); }}><FileUp className="mr-2 h-4 w-4" />Patches online</Button>}{user?.role === "admin" && <Button variant="ghost" className={`w-full justify-start ${activeView === "external" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`} onClick={() => { setActiveView("external"); setSidebarOpen(false); }}><Power className="mr-2 h-4 w-4" />Online separado</Button>}</div></aside>
-      <main className="min-w-0 flex-1 bg-[radial-gradient(circle_at_80%_0%,rgba(92,35,137,0.22),transparent_38%),#070812] px-4 py-5 md:px-8 md:py-7">
-      <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end"><div><p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#ef3c75]">{user?.role === "reseller" ? "Console do revendedor" : "Console privado"}</p><h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">Gerenciamento de licenças</h1><p className="mt-2 max-w-xl text-sm text-slate-400">{user?.role === "reseller" ? "Crie e acompanhe somente as licenças emitidas pela sua conta." : "Um centro elegante para criar, proteger e acompanhar as chaves do seu aplicativo iOS."}</p></div><div className="flex items-center gap-4"><div className="hidden text-right sm:block"><p className="text-sm font-medium text-white">{user?.name || "Administrador"}</p><p className="text-xs text-slate-500">{user?.email || "Conta protegida"}</p></div><div className="grid h-10 w-10 place-items-center rounded-full bg-[#d51b50] font-semibold text-white">{(user?.name || "A").slice(0, 1).toUpperCase()}</div></div></header>
-      {user?.role === "reseller" && <Card className="mt-6 border border-amber-400/30 bg-amber-950/20 shadow-sm"><CardContent className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Acesso do subrevendedor</p><p className="mt-1 text-sm text-slate-300">O gerador de keys fica disponível até a data abaixo.</p></div><div className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-right"><p className="text-xs text-amber-200">Expira em</p><p className="font-semibold text-amber-100">{dateLabel(user.resellerExpiresAt)}</p></div></CardContent></Card>}
-      <Button variant="outline" className="w-full justify-start lg:hidden" onClick={() => setSidebarOpen(open => !open)} aria-expanded={sidebarOpen}><KeyRound className="mr-2 h-4 w-4" />{sidebarOpen ? "Fechar navegação" : "Abrir navegação"}</Button>
-      {activeView === "keys" && <div className="grid gap-3 py-6 md:grid-cols-4"><Button className="h-12 justify-start bg-[#d51b50] text-white hover:bg-[#ee2b65]" onClick={() => setActiveView("generate")}><Plus className="mr-2 h-4 w-4" />Gerar key</Button><Button className="h-12 justify-start bg-[#245eea] text-white hover:bg-[#3470ff]" onClick={() => void licenses.refetch()}><RefreshCw className="mr-2 h-4 w-4" />Atualizar lista</Button><Button className="h-12 justify-start bg-[#d88916] text-white hover:bg-[#e49a28]" onClick={() => setStatusFilter("pending")}><Filter className="mr-2 h-4 w-4" />Pendentes</Button><Button className="h-12 justify-start bg-[#148c59] text-white hover:bg-[#1ca96d]" onClick={() => setStatusFilter("active")}><ShieldCheck className="mr-2 h-4 w-4" />Ativas</Button>{user?.role === "admin" && <Button className="h-12 justify-start bg-[#8f243d] text-white hover:bg-[#b42d4d]" disabled={pauseAll.isPending || stats.active === 0} onClick={() => { if (window.confirm(`Pausar todas as ${stats.active} keys ativas? Elas não serão apagadas e poderão ser desbloqueadas individualmente depois.`)) pauseAll.mutate(); }}><LockKeyhole className="mr-2 h-4 w-4" />Pausar todas</Button>}{user?.role === "admin" && <Button className="h-12 justify-start bg-[#245eea] text-white hover:bg-[#3470ff]" disabled={resumeAll.isPending || stats.paused === 0} onClick={() => { if (window.confirm(`Despausar todas as ${stats.paused} keys pausadas globalmente? Keys bloqueadas manualmente não serão alteradas.`)) resumeAll.mutate(); }}><ShieldCheck className="mr-2 h-4 w-4" />Despausar todas</Button>}</div>}
-      <div className={activeView === "home" ? "grid gap-4 md:grid-cols-3" : "hidden"}><StatCard label="Chaves totais" value={stats.total} icon={<KeyRound className="h-5 w-5 text-emerald-600" />} /><StatCard label="Ativas agora" value={stats.active} icon={<ShieldCheck className="h-5 w-5 text-emerald-600" />} /><StatCard label="Dispositivos vinculados" value={stats.devices} icon={<Users className="h-5 w-5 text-emerald-600" />} /></div>
-      {activeView === "home" && user?.role === "admin" && <Card className="border border-emerald-500/30 bg-emerald-950/20 shadow-sm"><CardHeader><CardTitle className="flex items-center gap-2 text-lg"><UserPlus className="h-5 w-5 text-emerald-400" />Criar subrevendedor</CardTitle><p className="text-sm text-slate-400">O subrevendedor terá acesso somente a gerar, apagar e resetar keys.</p></CardHeader><CardContent><div className="grid gap-3 md:grid-cols-5"><Input value={resellerUsername} onChange={event => setResellerUsername(event.target.value.toLowerCase())} placeholder="Usuário" /><Input type="password" value={resellerPassword} onChange={event => setResellerPassword(event.target.value)} placeholder="Senha" /><Input type="number" min="0" value={resellerCredits} onChange={event => setResellerCredits(event.target.value)} placeholder="Créditos" /><Input type="date" value={resellerExpiresAt} onChange={event => setResellerExpiresAt(event.target.value)} /><Button disabled={createResellerAccount.isPending || !resellerUsername || resellerPassword.length < 6} onClick={() => createResellerAccount.mutate({ username: resellerUsername, password: resellerPassword, credits: Number(resellerCredits) || 0, expiresAt: resellerExpiresAt ? new Date(resellerExpiresAt + "T23:59:59.000Z").toISOString() : null })}><UserPlus className="mr-2 h-4 w-4" />Criar conta</Button></div><p className="mt-2 text-xs text-slate-500">Senha mínima: 6 caracteres. Créditos = quantidade máxima de keys que ele pode criar.</p></CardContent></Card>}
-      {activeView === "home" && user?.role === "admin" && <Card className="mt-4 border border-sky-500/30 bg-sky-950/20 shadow-sm"><CardHeader><CardTitle className="flex items-center gap-2 text-lg"><ExternalLink className="h-5 w-5 text-sky-400" />Publicar link de atualização</CardTitle><p className="text-sm text-slate-400">Escolha o subrevendedor. Apenas as IPAs que usam keys criadas por ele verão o link na aba External → Perfil.</p></CardHeader><CardContent className="space-y-3"><Textarea value={announcementText} onChange={event => setAnnouncementText(event.target.value)} placeholder="Mensagem opcional da atualização" className="border-white/10 bg-white/5 text-white placeholder:text-slate-500" /><div className="grid gap-3 md:grid-cols-2"><Input value={announcementUrl} onChange={event => setAnnouncementUrl(event.target.value)} placeholder="https://link-da-atualizacao" className="border-white/10 bg-white/5 text-white placeholder:text-slate-500" /><select value={announcementTarget} onChange={event => setAnnouncementTarget(event.target.value)} className="h-10 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"><option value="">Todos os usuários</option>{(activeResellers.data ?? []).map(reseller => <option key={reseller.id} value={reseller.id}>{reseller.name || reseller.username || reseller.email || `Revendedor ${reseller.id}`}</option>)}</select></div><Button disabled={updateAnnouncement.isPending || !announcementUrl.trim()} onClick={() => updateAnnouncement.mutate({ announcement: announcementText.trim(), url: announcementUrl.trim(), targetResellerId: announcementTarget ? Number(announcementTarget) : null })} className="bg-sky-600 text-white hover:bg-sky-500"><ExternalLink className="mr-2 h-4 w-4" />Publicar link</Button></CardContent></Card>}
-      {activeView === "home" && user?.role === "admin" && <Card className="mt-4 border-0 shadow-sm"><CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Users className="h-5 w-5 text-emerald-600" />Revendedores ativos</CardTitle><p className="text-sm text-slate-500">Pesquise por nome, usuário ou e-mail. Veja quantas keys cada conta gerou e quando o acesso expira.</p><div className="relative mt-3"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><Input value={resellerSearch} onChange={event => setResellerSearch(event.target.value)} className="pl-9" placeholder="Pesquisar revendedor..." /></div></CardHeader><CardContent><div className="space-y-2">{activeResellers.isLoading ? <p className="text-sm text-slate-500">Carregando contas...</p> : activeResellers.isError ? <p className="text-sm text-rose-600">Não foi possível carregar as contas ativas.</p> : filteredResellers.length === 0 ? <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Nenhum revendedor encontrado.</p> : filteredResellers.map(reseller => { const generatedKeys = rows.filter(row => Number(row.creatorId) === Number(reseller.id)).length; return <div key={reseller.id} className="flex flex-col gap-3 rounded-xl bg-emerald-50/60 p-3 text-sm md:flex-row md:items-center md:justify-between"><div className="min-w-0"><p className="font-medium text-slate-800">{reseller.name || reseller.email || reseller.username || reseller.openId}</p><p className="text-xs text-slate-500">{reseller.email || reseller.username || "E-mail indisponível"}</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600"><span><strong>{generatedKeys}</strong> {generatedKeys === 1 ? "key gerada" : "keys geradas"}</span><span>Expira em <strong>{dateLabel(reseller.resellerExpiresAt)}</strong></span><span>{Number(reseller.credits ?? 0)} créditos restantes</span></div></div><div className="flex flex-wrap gap-2"><Button variant="outline" size="sm" onClick={() => revokeAccess.mutate({ id: reseller.id })}>Revogar acesso</Button><Button variant="outline" size="sm" className="border-rose-200 text-rose-700 hover:bg-rose-50" disabled={removeReseller.isPending} onClick={() => { if (window.confirm(`Remover ${reseller.name || reseller.email || "este revendedor"}? Todas as keys criadas por ele, dispositivos vinculados e histórico serão apagados permanentemente.`)) removeReseller.mutate({ id: reseller.id }); }}><Trash2 className="mr-1 h-4 w-4" />Remover e apagar keys</Button></div></div>; })}</div></CardContent></Card>}
-      {user?.role === "admin" && activeView === "patches" && <RemotePatchesPanel section="patches" />}
-      {user?.role === "admin" && activeView === "external" && <RemotePatchesPanel section="external" />}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <Card className={activeView === "keys" ? "admin-card border border-white/10 shadow-2xl shadow-black/20" : "hidden"}><CardHeader className="flex flex-row items-center justify-between"><div><CardTitle className="text-xl">Chaves de acesso</CardTitle><p className="mt-1 text-sm text-slate-500">Pesquise e administre as licenças emitidas.</p></div><Button variant="outline" size="icon" onClick={() => void licenses.refetch()} aria-label="Atualizar"><RefreshCw className={licenses.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"} /></Button></CardHeader><CardContent><div className="mb-5 rounded-2xl border border-white/10 bg-black/20 p-4"><div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white"><Filter className="h-4 w-4 text-[#ef3c75]" />Filtros de licenças</div><div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" /><Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar pelo prefixo da chave" className="border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-500" /></div><div className="mt-3 flex flex-wrap gap-2">{([["all", "Todas"], ["active", "Ativas"], ["pending", "Pendentes"], ["blocked", "Bloqueadas"]] as const).map(([value, label]) => <Button key={value} size="sm" variant="ghost" onClick={() => setStatusFilter(value)} className={statusFilter === value ? "bg-[#3a1329] text-[#ff5a8c]" : "text-slate-400 hover:bg-white/5 hover:text-white"}>{label}</Button>)}</div></div><div className="space-y-3">{licenses.isLoading ? <div className="flex justify-center py-12"><Loader2 className="animate-spin text-emerald-600" /></div> : filteredRows.length === 0 ? <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center text-sm text-slate-500">Nenhuma chave encontrada.</div> : visibleRows.map(row => <LicenseRow key={row.id} row={row} selected={selectedId === Number(row.id)} onDetails={() => selectLicense(row.id)} canModerate={user?.role === "admin"} onRevoke={() => revoke.mutate({ id: row.id })} onReactivate={() => reactivate.mutate({ id: row.id })} onReset={() => { if (window.confirm("Resetar esta key? Os dispositivos serão desvinculados e a validade começará novamente na próxima ativação.")) reset.mutate({ id: row.id }); }} onDelete={() => { if (window.confirm("Apagar esta key? Esta ação não pode ser desfeita.")) deleteKey.mutate({ id: row.id }); }} />)}</div>{filteredRows.length > PAGE_SIZE && <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-sm text-slate-300"><span>Mostrando {licensePage * PAGE_SIZE + 1}-{Math.min((licensePage + 1) * PAGE_SIZE, filteredRows.length)} de {filteredRows.length} keys</span><div className="flex items-center gap-2"><Button type="button" size="sm" variant="outline" disabled={licensePage === 0} onClick={() => { setSelectedId(null); setLicensePage(page => Math.max(0, page - 1)); }}>Anterior</Button><span>Página {licensePage + 1} de {pageCount}</span><Button type="button" size="sm" variant="outline" disabled={licensePage >= pageCount - 1} onClick={() => { setSelectedId(null); setLicensePage(page => Math.min(pageCount - 1, page + 1)); }}>Próxima</Button></div></div>}{selectedId !== null && <DetailsPanel details={details.data} isLoading={details.isLoading} isError={details.isError} errorMessage={details.error?.message} onClose={() => setSelectedId(null)} />}</CardContent></Card>
-        <div className="order-first space-y-6 xl:order-last"><Card className={activeView === "generate" ? "border-0 bg-[#17202f] text-white shadow-xl shadow-slate-300/30" : "hidden"}><CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Plus className="h-5 w-5 text-emerald-400" />Emitir nova chave</CardTitle><p className="text-sm text-slate-300">O segredo aparece uma única vez. A validade começa na primeira ativação.</p></CardHeader><CardContent className="space-y-4"><div className="grid grid-cols-2 gap-3"><div><Label className="text-slate-300">Quantidade</Label><Input type="number" min="1" max="500" value={quantity} onChange={event => setQuantity(event.target.value)} className="mt-2 border-slate-600 bg-slate-800 text-white" /></div><div><Label className="text-slate-300">Dispositivos por chave</Label><Input type="number" min="1" max="2000" value={deviceLimit} onChange={event => setDeviceLimit(event.target.value)} className="mt-2 border-slate-600 bg-slate-800 text-white" /></div></div>{Number(quantity) === 1 && <div><Label className="text-slate-300">Chave personalizada (opcional)</Label><Input value={customKey} onChange={event => setCustomKey(event.target.value.toUpperCase())} placeholder="Ex.: PHZINFD · vazio = automática" maxLength={64} className="mt-2 border-slate-600 bg-slate-800 text-white placeholder:text-slate-400" /></div>}<div><Label className="text-slate-300">Validade após ativação</Label><div className="mt-2 grid grid-cols-[1fr_1fr] gap-2"><Input type="number" min="1" max="30" value={durationValue} onChange={event => setDurationValue(event.target.value)} className="border-slate-600 bg-slate-800 text-white" /><select value={durationUnit} onChange={event => { const unit = event.target.value as "hours" | "days"; setDurationUnit(unit); setDurationValue(unit === "hours" ? "1" : "30"); }} className="rounded-md border border-slate-600 bg-slate-800 px-3 text-sm text-white"><option value="hours">hora</option><option value="days">dias</option></select></div><p className="mt-1 text-xs text-slate-400">Escolha de 1 a 30 horas ou de 1 a 30 dias. A contagem começa na primeira ativação.</p></div><Button className="w-full bg-emerald-500 text-slate-950 hover:bg-emerald-400" disabled={create.isPending} onClick={() => { const durationAmount = Math.max(1, Math.min(30, Number(durationValue) || 30)); const durationMinutes = durationUnit === "hours" ? durationAmount * 60 : durationAmount * 24 * 60; create.mutate({ quantity: Math.max(1, Math.min(500, Number(quantity) || 1)), deviceLimit: Number(deviceLimit), durationDays: durationUnit === "days" ? Math.max(1, Math.min(30, Number(durationValue) || 30)) : 1, durationMinutes, customKey: Number(quantity) === 1 ? customKey.trim() || undefined : undefined }); }}>{create.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <KeyRound className="mr-2 h-4 w-4" />}Gerar chave</Button>{createdKeys.length > 0 && <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3"><p className="mb-2 text-xs text-emerald-300">Copie agora — o lote não será exibido novamente.</p><div className="max-h-40 space-y-1 overflow-auto rounded-lg bg-black/20 p-2">{createdKeys.map((key, index) => <div key={`${key}-${index}`} className="border-b border-white/10 py-1 last:border-0"><code className="block break-all text-xs leading-5">{key}</code></div>)}</div><div className="mt-2 flex gap-2"><Button size="sm" variant="ghost" onClick={copyKeys} className="text-emerald-300"><Copy className="mr-2 h-4 w-4" />Copiar lote</Button><Button size="sm" variant="ghost" onClick={() => setCreatedKeys([])} className="text-slate-300"><X className="mr-2 h-4 w-4" />Ocultar</Button></div></div>}</CardContent></Card>{activeView === "generate" && <Card className="border border-rose-500/30 bg-[#21131c] text-white shadow-sm"><CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Trash2 className="h-5 w-5 text-rose-400" />Excluir lote de keys</CardTitle><p className="text-sm text-slate-300">Cole as keys completas, uma por linha ou separadas por espaço, vírgula ou ponto e vírgula. A exclusão é permanente.</p></CardHeader><CardContent className="space-y-3"><Textarea value={batchDeleteInput} onChange={event => setBatchDeleteInput(event.target.value)} placeholder="EXTERNAL-...
-EXTERNAL-..." className="min-h-32 border-rose-500/30 bg-slate-900 text-white placeholder:text-slate-500" /><p className="text-xs text-slate-400">Máximo de 500 keys por lote. Será solicitada confirmação antes de apagar.</p><Button variant="outline" className="w-full border-rose-400/50 text-rose-300 hover:bg-rose-950/50 hover:text-rose-200" disabled={deleteBatch.isPending || !batchDeleteInput.trim()} onClick={() => { const keys = Array.from(new Set(batchDeleteInput.split(/[\s,;]+/).map(key => key.trim()).filter(Boolean))); if (keys.length > 500) { toast.error("Cole no máximo 500 keys por lote"); return; } if (window.confirm(`Apagar permanentemente ${keys.length} ${keys.length === 1 ? "key" : "keys"}? Essa ação não pode ser desfeita.`)) deleteBatch.mutate({ keys }); }}>{deleteBatch.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}Excluir lote colado</Button></CardContent></Card>}{activeView === "home" && <Card className="border-0 shadow-sm"><CardHeader><CardTitle className="text-lg">Atividade recente</CardTitle></CardHeader><CardContent className="space-y-3">{events.isError ? <p className="text-sm text-rose-600">Não foi possível carregar a atividade.</p> : (events.data ?? []).slice(0, 6).map(event => <div key={event.id} className="flex items-center justify-between text-sm"><div><p className="font-medium capitalize">{event.eventType.replace("_", " ")}</p><p className="text-xs text-slate-400">{event.deviceId ? event.deviceId.slice(0, 16) : "Sistema"}</p></div><span className="text-xs text-slate-400">{new Date(event.createdAt).toLocaleDateString("pt-BR")}</span></div>)}</CardContent></Card>}</div>
-      </div><p className="text-center text-xs text-slate-400">As chaves são armazenadas como hash. A API pública nunca recebe operações administrativas.</p>
-    </main></div>
-  </div>;
+  return (
+    <div className="admin-shell min-h-screen bg-[#070812] text-slate-100">
+      <div className="mx-auto flex max-w-[1600px] flex-col gap-0 lg:flex-row">
+        <aside
+          className={`admin-sidebar w-full shrink-0 border-b border-white/10 bg-[#0b0d18] p-3 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:border-b-0 lg:border-r ${sidebarOpen ? "block" : "hidden lg:block"}`}
+        >
+          <div className="mb-8 flex items-center gap-3 px-3 pt-2">
+            <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#d51b50] text-white">
+              <KeyRound className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">
+                License Atelier
+              </p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                Admin console
+              </p>
+            </div>
+          </div>
+          <p className="px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Principal
+          </p>
+          <div className="space-y-1">
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeView === "home" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+              onClick={() => {
+                setActiveView("home");
+                setSidebarOpen(false);
+              }}
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Início
+            </Button>
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeView === "generate" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+              onClick={() => {
+                setActiveView("generate");
+                setSidebarOpen(false);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Gerar key
+            </Button>
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeView === "keys" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+              onClick={() => {
+                setActiveView("keys");
+                setSidebarOpen(false);
+              }}
+            >
+              <KeyRound className="mr-2 h-4 w-4" />
+              Ver keys
+            </Button>
+            {user?.role === "admin" && (
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${activeView === "patches" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+                onClick={() => {
+                  setActiveView("patches");
+                  setSidebarOpen(false);
+                }}
+              >
+                <FileUp className="mr-2 h-4 w-4" />
+                Patches online
+              </Button>
+            )}
+            {user?.role === "admin" && (
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${activeView === "external" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+                onClick={() => {
+                  setActiveView("external");
+                  setSidebarOpen(false);
+                }}
+              >
+                <Power className="mr-2 h-4 w-4" />
+                Online separado
+              </Button>
+            )}
+          </div>
+        </aside>
+        <main className="min-w-0 flex-1 bg-[radial-gradient(circle_at_80%_0%,rgba(92,35,137,0.22),transparent_38%),#070812] px-4 py-5 md:px-8 md:py-7">
+          <header className="flex flex-col justify-between gap-5 border-b border-white/10 pb-6 md:flex-row md:items-end">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#ef3c75]">
+                {user?.role === "reseller"
+                  ? "Console do revendedor"
+                  : "Console privado"}
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+                Gerenciamento de licenças
+              </h1>
+              <p className="mt-2 max-w-xl text-sm text-slate-400">
+                {user?.role === "reseller"
+                  ? "Crie e acompanhe somente as licenças emitidas pela sua conta."
+                  : "Um centro elegante para criar, proteger e acompanhar as chaves do seu aplicativo iOS."}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden text-right sm:block">
+                <p className="text-sm font-medium text-white">
+                  {user?.name || "Administrador"}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {user?.email || "Conta protegida"}
+                </p>
+              </div>
+              <div className="grid h-10 w-10 place-items-center rounded-full bg-[#d51b50] font-semibold text-white">
+                {(user?.name || "A").slice(0, 1).toUpperCase()}
+              </div>
+            </div>
+          </header>
+          {user?.role === "reseller" && (
+            <Card className="mt-6 border border-amber-400/30 bg-amber-950/20 shadow-sm">
+              <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">
+                    Acesso do subrevendedor
+                  </p>
+                  <p className="mt-1 text-sm text-slate-300">
+                    O gerador de keys fica disponível até a data abaixo.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-right">
+                  <p className="text-xs text-amber-200">Expira em</p>
+                  <p className="font-semibold text-amber-100">
+                    {dateLabel(user.resellerExpiresAt)}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          <Button
+            variant="outline"
+            className="w-full justify-start lg:hidden"
+            onClick={() => setSidebarOpen(open => !open)}
+            aria-expanded={sidebarOpen}
+          >
+            <KeyRound className="mr-2 h-4 w-4" />
+            {sidebarOpen ? "Fechar navegação" : "Abrir navegação"}
+          </Button>
+          {activeView === "keys" && (
+            <div className="grid gap-3 py-6 md:grid-cols-4">
+              <Button
+                className="h-12 justify-start bg-[#d51b50] text-white hover:bg-[#ee2b65]"
+                onClick={() => setActiveView("generate")}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Gerar key
+              </Button>
+              <Button
+                className="h-12 justify-start bg-[#245eea] text-white hover:bg-[#3470ff]"
+                onClick={() => void licenses.refetch()}
+              >
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Atualizar lista
+              </Button>
+              <Button
+                className="h-12 justify-start bg-[#d88916] text-white hover:bg-[#e49a28]"
+                onClick={() => setStatusFilter("pending")}
+              >
+                <Filter className="mr-2 h-4 w-4" />
+                Pendentes
+              </Button>
+              <Button
+                className="h-12 justify-start bg-[#148c59] text-white hover:bg-[#1ca96d]"
+                onClick={() => setStatusFilter("active")}
+              >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Ativas
+              </Button>
+              {user?.role === "admin" && (
+                <Button
+                  className="h-12 justify-start bg-[#8f243d] text-white hover:bg-[#b42d4d]"
+                  disabled={pauseAll.isPending || stats.active === 0}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Pausar todas as ${stats.active} keys ativas? Elas não serão apagadas e poderão ser desbloqueadas individualmente depois.`
+                      )
+                    )
+                      pauseAll.mutate();
+                  }}
+                >
+                  <LockKeyhole className="mr-2 h-4 w-4" />
+                  Pausar todas
+                </Button>
+              )}
+              {user?.role === "admin" && (
+                <Button
+                  className="h-12 justify-start bg-[#245eea] text-white hover:bg-[#3470ff]"
+                  disabled={resumeAll.isPending || stats.paused === 0}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Despausar todas as ${stats.paused} keys pausadas globalmente? Keys bloqueadas manualmente não serão alteradas.`
+                      )
+                    )
+                      resumeAll.mutate();
+                  }}
+                >
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Despausar todas
+                </Button>
+              )}
+            </div>
+          )}
+          <div
+            className={
+              activeView === "home" ? "grid gap-4 md:grid-cols-3" : "hidden"
+            }
+          >
+            <StatCard
+              label="Chaves totais"
+              value={stats.total}
+              icon={<KeyRound className="h-5 w-5 text-emerald-600" />}
+            />
+            <StatCard
+              label="Ativas agora"
+              value={stats.active}
+              icon={<ShieldCheck className="h-5 w-5 text-emerald-600" />}
+            />
+            <StatCard
+              label="Dispositivos vinculados"
+              value={stats.devices}
+              icon={<Users className="h-5 w-5 text-emerald-600" />}
+            />
+          </div>
+          {activeView === "home" && user?.role === "admin" && (
+            <Card className="border border-emerald-500/30 bg-emerald-950/20 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <UserPlus className="h-5 w-5 text-emerald-400" />
+                  Criar subrevendedor
+                </CardTitle>
+                <p className="text-sm text-slate-400">
+                  O subrevendedor terá acesso somente a gerar, apagar e resetar
+                  keys.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 md:grid-cols-5">
+                  <Input
+                    value={resellerUsername}
+                    onChange={event =>
+                      setResellerUsername(event.target.value.toLowerCase())
+                    }
+                    placeholder="Usuário"
+                  />
+                  <Input
+                    type="password"
+                    value={resellerPassword}
+                    onChange={event => setResellerPassword(event.target.value)}
+                    placeholder="Senha"
+                  />
+                  <Input
+                    type="number"
+                    min="0"
+                    value={resellerCredits}
+                    onChange={event => setResellerCredits(event.target.value)}
+                    placeholder="Créditos"
+                  />
+                  <Input
+                    type="date"
+                    value={resellerExpiresAt}
+                    onChange={event => setResellerExpiresAt(event.target.value)}
+                  />
+                  <Button
+                    disabled={
+                      createResellerAccount.isPending ||
+                      !resellerUsername ||
+                      resellerPassword.length < 6
+                    }
+                    onClick={() =>
+                      createResellerAccount.mutate({
+                        username: resellerUsername,
+                        password: resellerPassword,
+                        credits: Number(resellerCredits) || 0,
+                        expiresAt: resellerExpiresAt
+                          ? new Date(
+                              resellerExpiresAt + "T23:59:59.000Z"
+                            ).toISOString()
+                          : null,
+                      })
+                    }
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Criar conta
+                  </Button>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Senha mínima: 6 caracteres. Créditos = quantidade máxima de
+                  keys que ele pode criar.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          {activeView === "home" && user?.role === "admin" && (
+            <Card className="mt-4 border border-sky-500/30 bg-sky-950/20 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <ExternalLink className="h-5 w-5 text-sky-400" />
+                  Publicar link de atualização
+                </CardTitle>
+                <p className="text-sm text-slate-400">
+                  Escolha o administrador ou subrevendedor. Apenas as IPAs que
+                  usam keys criadas pela conta escolhida verão o link na aba
+                  External → Perfil.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Textarea
+                  value={announcementText}
+                  onChange={event => setAnnouncementText(event.target.value)}
+                  placeholder="Mensagem opcional da atualização"
+                  className="border-white/10 bg-white/5 text-white placeholder:text-slate-500"
+                />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Input
+                    value={announcementUrl}
+                    onChange={event => setAnnouncementUrl(event.target.value)}
+                    placeholder="https://link-da-atualizacao"
+                    className="border-white/10 bg-white/5 text-white placeholder:text-slate-500"
+                  />
+                  <select
+                    value={announcementTarget}
+                    onChange={event =>
+                      setAnnouncementTarget(event.target.value)
+                    }
+                    className="h-10 rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
+                  >
+                    <option value="">Todos os usuários</option>
+                    {user?.role === "admin" && (
+                      <option value={user.id}>
+                        Administrador — {user.email || `Conta ${user.id}`}
+                      </option>
+                    )}
+                    {(activeResellers.data ?? []).map(reseller => (
+                      <option key={reseller.id} value={reseller.id}>
+                        {reseller.name ||
+                          reseller.username ||
+                          reseller.email ||
+                          `Revendedor ${reseller.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  disabled={
+                    updateAnnouncement.isPending || !announcementUrl.trim()
+                  }
+                  onClick={() =>
+                    updateAnnouncement.mutate({
+                      announcement: announcementText.trim(),
+                      url: announcementUrl.trim(),
+                      targetResellerId: announcementTarget
+                        ? Number(announcementTarget)
+                        : null,
+                    })
+                  }
+                  className="bg-sky-600 text-white hover:bg-sky-500"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Publicar link
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+          {activeView === "home" && user?.role === "admin" && (
+            <Card className="mt-4 border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Users className="h-5 w-5 text-emerald-600" />
+                  Revendedores ativos
+                </CardTitle>
+                <p className="text-sm text-slate-500">
+                  Pesquise por nome, usuário ou e-mail. Veja quantas keys cada
+                  conta gerou e quando o acesso expira.
+                </p>
+                <div className="relative mt-3">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    value={resellerSearch}
+                    onChange={event => setResellerSearch(event.target.value)}
+                    className="pl-9"
+                    placeholder="Pesquisar revendedor..."
+                  />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {activeResellers.isLoading ? (
+                    <p className="text-sm text-slate-500">
+                      Carregando contas...
+                    </p>
+                  ) : activeResellers.isError ? (
+                    <p className="text-sm text-rose-600">
+                      Não foi possível carregar as contas ativas.
+                    </p>
+                  ) : filteredResellers.length === 0 ? (
+                    <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
+                      Nenhum revendedor encontrado.
+                    </p>
+                  ) : (
+                    filteredResellers.map(reseller => {
+                      const generatedKeys = rows.filter(
+                        row => Number(row.creatorId) === Number(reseller.id)
+                      ).length;
+                      return (
+                        <div
+                          key={reseller.id}
+                          className="flex flex-col gap-3 rounded-xl bg-emerald-50/60 p-3 text-sm md:flex-row md:items-center md:justify-between"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-medium text-slate-800">
+                              {reseller.name ||
+                                reseller.email ||
+                                reseller.username ||
+                                reseller.openId}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {reseller.email ||
+                                reseller.username ||
+                                "E-mail indisponível"}
+                            </p>
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600">
+                              <span>
+                                <strong>{generatedKeys}</strong>{" "}
+                                {generatedKeys === 1
+                                  ? "key gerada"
+                                  : "keys geradas"}
+                              </span>
+                              <span>
+                                Expira em{" "}
+                                <strong>
+                                  {dateLabel(reseller.resellerExpiresAt)}
+                                </strong>
+                              </span>
+                              <span>
+                                {Number(reseller.credits ?? 0)} créditos
+                                restantes
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                revokeAccess.mutate({ id: reseller.id })
+                              }
+                            >
+                              Revogar acesso
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-rose-200 text-rose-700 hover:bg-rose-50"
+                              disabled={removeReseller.isPending}
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    `Remover ${reseller.name || reseller.email || "este revendedor"}? Todas as keys criadas por ele, dispositivos vinculados e histórico serão apagados permanentemente.`
+                                  )
+                                )
+                                  removeReseller.mutate({ id: reseller.id });
+                              }}
+                            >
+                              <Trash2 className="mr-1 h-4 w-4" />
+                              Remover e apagar keys
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {user?.role === "admin" && activeView === "patches" && (
+            <RemotePatchesPanel section="patches" />
+          )}
+          {user?.role === "admin" && activeView === "external" && (
+            <RemotePatchesPanel section="external" />
+          )}
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+            <Card
+              className={
+                activeView === "keys"
+                  ? "admin-card border border-white/10 shadow-2xl shadow-black/20"
+                  : "hidden"
+              }
+            >
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl">Chaves de acesso</CardTitle>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Pesquise e administre as licenças emitidas.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => void licenses.refetch()}
+                  aria-label="Atualizar"
+                >
+                  <RefreshCw
+                    className={
+                      licenses.isFetching ? "h-4 w-4 animate-spin" : "h-4 w-4"
+                    }
+                  />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-5 rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-white">
+                    <Filter className="h-4 w-4 text-[#ef3c75]" />
+                    Filtros de licenças
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                    <Input
+                      value={search}
+                      onChange={event => setSearch(event.target.value)}
+                      placeholder="Buscar pelo prefixo da chave"
+                      className="border-white/10 bg-white/5 pl-9 text-white placeholder:text-slate-500"
+                    />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {(
+                      [
+                        ["all", "Todas"],
+                        ["active", "Ativas"],
+                        ["pending", "Pendentes"],
+                        ["blocked", "Bloqueadas"],
+                      ] as const
+                    ).map(([value, label]) => (
+                      <Button
+                        key={value}
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setStatusFilter(value)}
+                        className={
+                          statusFilter === value
+                            ? "bg-[#3a1329] text-[#ff5a8c]"
+                            : "text-slate-400 hover:bg-white/5 hover:text-white"
+                        }
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {licenses.isLoading ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2 className="animate-spin text-emerald-600" />
+                    </div>
+                  ) : filteredRows.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-white/10 p-10 text-center text-sm text-slate-500">
+                      Nenhuma chave encontrada.
+                    </div>
+                  ) : (
+                    visibleRows.map(row => (
+                      <LicenseRow
+                        key={row.id}
+                        row={row}
+                        selected={selectedId === Number(row.id)}
+                        onDetails={() => selectLicense(row.id)}
+                        canModerate={user?.role === "admin"}
+                        onRevoke={() => revoke.mutate({ id: row.id })}
+                        onReactivate={() => reactivate.mutate({ id: row.id })}
+                        onReset={() => {
+                          if (
+                            window.confirm(
+                              "Resetar esta key? Os dispositivos serão desvinculados e a validade começará novamente na próxima ativação."
+                            )
+                          )
+                            reset.mutate({ id: row.id });
+                        }}
+                        onDelete={() => {
+                          if (
+                            window.confirm(
+                              "Apagar esta key? Esta ação não pode ser desfeita."
+                            )
+                          )
+                            deleteKey.mutate({ id: row.id });
+                        }}
+                      />
+                    ))
+                  )}
+                </div>
+                {filteredRows.length > PAGE_SIZE && (
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/20 p-3 text-sm text-slate-300">
+                    <span>
+                      Mostrando {licensePage * PAGE_SIZE + 1}-
+                      {Math.min(
+                        (licensePage + 1) * PAGE_SIZE,
+                        filteredRows.length
+                      )}{" "}
+                      de {filteredRows.length} keys
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={licensePage === 0}
+                        onClick={() => {
+                          setSelectedId(null);
+                          setLicensePage(page => Math.max(0, page - 1));
+                        }}
+                      >
+                        Anterior
+                      </Button>
+                      <span>
+                        Página {licensePage + 1} de {pageCount}
+                      </span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={licensePage >= pageCount - 1}
+                        onClick={() => {
+                          setSelectedId(null);
+                          setLicensePage(page =>
+                            Math.min(pageCount - 1, page + 1)
+                          );
+                        }}
+                      >
+                        Próxima
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {selectedId !== null && (
+                  <DetailsPanel
+                    details={details.data}
+                    isLoading={details.isLoading}
+                    isError={details.isError}
+                    errorMessage={details.error?.message}
+                    onClose={() => setSelectedId(null)}
+                  />
+                )}
+              </CardContent>
+            </Card>
+            <div className="order-first space-y-6 xl:order-last">
+              <Card
+                className={
+                  activeView === "generate"
+                    ? "border-0 bg-[#17202f] text-white shadow-xl shadow-slate-300/30"
+                    : "hidden"
+                }
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Plus className="h-5 w-5 text-emerald-400" />
+                    Emitir nova chave
+                  </CardTitle>
+                  <p className="text-sm text-slate-300">
+                    O segredo aparece uma única vez. A validade começa na
+                    primeira ativação.
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-slate-300">Quantidade</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="500"
+                        value={quantity}
+                        onChange={event => setQuantity(event.target.value)}
+                        className="mt-2 border-slate-600 bg-slate-800 text-white"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-slate-300">
+                        Dispositivos por chave
+                      </Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="2000"
+                        value={deviceLimit}
+                        onChange={event => setDeviceLimit(event.target.value)}
+                        className="mt-2 border-slate-600 bg-slate-800 text-white"
+                      />
+                    </div>
+                  </div>
+                  {Number(quantity) === 1 && (
+                    <div>
+                      <Label className="text-slate-300">
+                        Chave personalizada (opcional)
+                      </Label>
+                      <Input
+                        value={customKey}
+                        onChange={event =>
+                          setCustomKey(event.target.value.toUpperCase())
+                        }
+                        placeholder="Ex.: PHZINFD · vazio = automática"
+                        maxLength={64}
+                        className="mt-2 border-slate-600 bg-slate-800 text-white placeholder:text-slate-400"
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <Label className="text-slate-300">
+                      Validade após ativação
+                    </Label>
+                    <div className="mt-2 grid grid-cols-[1fr_1fr] gap-2">
+                      <Input
+                        type="number"
+                        min="1"
+                        max="30"
+                        value={durationValue}
+                        onChange={event => setDurationValue(event.target.value)}
+                        className="border-slate-600 bg-slate-800 text-white"
+                      />
+                      <select
+                        value={durationUnit}
+                        onChange={event => {
+                          const unit = event.target.value as "hours" | "days";
+                          setDurationUnit(unit);
+                          setDurationValue(unit === "hours" ? "1" : "30");
+                        }}
+                        className="rounded-md border border-slate-600 bg-slate-800 px-3 text-sm text-white"
+                      >
+                        <option value="hours">hora</option>
+                        <option value="days">dias</option>
+                      </select>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Escolha de 1 a 30 horas ou de 1 a 30 dias. A contagem
+                      começa na primeira ativação.
+                    </p>
+                  </div>
+                  <Button
+                    className="w-full bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+                    disabled={create.isPending}
+                    onClick={() => {
+                      const durationAmount = Math.max(
+                        1,
+                        Math.min(30, Number(durationValue) || 30)
+                      );
+                      const durationMinutes =
+                        durationUnit === "hours"
+                          ? durationAmount * 60
+                          : durationAmount * 24 * 60;
+                      create.mutate({
+                        quantity: Math.max(
+                          1,
+                          Math.min(500, Number(quantity) || 1)
+                        ),
+                        deviceLimit: Number(deviceLimit),
+                        durationDays:
+                          durationUnit === "days"
+                            ? Math.max(
+                                1,
+                                Math.min(30, Number(durationValue) || 30)
+                              )
+                            : 1,
+                        durationMinutes,
+                        customKey:
+                          Number(quantity) === 1
+                            ? customKey.trim() || undefined
+                            : undefined,
+                      });
+                    }}
+                  >
+                    {create.isPending ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <KeyRound className="mr-2 h-4 w-4" />
+                    )}
+                    Gerar chave
+                  </Button>
+                  {createdKeys.length > 0 && (
+                    <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3">
+                      <p className="mb-2 text-xs text-emerald-300">
+                        Copie agora — o lote não será exibido novamente.
+                      </p>
+                      <div className="max-h-40 space-y-1 overflow-auto rounded-lg bg-black/20 p-2">
+                        {createdKeys.map((key, index) => (
+                          <div
+                            key={`${key}-${index}`}
+                            className="border-b border-white/10 py-1 last:border-0"
+                          >
+                            <code className="block break-all text-xs leading-5">
+                              {key}
+                            </code>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={copyKeys}
+                          className="text-emerald-300"
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          Copiar lote
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setCreatedKeys([])}
+                          className="text-slate-300"
+                        >
+                          <X className="mr-2 h-4 w-4" />
+                          Ocultar
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              {activeView === "generate" && (
+                <Card className="border border-rose-500/30 bg-[#21131c] text-white shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Trash2 className="h-5 w-5 text-rose-400" />
+                      Excluir lote de keys
+                    </CardTitle>
+                    <p className="text-sm text-slate-300">
+                      Cole as keys completas, uma por linha ou separadas por
+                      espaço, vírgula ou ponto e vírgula. A exclusão é
+                      permanente.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Textarea
+                      value={batchDeleteInput}
+                      onChange={event =>
+                        setBatchDeleteInput(event.target.value)
+                      }
+                      placeholder="EXTERNAL-...
+EXTERNAL-..."
+                      className="min-h-32 border-rose-500/30 bg-slate-900 text-white placeholder:text-slate-500"
+                    />
+                    <p className="text-xs text-slate-400">
+                      Máximo de 500 keys por lote. Será solicitada confirmação
+                      antes de apagar.
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="w-full border-rose-400/50 text-rose-300 hover:bg-rose-950/50 hover:text-rose-200"
+                      disabled={
+                        deleteBatch.isPending || !batchDeleteInput.trim()
+                      }
+                      onClick={() => {
+                        const keys = Array.from(
+                          new Set(
+                            batchDeleteInput
+                              .split(/[\s,;]+/)
+                              .map(key => key.trim())
+                              .filter(Boolean)
+                          )
+                        );
+                        if (keys.length > 500) {
+                          toast.error("Cole no máximo 500 keys por lote");
+                          return;
+                        }
+                        if (
+                          window.confirm(
+                            `Apagar permanentemente ${keys.length} ${keys.length === 1 ? "key" : "keys"}? Essa ação não pode ser desfeita.`
+                          )
+                        )
+                          deleteBatch.mutate({ keys });
+                      }}
+                    >
+                      {deleteBatch.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-2 h-4 w-4" />
+                      )}
+                      Excluir lote colado
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+              {activeView === "home" && (
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Atividade recente</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {events.isError ? (
+                      <p className="text-sm text-rose-600">
+                        Não foi possível carregar a atividade.
+                      </p>
+                    ) : (
+                      (events.data ?? []).slice(0, 6).map(event => (
+                        <div
+                          key={event.id}
+                          className="flex items-center justify-between text-sm"
+                        >
+                          <div>
+                            <p className="font-medium capitalize">
+                              {event.eventType.replace("_", " ")}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {event.deviceId
+                                ? event.deviceId.slice(0, 16)
+                                : "Sistema"}
+                            </p>
+                          </div>
+                          <span className="text-xs text-slate-400">
+                            {new Date(event.createdAt).toLocaleDateString(
+                              "pt-BR"
+                            )}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
+          <p className="text-center text-xs text-slate-400">
+            As chaves são armazenadas como hash. A API pública nunca recebe
+            operações administrativas.
+          </p>
+        </main>
+      </div>
+    </div>
+  );
 }
 
 function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
   const isExternal = section === "external";
-  const [slug, setSlug] = useState(""); const [title, setTitle] = useState(""); const [game, setGame] = useState("free-fire"); const [interfaceTab, setInterfaceTab] = useState("Funções"); const [file, setFile] = useState<File | null>(null); const [editingId, setEditingId] = useState<number | null>(null);
+  const [slug, setSlug] = useState("");
+  const [title, setTitle] = useState("");
+  const [game, setGame] = useState("free-fire");
+  const [interfaceTab, setInterfaceTab] = useState("Funções");
+  const [file, setFile] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const patches = trpc.patches.list.useQuery({ section });
-  const publish = trpc.patches.publish.useMutation({ onSuccess: () => { toast.success(isExternal ? "Online separado publicado" : "Patch publicado online"); setFile(null); setSlug(""); setTitle(""); void patches.refetch(); }, onError: error => toast.error(error.message) });
-  const edit = trpc.patches.edit.useMutation({ onSuccess: () => { toast.success("Publicação atualizada"); setEditingId(null); setFile(null); void patches.refetch(); }, onError: error => toast.error(error.message) });
-  const activate = trpc.patches.activate.useMutation({ onSuccess: () => { toast.success("Arquivo ativado"); void patches.refetch(); }, onError: error => toast.error(error.message) });
-  const deactivate = trpc.patches.deactivate.useMutation({ onSuccess: () => { toast.success("Arquivo desativado"); void patches.refetch(); }, onError: error => toast.error(error.message) });
-  const remove = trpc.patches.delete.useMutation({ onSuccess: () => { toast.success("Publicação apagada"); setEditingId(null); setFile(null); void patches.refetch(); }, onError: error => toast.error(error.message) });
-  const readFile = async (selected: File) => await new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result).split(",")[1] ?? ""); reader.onerror = () => reject(new Error("Não foi possível ler o arquivo")); reader.readAsDataURL(selected); });
-  const submit = async () => { if (!title.trim() || (!editingId && (!file || !slug.trim()))) { toast.error(editingId ? "Preencha o título" : "Preencha slug, título e arquivo"); return; } const dataBase64 = file ? await readFile(file) : undefined; if (editingId) edit.mutate({ id: editingId, title, game, interfaceTab: isExternal ? interfaceTab : null, fileName: file?.name, dataBase64: dataBase64 ?? "" }); else if (file) publish.mutate({ slug, title, game, section, interfaceTab: isExternal ? interfaceTab : undefined, fileName: file.name, dataBase64: dataBase64 ?? "" }); };
-  const beginEdit = (patch: any) => { setEditingId(patch.id); setSlug(patch.slug); setTitle(patch.title); setGame("free-fire"); setInterfaceTab(patch.interfaceTab || "Funções"); setFile(null); };
-  return <Card className="border border-white/10 bg-[#0b0d18] text-white shadow-2xl shadow-black/20"><CardHeader><CardTitle className="flex items-center gap-2 text-xl">{isExternal ? <Power className="h-5 w-5 text-[#ef3c75]" /> : <FileUp className="h-5 w-5 text-[#ef3c75]" />}{isExternal ? "Online separado" : "Patches online"}</CardTitle><p className="text-sm text-slate-400">Publique e gerencie arquivos já existentes sem recompilar a IPA.</p></CardHeader><CardContent className="space-y-6"><div className="grid gap-3 md:grid-cols-2">{!editingId && <div><Label className="text-slate-300">Slug</Label><Input value={slug} onChange={event => setSlug(event.target.value)} placeholder="hs-alto" className="mt-2 border-white/10 bg-white/5 text-white" /></div>}<div><Label className="text-slate-300">Nome exibido</Label><Input value={title} onChange={event => setTitle(event.target.value)} placeholder="HS ALTO" className="mt-2 border-white/10 bg-white/5 text-white" /></div><div><Label className="text-slate-300">Jogo</Label><select value={game} onChange={event => setGame(event.target.value)} className="mt-2 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"><option value="free-fire">Free Fire</option></select></div>{isExternal && <div><Label className="text-slate-300">Aba da interface</Label><select value={interfaceTab} onChange={event => setInterfaceTab(event.target.value)} className="mt-2 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"><option value="Funções">Funções</option><option value="ESP">ESP</option><option value="Extras/Ferramentas">Extras/Ferramentas</option></select></div>}<div><Label className="text-slate-300">Arquivo `.3105` {editingId ? "(opcional para substituir)" : ""}</Label><Input type="file" accept=".3105" onChange={event => setFile(event.target.files?.[0] ?? null)} className="mt-2 border-white/10 bg-white/5 text-slate-300 file:text-white" /></div></div><div className="flex flex-wrap gap-2"><Button onClick={() => void submit()} disabled={publish.isPending || edit.isPending || remove.isPending} className="bg-[#d51b50] text-white hover:bg-[#ee2b65]">{editingId ? <Pencil className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4" />}{editingId ? "Salvar edição" : "Publicar versão"}</Button>{editingId && <Button variant="outline" onClick={() => { setEditingId(null); setFile(null); }}>Cancelar</Button>}</div><div><p className="mb-3 text-sm font-semibold text-white">Publicações atuais</p>{patches.isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (patches.data ?? []).length === 0 ? <p className="text-sm text-slate-500">Nenhuma publicação encontrada.</p> : <div className="space-y-2">{(patches.data ?? []).map(patch => <div key={patch.id} className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-sm md:flex-row md:items-center md:justify-between"><div><p className="font-medium text-white">{patch.title} <span className="text-xs text-slate-400">({patch.interfaceTab || "geral"})</span></p><p className="text-xs text-slate-400">{patch.slug} · {patch.game} · v{patch.version} · {patch.fileName}</p><code className="text-xs text-emerald-300">{patch.sha256.slice(0, 12)}…</code></div><div className="flex flex-wrap gap-2"><Button size="sm" variant="outline" onClick={() => beginEdit(patch)}><Pencil className="mr-1 h-3.5 w-3.5" />Editar</Button>{patch.status === "published" ? <Button size="sm" variant="outline" className="text-amber-300" onClick={() => deactivate.mutate({ id: patch.id })}><PowerOff className="mr-1 h-3.5 w-3.5" />Desativar</Button> : <Button size="sm" variant="outline" className="text-emerald-300" onClick={() => activate.mutate({ id: patch.id })}><Power className="mr-1 h-4 w-4" />Ativar</Button>}<Button size="sm" variant="outline" className="text-rose-300 hover:text-rose-200" disabled={remove.isPending} onClick={() => { if (window.confirm(`Apagar a publicação "${patch.title}"? Ela sumirá desta lista e não será mais entregue pela API.`)) remove.mutate({ id: patch.id }); }}><Trash2 className="mr-1 h-3.5 w-3.5" />Apagar</Button></div></div>)}</div>}</div></CardContent></Card>;
+  const publish = trpc.patches.publish.useMutation({
+    onSuccess: () => {
+      toast.success(
+        isExternal ? "Online separado publicado" : "Patch publicado online"
+      );
+      setFile(null);
+      setSlug("");
+      setTitle("");
+      void patches.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const edit = trpc.patches.edit.useMutation({
+    onSuccess: () => {
+      toast.success("Publicação atualizada");
+      setEditingId(null);
+      setFile(null);
+      void patches.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const activate = trpc.patches.activate.useMutation({
+    onSuccess: () => {
+      toast.success("Arquivo ativado");
+      void patches.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const deactivate = trpc.patches.deactivate.useMutation({
+    onSuccess: () => {
+      toast.success("Arquivo desativado");
+      void patches.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const remove = trpc.patches.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Publicação apagada");
+      setEditingId(null);
+      setFile(null);
+      void patches.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const readFile = async (selected: File) =>
+    await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+      reader.onerror = () =>
+        reject(new Error("Não foi possível ler o arquivo"));
+      reader.readAsDataURL(selected);
+    });
+  const submit = async () => {
+    if (!title.trim() || (!editingId && (!file || !slug.trim()))) {
+      toast.error(
+        editingId ? "Preencha o título" : "Preencha slug, título e arquivo"
+      );
+      return;
+    }
+    const dataBase64 = file ? await readFile(file) : undefined;
+    if (editingId)
+      edit.mutate({
+        id: editingId,
+        title,
+        game,
+        interfaceTab: isExternal ? interfaceTab : null,
+        fileName: file?.name,
+        dataBase64: dataBase64 ?? "",
+      });
+    else if (file)
+      publish.mutate({
+        slug,
+        title,
+        game,
+        section,
+        interfaceTab: isExternal ? interfaceTab : undefined,
+        fileName: file.name,
+        dataBase64: dataBase64 ?? "",
+      });
+  };
+  const beginEdit = (patch: any) => {
+    setEditingId(patch.id);
+    setSlug(patch.slug);
+    setTitle(patch.title);
+    setGame("free-fire");
+    setInterfaceTab(patch.interfaceTab || "Funções");
+    setFile(null);
+  };
+  return (
+    <Card className="border border-white/10 bg-[#0b0d18] text-white shadow-2xl shadow-black/20">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-xl">
+          {isExternal ? (
+            <Power className="h-5 w-5 text-[#ef3c75]" />
+          ) : (
+            <FileUp className="h-5 w-5 text-[#ef3c75]" />
+          )}
+          {isExternal ? "Online separado" : "Patches online"}
+        </CardTitle>
+        <p className="text-sm text-slate-400">
+          Publique e gerencie arquivos já existentes sem recompilar a IPA.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid gap-3 md:grid-cols-2">
+          {!editingId && (
+            <div>
+              <Label className="text-slate-300">Slug</Label>
+              <Input
+                value={slug}
+                onChange={event => setSlug(event.target.value)}
+                placeholder="hs-alto"
+                className="mt-2 border-white/10 bg-white/5 text-white"
+              />
+            </div>
+          )}
+          <div>
+            <Label className="text-slate-300">Nome exibido</Label>
+            <Input
+              value={title}
+              onChange={event => setTitle(event.target.value)}
+              placeholder="HS ALTO"
+              className="mt-2 border-white/10 bg-white/5 text-white"
+            />
+          </div>
+          <div>
+            <Label className="text-slate-300">Jogo</Label>
+            <select
+              value={game}
+              onChange={event => setGame(event.target.value)}
+              className="mt-2 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
+            >
+              <option value="free-fire">Free Fire</option>
+            </select>
+          </div>
+          {isExternal && (
+            <div>
+              <Label className="text-slate-300">Aba da interface</Label>
+              <select
+                value={interfaceTab}
+                onChange={event => setInterfaceTab(event.target.value)}
+                className="mt-2 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
+              >
+                <option value="Funções">Funções</option>
+                <option value="ESP">ESP</option>
+                <option value="Extras/Ferramentas">Extras/Ferramentas</option>
+              </select>
+            </div>
+          )}
+          <div>
+            <Label className="text-slate-300">
+              Arquivo `.3105` {editingId ? "(opcional para substituir)" : ""}
+            </Label>
+            <Input
+              type="file"
+              accept=".3105"
+              onChange={event => setFile(event.target.files?.[0] ?? null)}
+              className="mt-2 border-white/10 bg-white/5 text-slate-300 file:text-white"
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => void submit()}
+            disabled={publish.isPending || edit.isPending || remove.isPending}
+            className="bg-[#d51b50] text-white hover:bg-[#ee2b65]"
+          >
+            {editingId ? (
+              <Pencil className="mr-2 h-4 w-4" />
+            ) : (
+              <FileUp className="mr-2 h-4 w-4" />
+            )}
+            {editingId ? "Salvar edição" : "Publicar versão"}
+          </Button>
+          {editingId && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEditingId(null);
+                setFile(null);
+              }}
+            >
+              Cancelar
+            </Button>
+          )}
+        </div>
+        <div>
+          <p className="mb-3 text-sm font-semibold text-white">
+            Publicações atuais
+          </p>
+          {patches.isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (patches.data ?? []).length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Nenhuma publicação encontrada.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {(patches.data ?? []).map(patch => (
+                <div
+                  key={patch.id}
+                  className="flex flex-col gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-sm md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <p className="font-medium text-white">
+                      {patch.title}{" "}
+                      <span className="text-xs text-slate-400">
+                        ({patch.interfaceTab || "geral"})
+                      </span>
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {patch.slug} · {patch.game} · v{patch.version} ·{" "}
+                      {patch.fileName}
+                    </p>
+                    <code className="text-xs text-emerald-300">
+                      {patch.sha256.slice(0, 12)}…
+                    </code>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => beginEdit(patch)}
+                    >
+                      <Pencil className="mr-1 h-3.5 w-3.5" />
+                      Editar
+                    </Button>
+                    {patch.status === "published" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-amber-300"
+                        onClick={() => deactivate.mutate({ id: patch.id })}
+                      >
+                        <PowerOff className="mr-1 h-3.5 w-3.5" />
+                        Desativar
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-emerald-300"
+                        onClick={() => activate.mutate({ id: patch.id })}
+                      >
+                        <Power className="mr-1 h-4 w-4" />
+                        Ativar
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-rose-300 hover:text-rose-200"
+                      disabled={remove.isPending}
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Apagar a publicação "${patch.title}"? Ela sumirá desta lista e não será mais entregue pela API.`
+                          )
+                        )
+                          remove.mutate({ id: patch.id });
+                      }}
+                    >
+                      <Trash2 className="mr-1 h-3.5 w-3.5" />
+                      Apagar
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
-function StatCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) { return <Card className="border-0 shadow-sm"><CardContent className="flex items-center justify-between p-5"><div><p className="text-sm text-slate-500">{label}</p><p className="mt-1 text-3xl font-semibold">{value}</p></div>{icon}</CardContent></Card>; }
+function StatCard({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: number;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Card className="border-0 shadow-sm">
+      <CardContent className="flex items-center justify-between p-5">
+        <div>
+          <p className="text-sm text-slate-500">{label}</p>
+          <p className="mt-1 text-3xl font-semibold">{value}</p>
+        </div>
+        {icon}
+      </CardContent>
+    </Card>
+  );
+}
 
-function LicenseRow({ row, selected, onDetails, canModerate, onRevoke, onReactivate, onReset, onDelete }: { row: any; selected: boolean; onDetails: () => void; canModerate: boolean; onRevoke: () => void; onReactivate: () => void; onReset: () => void; onDelete: () => void }) { return <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4"><div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"><div className="min-w-0"><div className="flex items-center gap-2"><code className="font-mono text-sm font-semibold">{row.keyPrefix}••••••••</code><Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Copiar prefixo" onClick={() => { void navigator.clipboard.writeText(row.keyPrefix); toast.success("Prefixo copiado"); }}><Copy className="h-3.5 w-3.5" /></Button><Badge className={row.status === "active" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : "bg-slate-200 text-slate-600 hover:bg-slate-200"}>{row.status === "active" ? "Ativa" : "Bloqueada"}</Badge></div><p className="mt-2 text-xs text-slate-400">{Number(row.deviceCount ?? 0)} / {row.deviceLimit} dispositivos · {licenseExpirationLabel(row)}</p><p className="mt-1 text-xs text-slate-500"><strong>Gerada por:</strong> {licenseCreatorLabel(row)}</p><p className="mt-1 text-xs"><RemainingTime row={row} /></p></div><div className="flex flex-wrap items-center gap-2"><Button type="button" variant="ghost" size="sm" aria-expanded={selected} onClick={onDetails}>{selected ? "Fechar" : "Ver key"}</Button><Button type="button" variant="outline" size="sm" className="text-slate-700" onClick={onReset}><RotateCcw className="mr-1.5 h-4 w-4" />Resetar</Button>{canModerate && (row.status === "active" ? <Button type="button" variant="outline" size="sm" className="text-rose-600 hover:text-rose-700" onClick={onRevoke}><LockKeyhole className="mr-1.5 h-4 w-4" />Bloquear</Button> : <Button type="button" variant="outline" size="sm" className="text-emerald-700" onClick={onReactivate}><ShieldCheck className="mr-1.5 h-4 w-4" />Desbloquear</Button>)}<Button type="button" variant="outline" size="sm" className="text-rose-700" onClick={onDelete}><Trash2 className="mr-1.5 h-4 w-4" />Apagar</Button></div></div></div>; }
+function LicenseRow({
+  row,
+  selected,
+  onDetails,
+  canModerate,
+  onRevoke,
+  onReactivate,
+  onReset,
+  onDelete,
+}: {
+  row: any;
+  selected: boolean;
+  onDetails: () => void;
+  canModerate: boolean;
+  onRevoke: () => void;
+  onReactivate: () => void;
+  onReset: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <code className="font-mono text-sm font-semibold">
+              {row.keyPrefix}••••••••
+            </code>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              aria-label="Copiar prefixo"
+              onClick={() => {
+                void navigator.clipboard.writeText(row.keyPrefix);
+                toast.success("Prefixo copiado");
+              }}
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+            <Badge
+              className={
+                row.status === "active"
+                  ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+                  : "bg-slate-200 text-slate-600 hover:bg-slate-200"
+              }
+            >
+              {row.status === "active" ? "Ativa" : "Bloqueada"}
+            </Badge>
+          </div>
+          <p className="mt-2 text-xs text-slate-400">
+            {Number(row.deviceCount ?? 0)} / {row.deviceLimit} dispositivos ·{" "}
+            {licenseExpirationLabel(row)}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            <strong>Gerada por:</strong> {licenseCreatorLabel(row)}
+          </p>
+          <p className="mt-1 text-xs">
+            <RemainingTime row={row} />
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-expanded={selected}
+            onClick={onDetails}
+          >
+            {selected ? "Fechar" : "Ver key"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-slate-700"
+            onClick={onReset}
+          >
+            <RotateCcw className="mr-1.5 h-4 w-4" />
+            Resetar
+          </Button>
+          {canModerate &&
+            (row.status === "active" ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-rose-600 hover:text-rose-700"
+                onClick={onRevoke}
+              >
+                <LockKeyhole className="mr-1.5 h-4 w-4" />
+                Bloquear
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-emerald-700"
+                onClick={onReactivate}
+              >
+                <ShieldCheck className="mr-1.5 h-4 w-4" />
+                Desbloquear
+              </Button>
+            ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-rose-700"
+            onClick={onDelete}
+          >
+            <Trash2 className="mr-1.5 h-4 w-4" />
+            Apagar
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-function DetailsPanel({ details, isLoading, isError, errorMessage, onClose }: { details: any; isLoading: boolean; isError: boolean; errorMessage?: string; onClose: () => void }) {
+function DetailsPanel({
+  details,
+  isLoading,
+  isError,
+  errorMessage,
+  onClose,
+}: {
+  details: any;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  onClose: () => void;
+}) {
   const devices = Array.isArray(details?.devices) ? details.devices : [];
   const events = Array.isArray(details?.events) ? details.events : [];
   const creator = details?.creator;
-  return <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4"><div className="mb-3 flex items-center justify-between"><p className="text-sm font-semibold">Detalhes da key</p><Button type="button" variant="ghost" size="sm" onClick={onClose}>Fechar</Button></div>{isLoading ? <Loader2 className="h-4 w-4 animate-spin text-emerald-600" /> : isError ? <p className="text-sm text-rose-600">{errorMessage || "Não foi possível carregar os detalhes."}</p> : <div className="space-y-3 text-xs text-slate-600"><p><strong>Gerada por:</strong> {licenseCreatorLabel(creator)}</p><p><strong>Dispositivos vinculados:</strong> {devices.length}</p>{devices.length === 0 ? <p className="rounded-xl bg-white p-3 text-slate-500">Nenhum dispositivo vinculado a esta key.</p> : devices.map((device: any) => <div key={device.id} className="rounded-xl bg-white p-3"><p className="font-medium text-slate-800">{device.deviceId}</p><p>{device.packageName} · versão {device.appVersion}</p></div>)}<Separator /><p><strong>Histórico:</strong> {events.length} eventos</p>{events.slice(0, 8).map((event: any) => <div key={event.id} className="flex justify-between"><span className="capitalize">{event.eventType.replace("_", " ")}</span><span>{new Date(event.createdAt).toLocaleString("pt-BR")}</span></div>)}</div>}</div>;
+  return (
+    <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-semibold">Detalhes da key</p>
+        <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+          Fechar
+        </Button>
+      </div>
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+      ) : isError ? (
+        <p className="text-sm text-rose-600">
+          {errorMessage || "Não foi possível carregar os detalhes."}
+        </p>
+      ) : (
+        <div className="space-y-3 text-xs text-slate-600">
+          <p>
+            <strong>Gerada por:</strong> {licenseCreatorLabel(creator)}
+          </p>
+          <p>
+            <strong>Dispositivos vinculados:</strong> {devices.length}
+          </p>
+          {devices.length === 0 ? (
+            <p className="rounded-xl bg-white p-3 text-slate-500">
+              Nenhum dispositivo vinculado a esta key.
+            </p>
+          ) : (
+            devices.map((device: any) => (
+              <div key={device.id} className="rounded-xl bg-white p-3">
+                <p className="font-medium text-slate-800">{device.deviceId}</p>
+                <p>
+                  {device.packageName} · versão {device.appVersion}
+                </p>
+              </div>
+            ))
+          )}
+          <Separator />
+          <p>
+            <strong>Histórico:</strong> {events.length} eventos
+          </p>
+          {events.slice(0, 8).map((event: any) => (
+            <div key={event.id} className="flex justify-between">
+              <span className="capitalize">
+                {event.eventType.replace("_", " ")}
+              </span>
+              <span>{new Date(event.createdAt).toLocaleString("pt-BR")}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
-export default function Home() { return <DashboardLayout hideSidebar><AdminPanel /></DashboardLayout>; }
+export default function Home() {
+  return (
+    <DashboardLayout hideSidebar>
+      <AdminPanel />
+    </DashboardLayout>
+  );
+}
