@@ -1,12 +1,14 @@
-# Integração do aplicativo iOS
+ファイル名: API_RAILWAY.md
 
-Depois de publicar este painel, use a URL HTTPS atribuída pelo Railway como base. O endpoint público de validação é:
+# iOSアプリの統合
+
+このパネルを公開したら、Railway により割り当てられた HTTPS URL をベースとして使用してください。公開検証エンドポイントは次のとおりです:
 
 ```text
-https://api-key-external.up.railway.app/api/license/validate
+https://api-production-182c.up.railway.app/api/license/validate
 ```
 
-O app deve enviar uma requisição `POST` com `Content-Type: application/json` e este corpo:
+アプリは `Content-Type: application/json` の `POST` リクエストを送信し、ボディは次のとおりにしてください:
 
 ```json
 {
@@ -17,9 +19,9 @@ O app deve enviar uma requisição `POST` com `Content-Type: application/json` e
 }
 ```
 
-A liberação deve ocorrer exclusivamente quando a resposta tiver o booleano JSON exato `valid: true`. Uma string como `"true"`, um campo ausente ou qualquer erro deve ser tratado como não autorizado.
+アプリの解放（アクセス許可）は、レスポンスに JSON ブール値として正確に `valid: true` が含まれている場合にのみ行われるべきです。文字列 `"true"`、フィールドが存在しない場合、またはその他のエラーはすべて未承認として扱ってください。
 
-Resposta de sucesso:
+成功時のレスポンス:
 
 ```json
 {
@@ -31,7 +33,7 @@ Resposta de sucesso:
 }
 ```
 
-Resposta de chave inválida:
+無効なキー時のレスポンス:
 
 ```json
 {
@@ -41,9 +43,9 @@ Resposta de chave inválida:
 }
 ```
 
-Para testar, gere uma chave no painel autenticado, use-a uma vez com um `device_id` de teste e confira `valid: true`. Em seguida, altere um caractere da chave ou revogue-a no painel e repita a chamada; o aplicativo deve permanecer bloqueado com `valid: false`.
+テストするには、認証済みのパネルでキーを生成し、テスト用の `device_id` で一度使用して `valid: true` を確認してください。その後、キーの文字を1つ変更するかパネル上で取り消してリクエストを再度行ってください。アプリは `valid: false` のままブロックされている必要があります。
 
-No SwiftUI, a condição deve ser equivalente a:
+SwiftUI では、条件は次のように等価であるべきです:
 
 ```swift
 let allowed = response.valid == true
@@ -54,4 +56,4 @@ if allowed {
 }
 ```
 
-Não coloque o segredo administrativo, hash da chave ou credenciais do banco no app. O app conhece apenas o endpoint público e a chave de licença digitada pelo usuário.
+管理用のシークレット、キーのハッシュ、データベースの資格情報をアプリ内に置かないでください。アプリが知っているのは公開エンドポイントとユーザが入力したライセンスキーだけです。

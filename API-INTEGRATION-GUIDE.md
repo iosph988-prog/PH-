@@ -1,29 +1,29 @@
-# Guia rápido de integração da API PH-
+# PH- API クイックガイド
 
-## URL base
+## ベースURL
 
 ```text
-https://api-key-external.up.railway.app
+https://api-production-182c.up.railway.app
 ```
 
-## Importante sobre a chave
+## キーについての重要な注意
 
-Esta API não usa uma `X-API-Key` fixa no cabeçalho. O aplicativo usa uma **chave de licença** gerada no painel administrativo e envia essa chave no campo `key` do corpo JSON.
+このAPIはヘッダーに固定の `X-API-Key` を使用しません。アプリは管理パネルで生成された**ライセンスキー**を使用し、そのキーをJSONボディの `key` フィールドで送信します。
 
-A mesma chave pode ser usada para validar a licença e obter o catálogo de patches. O `device_id`, o pacote e a versão do aplicativo também precisam ser enviados.
+同じキーでライセンスの検証とパッチカタログの取得ができます。`device_id`、パッケージ、およびアプリのバージョンも送信する必要があります。
 
-## Validar uma licença
+## ライセンスを検証する
 
-Endpoint:
+エンドポイント:
 
 ```text
 POST /api/license/validate
 ```
 
-Exemplo com cURL:
+cURL例:
 
 ```bash
-curl -X POST "https://api-key-external.up.railway.app/api/license/validate" \
+curl -X POST "https://api-production-182c.up.railway.app/api/license/validate" \
   -H "Content-Type: application/json" \
   -d '{
     "key": "COLE_A_CHAVE_GERADA_AQUI",
@@ -33,7 +33,7 @@ curl -X POST "https://api-key-external.up.railway.app/api/license/validate" \
   }'
 ```
 
-Exemplo de resposta válida:
+有効なレスポンス例:
 
 ```json
 {
@@ -43,20 +43,20 @@ Exemplo de resposta válida:
 }
 ```
 
-Se a licença for inválida, expirada, revogada ou exceder o limite de dispositivos, a resposta terá `valid: false`.
+ライセンスが無効、期限切れ、取り消し済み、またはデバイス数の上限を超えている場合、レスポンスは `valid: false` になります。
 
-## Obter patches do PROXY
+## PROXY からパッチを取得する
 
-Endpoint:
+エンドポイント:
 
 ```text
 POST /api/patches/catalog
 ```
 
-Exemplo:
+例:
 
 ```bash
-curl -X POST "https://api-key-external.up.railway.app/api/patches/catalog" \
+curl -X POST "https://api-production-182c.up.railway.app/api/patches/catalog" \
   -H "Content-Type: application/json" \
   -d '{
     "key": "COLE_A_CHAVE_GERADA_AQUI",
@@ -66,17 +66,17 @@ curl -X POST "https://api-key-external.up.railway.app/api/patches/catalog" \
   }'
 ```
 
-A resposta contém um array `patches`. Cada item pode conter `slug`, `title`, `game`, `section`, `interfaceTab`, `fileName`, `sha256`, `sizeBytes` e `downloadUrl`.
+レスポンスには配列 `patches` が含まれます。各アイテムは `slug`、`title`、`game`、`section`、`interfaceTab`、`fileName`、`sha256`、`sizeBytes`、`downloadUrl` を含む場合があります。
 
-## Obter patches do External / Online separado
+## External / Online（別扱い）からパッチを取得する
 
-Endpoint:
+エンドポイント:
 
 ```text
 POST /api/patches/external/catalog
 ```
 
-O corpo é o mesmo:
+ボディは同じです:
 
 ```json
 {
@@ -87,22 +87,22 @@ O corpo é o mesmo:
 }
 ```
 
-Esse endpoint retorna somente as publicações da seção `external`.
+このエンドポイントは `external` セクションの公開物のみを返します。
 
-## Baixar um patch
+## パッチをダウンロードする
 
-Não monte o download manualmente. Use o `downloadUrl` retornado pelo catálogo:
+ダウンロードを手動で組み立てないでください。カタログで返される `downloadUrl` を使用してください:
 
 ```bash
 curl -L "URL_DO_CAMPO_downloadUrl" -o patch.3105
 ```
 
-O endereço é temporário e assinado. Ele fica vinculado à licença, ao dispositivo, ao pacote e à versão do aplicativo. Se o token expirar, consulte o catálogo novamente.
+URLは署名付きの一時的なものです。ライセンス、デバイス、パッケージ、アプリのバージョンに紐づいています。トークンが期限切れの場合は、カタログを再取得してください。
 
-## Exemplo em JavaScript
+## JavaScript の例
 
 ```js
-const API_BASE = "https://api-key-external.up.railway.app";
+const API_BASE = "https://api-production-182c.up.railway.app";
 
 const payload = {
   key: licenseKey,
@@ -136,36 +136,36 @@ for (const patch of catalog.patches ?? []) {
 }
 ```
 
-## Campos obrigatórios
+## 必須フィールド
 
 | Campo | Descrição |
 |---|---|
-| `key` | Chave de licença criada no painel |
-| `device_id` | Identificador estável do dispositivo |
-| `package` | Bundle ID ou package name do aplicativo |
-| `app_version` | Versão atual do aplicativo |
+| `key` | 管理パネルで作成されたライセンスキー |
+| `device_id` | デバイスの安定した識別子 |
+| `package` | アプリの Bundle ID またはパッケージ名 |
+| `app_version` | 現在のアプリバージョン |
 
-## Códigos comuns
+## 共通のステータス / コード
 
 | HTTP | Código | Significado |
 |---:|---|---|
-| 200 | `valid` | Licença válida e resposta disponível |
-| 400 | `invalid_request` | Campo obrigatório ausente ou vazio |
-| 403 | resposta com `valid: false` | Licença recusada ou download não autorizado |
-| 503 | `service_unavailable` | Falha temporária no banco ou no serviço |
+| 200 | `valid` | ライセンスが有効で、レスポンスが利用可能 |
+| 400 | `invalid_request` | 必須フィールドが欠落しているか空 |
+| 403 | resposta com `valid: false` | ライセンス拒否またはダウンロードが許可されていない |
+| 503 | `service_unavailable` | データベースまたはサービスの一時的な障害 |
 
-## Onde gerar a chave
+## キーの生成方法
 
-Entre no painel administrativo, abra **Gerar key**, defina a quantidade e o prazo e copie a chave exibida. Essa é a chave que deve ser colocada no campo `key` do outro projeto.
+管理パネルにログインし、**Gerar key** を開き、数量と期間を設定して表示されたキーをコピーしてください。このキーを別プロジェクトの `key` フィールドに入れてください。
 
-Não coloque a senha do administrador, o cookie de sessão ou o segredo do servidor no aplicativo. O aplicativo deve receber apenas a chave de licença destinada ao usuário.
+管理者パスワード、セッションCookie、サーバーのシークレットをアプリに入れないでください。アプリにはユーザー向けのライセンスキーのみを渡してください。
 
-## Documentação completa
+## 完全なドキュメント
 
-[Documentação completa da API](/blob/main/API-DOCUMENTATION.md)
+[API 完全ドキュメント](/blob/main/API-DOCUMENTATION.md)
 
-## Referências
+## 参照
 
 [1]:  "Repositório do projeto PH-"
 
-[2]: https://api-key-external.up.railway.app "API pública implantada"
+[2]: https://api-production-182c.up.railway.app "公開 API"

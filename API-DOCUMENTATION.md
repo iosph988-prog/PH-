@@ -1,30 +1,30 @@
-# PH- API e sistema de patches
+# PH- API とパッチシステム
 
-## Visão geral
+## 概要
 
-O projeto reúne a API Railway, o painel administrativo web, o sistema de autenticação local, o gerador de keys e o workflow que compila a interface iOS. A API pública valida licenças e entrega dois catálogos de patches: o catálogo do **PROXY** e o catálogo do **External**, usado pelo Online separado.
+このプロジェクトには Railway 上の API、管理用 Web パネル、ローカル認証システム、キー生成器、iOS インターフェイスをビルドするワークフローが含まれます。公開 API はライセンスを検証し、2 つのパッチカタログを配信します：**PROXY** カタログと、別運用の Online が使用する **External** カタログです。
 
-A URL pública atual da API é:
+現在の公開 API の URL:
 
 ```text
-https://api-key-external.up.railway.app
+https://api-production-182c.up.railway.app
 ```
 
-O código-fonte está no repositório [PH-](). O backend fica no diretório `ph/`.
+ソースコードはリポジトリ [PH-]() にあります。バックエンドは `ph/` ディレクトリに配置されています。
 
-## Autenticação administrativa e de subrevendedores
+## 管理者およびサブ販売者の認証
 
-O login local usa sessão HTTP protegida por cookie. O administrador entra com o e-mail configurado em `ADMIN_EMAIL` e com `ADMIN_PASSWORD` ou `ADMIN_PASSWORD_HASH`. O administrador pode criar subrevendedores pelo painel.
+ローカルログインはクッキーで保護された HTTP セッションを使用します。管理者は `ADMIN_EMAIL` に設定したメールアドレスと `ADMIN_PASSWORD` または `ADMIN_PASSWORD_HASH` を使ってログインします。管理者はパネル上でサブ販売者を作成できます。
 
-Um subrevendedor pode usar qualquer e-mail válido, inclusive Gmail, ou um identificador de usuário válido. A senha precisa ter pelo menos seis caracteres. A conta recebe um limite de créditos e uma data de expiração. Cada key criada consome créditos conforme a quantidade solicitada. Quando a conta expira, o login e as operações de geração ficam bloqueados.
+サブ販売者は有効な任意のメール（Gmail を含む）または有効なユーザー識別子を使用できます。パスワードは最低 6 文字必要です。アカウントにはクレジット上限と有効期限が設定されます。作成された各 `key` は要求された数量に応じてクレジットを消費します。アカウントの有効期限が切れると、ログインおよび生成操作はブロックされます。
 
-O subrevendedor possui somente as operações de gerar, apagar e resetar suas próprias keys. Ele não possui acesso ao gerenciamento de patches, à revogação administrativa global ou à criação de outras contas.
+サブ販売者は自身の `key` の生成、削除、リセットのみを行えます。パッチ管理、管理者によるグローバルな無効化、他アカウントの作成にはアクセスできません。
 
-### Login local
+### ローカルログイン
 
 `POST /api/auth/local/login`
 
-Corpo JSON:
+リクエストボディ JSON:
 
 ```json
 {
@@ -33,19 +33,19 @@ Corpo JSON:
 }
 ```
 
-O campo `username` também é aceito como alternativa ao campo `email`. Em caso de sucesso, a API grava uma sessão e retorna:
+`email` の代わりに `username` フィールドも受け付けます。成功時、API はセッションを記録して次を返します：
 
 ```json
 { "ok": true }
 ```
 
-`POST /api/auth/local/logout` encerra a sessão atual.
+`POST /api/auth/local/logout` は現在のセッションを終了します。
 
-## Validação de licença
+## ライセンス検証
 
 `POST /api/license/validate`
 
-Corpo obrigatório:
+必須ボディ:
 
 ```json
 {
@@ -56,23 +56,23 @@ Corpo obrigatório:
 }
 ```
 
-A resposta informa se a key é válida, o estado da licença, a validade e os limites de dispositivos. A primeira ativação inicia a validade configurada para a key. Requisições incompletas retornam `400`; uma licença recusada retorna `valid: false`.
+レスポンスでは `key` の有効性、ライセンス状態、有効期限、デバイス数上限が返されます。最初のアクティベーションで `key` に設定された有効期間が開始されます。不完全なリクエストは `400` を返し、拒否されたライセンスは `valid: false` を返します。
 
-## Catálogo do PROXY
+## PROXY カタログ
 
 `POST /api/patches/catalog`
 
-O corpo usa os mesmos quatro campos da validação de licença: `key`, `device_id`, `package` e `app_version`. A API valida a licença antes de devolver os patches publicados na seção padrão.
+リクエストボディはライセンス検証と同じ 4 つのフィールド：`key`、`device_id`、`package`、`app_version` を使用します。API はライセンスを検証した上で、標準セクションに公開されているパッチを返します。
 
-Cada item publicado inclui, entre outros campos, `slug`, `title`, `game`, `section`, `interfaceTab`, `versionId`, `version`, `fileName`, `sha256`, `sizeBytes`, `status`, `publishedAt` e `downloadUrl`.
+各公開アイテムには `slug`、`title`、`game`、`section`、`interfaceTab`、`versionId`、`version`、`fileName`、`sha256`、`sizeBytes`、`status`、`publishedAt`、`downloadUrl` などのフィールドが含まれます。
 
-## Catálogo do External
+## External カタログ
 
 `POST /api/patches/external/catalog`
 
-O corpo é igual ao do catálogo do PROXY. A diferença é que a API consulta exclusivamente a seção `external`, usada pelo Online separado. As categorias publicadas são convertidas para os identificadores usados pela IPA:
+ボディは PROXY カタログと同じです。違いは API が `external` セクションのみを照会することで、これは独立した Online が使用します。公開されたカテゴリは IPA が使用する識別子に変換されます：
 
-| Aba administrativa | Identificador entregue à IPA |
+| 管理パネルのタブ | IPA に渡される識別子 |
 |---|---|
 | MIRA | `aim` |
 | ESP | `esp` |
@@ -80,37 +80,37 @@ O corpo é igual ao do catálogo do PROXY. A diferença é que a API consulta ex
 | RAIO-X | `xray` |
 | OUTROS | `other` |
 
-Para o jogo, a API usa o formato `online-free-fire:categoria` ou `online-free-fire-max:categoria`. O campo `interfaceTab` da publicação define a categoria entregue ao aplicativo.
+ゲーム向けには API は `online-free-fire:categoria` または `online-free-fire-max:categoria` 形式を使用します。公開データの `interfaceTab` フィールドがアプリへ渡されるカテゴリを定義します。
 
-## Download autorizado de patch
+## 承認されたパッチのダウンロード
 
 `GET /api/patches/download?t=TOKEN`
 
-O `downloadUrl` recebido no catálogo contém um token temporário assinado. O token vincula a versão do patch à licença, ao dispositivo e ao pacote da aplicação. A API só redireciona para o arquivo quando o token é válido, a licença continua ativa e a versão ainda está publicada.
+カタログで受け取る `downloadUrl` は署名付きの一時トークンを含みます。トークンはパッチのバージョンをライセンス、デバイス、アプリのパッケージに紐付けます。トークンが有効であり、ライセンスが有効で、バージョンが公開されたままの場合にのみ API はファイルへリダイレクトします。
 
-Os arquivos publicados precisam terminar em `.3105`, não podem conter caminhos de diretório e têm limite de 50 MB. O sistema calcula e retorna o SHA-256 do arquivo para permitir conferência de integridade.
+公開されるファイルは `.3105` で終わる必要があり、ディレクトリパスを含めてはいけません。ファイルサイズは 50 MB の上限があります。システムは整合性検証のためファイルの SHA-256 を計算して返します。
 
-## Publicação e gerenciamento de patches
+## パッチの公開と管理
 
-O painel web usa a API tRPC em `/api/trpc`. As operações administrativas incluem publicação, listagem, edição e alteração do estado publicado ou desativado. O Online separado exige uma categoria `interfaceTab` válida.
+Web パネルは `/api/trpc` の tRPC API を使用します。管理操作には公開、一覧表示、編集、公開/無効化の状態変更が含まれます。独立した Online は有効な `interfaceTab` カテゴリを要求します。
 
-Na publicação, o administrador informa o slug, o título, o jogo, a seção, a categoria e o arquivo `.3105`. Uma publicação cria uma versão armazenada no storage configurado e atualiza a versão atual do patch. Desativar uma publicação altera seu estado para rascunho; ativar novamente publica a versão corrente.
+公開時、管理者は slug、タイトル、ゲーム、セクション、カテゴリ、および `.3105` ファイルを指定します。公開は設定されたストレージにバージョンを保存し、パッチの現在バージョンを更新します。公開を無効化すると状態は下書きになり、再度有効化すると現在のバージョンが公開されます。
 
-## Variáveis de ambiente
+## 環境変数
 
-A implantação precisa fornecer a conexão MySQL usada pelo Drizzle e o storage configurado para os arquivos. Também deve definir uma chave estável para assinar sessões e tokens de download.
+デプロイ時は Drizzle が使用する MySQL 接続と、ファイル用の設定済みストレージを提供する必要があります。また、セッションとダウンロードトークンの署名に使う安定したキーを設定してください。
 
-| Variável | Uso |
+| 変数 | 用途 |
 |---|---|
-| `DATABASE_URL` ou configuração equivalente do MySQL | Conexão com o banco de dados |
-| `ADMIN_EMAIL` | E-mail do administrador local |
-| `ADMIN_PASSWORD` ou `ADMIN_PASSWORD_HASH` | Senha local do administrador |
-| `SESSION_SECRET` ou `JWT_SECRET` | Assinatura das sessões e tokens |
-| Variáveis do storage | Upload e URLs assinadas dos arquivos `.3105` |
+| `DATABASE_URL` または同等の MySQL 設定 | データベース接続 |
+| `ADMIN_EMAIL` | ローカル管理者のメールアドレス |
+| `ADMIN_PASSWORD` または `ADMIN_PASSWORD_HASH` | 管理者ローカルパスワード |
+| `SESSION_SECRET` または `JWT_SECRET` | セッションおよびトークンの署名 |
+| ストレージ関連の変数 | `.3105` ファイルのアップロードと署名付き URL |
 
-Nunca publique senhas, hashes, chaves de sessão ou credenciais de storage no repositório.
+パスワード、ハッシュ、セッションキー、ストレージの認証情報をリポジトリに公開しないでください。
 
-## Estrutura do projeto
+## プロジェクト構成
 
 ```text
 PH-/
@@ -125,75 +125,75 @@ PH-/
 └── ph/package.json                     # scripts do backend e frontend
 ```
 
-## Compilação e implantação
+## ビルドとデプロイ
 
-Para validar o projeto da API dentro de `ph/`, use:
+`ph/` の API プロジェクトを検証するには次を使用します：
 
 ```bash
 pnpm install --frozen-lockfile
 pnpm run build
 ```
 
-O Railway está conectado ao repositório `iosph988-prog/PH-` e usa `ph` como diretório raiz. Um push na branch `main` dispara a implantação configurada.
+Railway は `iosph988-prog/PH-` リポジトリに接続されており、ルートディレクトリとして `ph` を使用しています。`main` ブランチへの push が設定されたデプロイをトリガーします。
 
-O workflow iOS é [ios-kyojinx.yml](/blob/main/.github/workflows/ios-kyojinx.yml). Ele injeta as correções da interface e compila o artefato IPA por meio do GitHub Actions.
+iOS ワークフローは [ios-kyojinx.yml](/blob/main/.github/workflows/ios-kyojinx.yml) です。これはインターフェイス修正を注入して GitHub Actions 経由で IPA アーティファクトをビルドします。
 
-## Diagnóstico rápido
+## 簡易トラブルシューティング
 
-Se o painel mostrar “E-mail indisponível”, atualize a interface para a versão que usa `username` como fallback. Contas novas com Gmail passam a gravar o endereço nos campos `email` e `username`.
+パネルが「E-mail indisponível」を表示する場合は、`username` をフォールバックとして使うバージョンのインターフェイスに更新してください。Gmail で作成された新規アカウントは `email` と `username` の両方にアドレスが保存されます。
 
-Se o catálogo retornar `401` ou `403`, confirme a key, o identificador do dispositivo, o pacote e a versão do aplicativo. Se retornar `503`, verifique o banco, o storage e as variáveis de ambiente da implantação Railway.
+カタログが `401` または `403` を返す場合は、`key`、デバイス識別子、パッケージ、アプリバージョンを確認してください。`503` が返る場合は、データベース、ストレージ、および Railway デプロイの環境変数を確認してください。
 
-Se um patch não aparecer no External, confirme que a publicação está ativa, que a seção é `external` e que `interfaceTab` foi definida. Se o arquivo não baixar, confira se a versão está publicada e se o token ainda não expirou.
+External にパッチが表示されない場合は、公開が有効であること、セクションが `external` であること、`interfaceTab` が設定されていることを確認してください。ファイルがダウンロードできない場合は、バージョンが公開中であることとトークンの有効期限を確認してください。
 
-## Referências
+## 参考
 
-[1]:  "Repositório do projeto PH-"
+[1]:  "プロジェクト PH- のリポジトリ"
 
-[2]: /blob/main/.github/workflows/ios-kyojinx.yml "Workflow de compilação da IPA"
+[2]: /blob/main/.github/workflows/ios-kyojinx.yml "IPA ビルドのワークフロー"
 
-[3]: https://api-key-external.up.railway.app "API pública implantada"
+[3]: https://api-production-182c.up.railway.app "公開 API のデプロイ先"
 
-[4]: /blob/main/ph/server/_core/index.ts "Rotas HTTP da API"
+[4]: /blob/main/ph/server/_core/index.ts "API の HTTP ルート"
 
-[5]: /blob/main/ph/server/remotePatches.ts "Catálogo e download de patches"
+[5]: /blob/main/ph/server/remotePatches.ts "パッチのカタログとダウンロード"
 
 
-## Atualização de segurança — build autorizado 2026.09.28
+## セキュリティ更新 — 承認済みビルド 2026.10.07
 
-A versão de cliente atualmente autorizada pelo backend é:
+現在バックエンドが承認しているクライアント版は次のとおりです：
 
 ```text
 Bundle ID: com.apple.mobile.MobileHouseArrest
-Versão:   2026.09.28
+Versão:   2026.10.07
 ```
 
-As rotas móveis `/api/license/validate`, `/api/patches/catalog` e `/api/patches/external/catalog` recusam clientes que não correspondam simultaneamente ao Bundle ID e à versão configurados por `PH_ALLOWED_IOS_BUNDLE_ID` e `PH_ALLOWED_IOS_VERSION`.
+モバイル向けルート `/api/license/validate`、`/api/patches/catalog`、`/api/patches/external/catalog` は、`PH_ALLOWED_IOS_BUNDLE_ID` と `PH_ALLOWED_IOS_VERSION` で設定された Bundle ID とバージョンの両方に同時に一致しないクライアントを拒否します。
 
-O header reservado para o cliente iOS é:
+iOS クライアント用に予約されたヘッダーは次です：
 
 ```http
 X-PH-IOS-Token: <token-do-cliente>
 ```
 
-Na revisão atual do código, o header é mantido no protocolo para compatibilidade, mas a função `hasValidIosToken()` não compara o valor recebido. Portanto, o header não deve ser tratado como fator de autenticação isolado. A autorização efetiva continua sendo feita pela licença, dispositivo, Bundle ID e versão. Para exigir o token também no servidor, configure `PH_IOS_API_TOKEN` no Railway e implemente a comparação do header usando comparação em tempo constante; não coloque o segredo em documentação pública.
+現行コードのレビューでは、このヘッダーは互換性のためにプロトコルに残されていますが、関数 `hasValidIosToken()` は受信した値を比較していません。したがって、このヘッダーを単独の認証要素として扱うべきではありません。実際の認可は引き続きライセンス、デバイス、Bundle ID、およびバージョンで行われます。サーバー側でトークンも必須にするには、Railway に `PH_IOS_API_TOKEN` を設定し、ヘッダー値との比較を定数時間比較で実装してください。秘密は公開ドキュメントに置かないでください。
 
-O catálogo do External aceita as categorias administrativas `MIRA`, `ESP`, `GERAL`, `RAIO-X`, `OUTROS`, `FUNÇÕES`, `EXTRAS/FERRAMENTAS` e `PERFIL`, convertendo-as para identificadores de cliente. Publicações External sem `interfaceTab` são rejeitadas.
+External カタログは管理タブ `MIRA`、`ESP`、`GERAL`、`RAIO-X`、`OUTROS`、`FUNÇÕES`、`EXTRAS/FERRAMENTAS`、`PERFIL` を受け入れ、それらをクライアント識別子に変換します。`interfaceTab` を欠く External 公開は拒否されます。
 
-O workflow iOS atualizado também bloqueia a entrega de uma IPA que contenha um arquivo `.dylib` independente ou uma pasta singular `Framework/` no bundle. A pasta padrão `Frameworks/` continua reservada a dependências legítimas reconhecidas pelo aplicativo.
+更新された iOS ワークフローは、バンドルに独立した `.dylib` ファイルまたは単一の `Framework/` フォルダを含む IPA の配布をブロックします。標準の `Frameworks/` フォルダは引き続きアプリが認識する正当な依存関係用に予約されています。
 
-### Códigos de resposta do cliente móvel
+### モバイルクライアントの応答コード
 
-| HTTP | Código | Ação recomendada |
+| HTTP | コード | 推奨アクション |
 |---:|---|---|
-| 200 | `valid` | Continuar e usar o catálogo retornado. |
-| 400 | `invalid_request` | Corrigir campos obrigatórios. |
-| 403 | `unsupported_client` | Atualizar para o build autorizado. |
-| 403 | `invalid_key`, `revoked`, `expired`, `device_limit` | Exibir acesso negado e não tentar baixar. |
-| 403 | `download_forbidden` | Solicitar um novo catálogo/token. |
-| 503 | `service_unavailable` | Tratar como indisponibilidade temporária. |
+| 200 | `valid` | 続行して返されたカタログを使用する。 |
+| 400 | `invalid_request` | 必須フィールドを修正する。 |
+| 403 | `unsupported_client` | 承認されたビルドにアップデートする。 |
+| 403 | `invalid_key`, `revoked`, `expired`, `device_limit` | アクセス拒否を表示し、ダウンロードを試みない。 |
+| 403 | `download_forbidden` | 新しいカタログ／トークンを要求する。 |
+| 503 | `service_unavailable` | 一時的なサービス停止として扱う。 |
 
-### Exemplo mínimo de integração
+### 最小限の統合例
 
 ```swift
 struct LicenseRequest: Encodable {
@@ -203,7 +203,7 @@ struct LicenseRequest: Encodable {
     let app_version: String
 }
 
-var request = URLRequest(url: URL(string: "https://api-key-external.up.railway.app/api/patches/catalog")!)
+var request = URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/patches/catalog")!)
 request.httpMethod = "POST"
 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 request.setValue("<token-do-cliente>", forHTTPHeaderField: "X-PH-IOS-Token")
@@ -211,29 +211,29 @@ request.httpBody = try JSONEncoder().encode(LicenseRequest(
     key: licenseKey,
     device_id: deviceIdentifier,
     package: "com.apple.mobile.MobileHouseArrest",
-    app_version: "2026.09.28"
+    app_version: "2026.10.07"
 ))
 ```
 
-Nunca confie apenas na IPA para autorização: o backend deve continuar sendo a autoridade final para licenças, catálogo, status de publicação e downloads.
+IPA のみを認可手段として信頼してはいけません：バックエンドは引き続きライセンス、カタログ、公開状態、ダウンロードの最終的な権威であるべきです。
 
-## Cliente Android autorizado
+## 承認された Android クライアント
 
-O backend agora aceita, além da IPA iOS autorizada, somente esta combinação Android:
+バックエンドは現在、承認された iOS IPA に加えて次の Android 組み合わせのみを受け入れます：
 
 ```text
 Package/Application ID: com.my.rtxxiters
 Versão:                 1.0
 ```
 
-As variáveis configuráveis no Railway são:
+Railway で設定可能な変数は次のとおりです：
 
 ```env
 PH_ALLOWED_ANDROID_PACKAGE=com.my.rtxxiters
 PH_ALLOWED_ANDROID_VERSION=1.0
 ```
 
-O APK deve enviar o mesmo corpo JSON usado pela IPA:
+APK は IPA と同じ JSON ボディを送信する必要があります：
 
 ```json
 {
@@ -244,6 +244,11 @@ O APK deve enviar o mesmo corpo JSON usado pela IPA:
 }
 ```
 
-As rotas aceitas são `/api/license/validate`, `/api/patches/catalog` e `/api/patches/external/catalog`. Qualquer outro package ou versão recebe `403` com `code: "unsupported_client"`.
+許可されるルートは `/api/license/validate`、`/api/patches/catalog`、`/api/patches/external/catalog` です。その他の package またはバージョンは `403` を `code: "unsupported_client"` で受け取ります。
 
-Se o APK continuar mostrando “Cliente não autorizado” depois do deploy, confirme no Railway se as variáveis acima não foram sobrescritas por valores diferentes e reinicie o serviço para carregar a configuração.
+デプロイ後に APK が「Cliente não autorizado」を表示し続ける場合は、Railway 上で上記変数が別の値に上書きされていないか確認し、サービスを再起動して設定を反映させてください。
+
+## API変更時の安全な動作
+IPA は API の応答が不正、未知の形式、未承認の Bundle ID、または未承認バージョンの場合に、保護された画面とカタログを開放しません。意図的にアプリをクラッシュさせるのではなく、アクセスを拒否してライセンス画面へ戻るフェイルクローズ方式を使用します。これによりデータ破損や端末の不安定化を避けながら、API の変更や改ざんによる利用を防ぎます。
+
+このリポジトリの Markdown は API サーバーから自動的に公開されません。管理用ドキュメントへのアクセスを制限するには、GitHub リポジトリを private にし、管理者だけに権限を付与してください。日本語化は可読性の変更であり、認証・暗号化・アクセス制御の代替ではありません。

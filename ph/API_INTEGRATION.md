@@ -1,25 +1,25 @@
-# Documentação de integração da API de licença — Hock FF
+# ライセンスAPI統合ドキュメント — Hock FF
 
-## Visão geral
+## 概要
 
-A API valida uma licença associada a um dispositivo e retorna um objeto JSON estável. O cliente deve liberar o fluxo somente quando o campo `valid` for exatamente o booleano `true`. Qualquer outro valor deve ser tratado como acesso negado ou erro temporário.
+この API はデバイスに紐づくライセンスを検証し、安定した JSON オブジェクトを返します。クライアントはフィールド `valid` が厳密に boolean の `true` である場合にのみフローを解放してください。その他の値はアクセス拒否または一時的なエラーとして扱う必要があります。
 
-> **Endpoint público atual:** `https://apikeydash-rhz9ayn4.manus.space/api/license/validate`
+> **現在の公開エンドポイント:** `https://api-production-182c.up.railway.app/api/license/validate`
 
-A chamada não exige token administrativo. As credenciais administrativas nunca devem ser incluídas no aplicativo cliente.
+呼び出しは管理者トークンを必要としません。管理者用の資格情報をクライアントアプリに含めてはいけません。
 
-## Requisição
+## リクエスト
 
-Use `POST` com `Content-Type: application/json`.
+`POST` を使用し、`Content-Type: application/json` を指定してください。
 
-| Campo | Tipo | Obrigatório | Descrição |
+| フィールド | 型 | 必須 | 説明 |
 |---|---|---:|---|
-| `key` | string | Sim | Chave de licença digitada pelo usuário. |
-| `device_id` | string | Sim | Identificador estável do dispositivo gerado pelo aplicativo. |
-| `package` | string | Sim | Identificador do aplicativo que está solicitando a validação. |
-| `app_version` | string | Sim | Versão do aplicativo cliente. |
+| `key` | string | はい | ユーザーが入力するライセンスキー。 |
+| `device_id` | string | はい | アプリが生成する安定したデバイス識別子。 |
+| `package` | string | はい | 検証を要求しているアプリの識別子。 |
+| `app_version` | string | はい | クライアントアプリのバージョン。 |
 
-Exemplo de corpo:
+リクエスト本文の例:
 
 ```json
 {
@@ -30,13 +30,13 @@ Exemplo de corpo:
 }
 ```
 
-Não envie `null`, objetos, números ou strings vazias nesses campos. O cliente deve validar a entrada antes da chamada e também tratar respostas inesperadas sem fazer force unwrap.
+これらのフィールドに `null`、オブジェクト、数値、空文字列を送ってはいけません。クライアントは呼び出し前に入力を検証し、予期しないレスポンスも force unwrap を行わないで処理する必要があります。
 
-## Respostas
+## レスポンス
 
-### Licença válida — HTTP 200
+### 有効なライセンス — HTTP 200
 
-Na primeira validação válida, o prazo começa a contar. A resposta pode conter os dados de ativação e expiração:
+最初の有効な検証時に期限のカウントが始まります。レスポンスには有効化・期限のデータが含まれることがあります:
 
 ```json
 {
@@ -51,9 +51,9 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-`expiresAt` e `activatedAt` são timestamps ISO 8601 em UTC. O cliente deve decodificá-los como datas opcionais. `durationMinutes` é a duração precisa da licença; para uma licença de um dia, o valor é `1440`, e para uma licença de uma hora, `60`.
+`expiresAt` と `activatedAt` は UTC の ISO 8601 タイムスタンプです。クライアントはこれらをオプショナルな日付としてデコードしてください。`durationMinutes` はライセンスの正確な期間を分単位で表します。1日ライセンスなら `1440`、1時間ライセンスなら `60` です。
 
-### Key inválida — HTTP 200
+### 無効なキー — HTTP 200
 
 ```json
 {
@@ -64,7 +64,7 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-### Key bloqueada ou pausada — HTTP 200
+### ブロックまたは一時停止されたキー — HTTP 200
 
 ```json
 {
@@ -75,7 +75,7 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-### Key expirada — HTTP 200
+### 期限切れのキー — HTTP 200
 
 ```json
 {
@@ -86,7 +86,7 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-### Limite de dispositivos — HTTP 200
+### デバイス数上限 — HTTP 200
 
 ```json
 {
@@ -97,7 +97,7 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-### Requisição incompleta — HTTP 400
+### 不完全なリクエスト — HTTP 400
 
 ```json
 {
@@ -107,7 +107,7 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-### Indisponibilidade temporária — HTTP 503
+### 一時的なサービス停止 — HTTP 503
 
 ```json
 {
@@ -118,11 +118,11 @@ Na primeira validação válida, o prazo começa a contar. A resposta pode conte
 }
 ```
 
-Códigos HTTP diferentes de `200` não devem ser interpretados como licença válida. Em `503`, o aplicativo pode oferecer uma nova tentativa; não deve liberar o acesso localmente.
+HTTP ステータスが `200` 以外の場合、それをライセンス有効と解釈してはいけません。`503` の場合、アプリは再試行を提案できますが、ローカルでアクセスを解放してはいけません。
 
-## Exemplo Swift com `URLSession`
+## `URLSession` を使った Swift の例
 
-O exemplo abaixo evita force unwrap, trata status HTTP, aceita campos opcionais e só considera a licença aprovada quando `valid == true`.
+以下の例は force unwrap を避け、HTTP ステータスを扱い、オプショナルなフィールドを受け入れ、かつ `valid == true` のときのみライセンスを承認します。
 
 ```swift
 import Foundation
@@ -172,7 +172,7 @@ func validateLicense(
         return
     }
 
-    guard let url = URL(string: "https://apikeydash-rhz9ayn4.manus.space/api/license/validate") else {
+    guard let url = URL(string: "https://api-production-182c.up.railway.app/api/license/validate") else {
         completion(.failure(LicenseValidationError.invalidURL))
         return
     }
@@ -227,8 +227,8 @@ func validateLicense(
                 }
 
                 guard result.valid == true else {
-                    // O cliente pode exibir um botão de suporte usando result.supportUrl;
-                    // não abra links automaticamente sem uma ação explícita do usuário.
+                    // クライアントは result.supportUrl を使ってサポート用のボタンを表示できます。
+                    // ユーザーの明示的な操作なしにリンクを自動で開かないでください。
                     completion(.failure(LicenseValidationError.denied(result.message ?? "Chave não autorizada")))
                     return
                 }
@@ -242,19 +242,19 @@ func validateLicense(
 }
 ```
 
-## Regras para evitar crash
+## クラッシュを避けるためのルール
 
-O cliente deve manter `valid`, `code`, `message`, `expiresAt`, `activatedAt`, `durationDays`, `durationMinutes` e `deviceLimit` como campos opcionais. Isso evita falha quando uma resposta de erro não contém os campos de uma resposta válida.
+クライアントは `valid`、`code`、`message`、`expiresAt`、`activatedAt`、`durationDays`、`durationMinutes`、`deviceLimit` をオプショナルなフィールドとして扱う必要があります。これにより、エラーレスポンスに有効なレスポンス用フィールドが含まれていない場合のクラッシュを防げます。
 
-O cliente não deve converter datas com `!`, acessar posições de arrays sem verificar o tamanho, presumir que todo status HTTP é `200`, ou liberar o fluxo com base apenas em `message`. A única condição de aprovação é `response.valid == true` após a decodificação bem-sucedida e a confirmação de HTTP 200.
+クライアントは日付を `!` で変換したり、配列の位置にサイズチェックなしでアクセスしたり、すべての HTTP ステータスが `200` であると仮定したり、`message` のみを根拠にフローを解放してはいけません。承認の唯一の条件は、デコードに成功し HTTP 200 を確認した上で `response.valid == true` であることです。
 
-Para o contador local, use `expiresAt` quando estiver presente. Uma licença ainda não ativada não deve inventar uma data de expiração; nesse caso, exiba “Aguardando ativação”. Em respostas inválidas, `supportUrl` contém o canal oficial de suporte; o cliente pode oferecer um botão para abrir esse endereço após ação explícita do usuário.
+ローカルのカウントダウンには `expiresAt` を使用してください。まだ有効化されていないライセンスに対して期限を捏造してはいけません。その場合は「有効化待ち」と表示してください。無効なレスポンスでは `supportUrl` に公式サポートチャンネルが含まれています。クライアントはユーザーの明示的な操作後にそのアドレスを開くためのボタンを提供してもよいです。
 
-## Teste manual com cURL
+## cURL による手動テスト
 
 ```bash
 curl -i -X POST \
-  'https://apikeydash-rhz9ayn4.manus.space/api/license/validate' \
+  'https://api-production-182c.up.railway.app/api/license/validate' \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json' \
   --data '{
@@ -265,22 +265,22 @@ curl -i -X POST \
   }'
 ```
 
-Use uma key real do painel para testar o caso aprovado. Para testar erros, use uma key inexistente, campos vazios e um dispositivo que já tenha atingido o limite. Não registre keys completas em logs de produção.
+承認ケースをテストするには、パネルの実際のキーを使用してください。エラーをテストするには、存在しないキー、空のフィールド、あるいは既に上限に達しているデバイスを使用してください。本番ログに完全なキーを記録しないでください。
 
-## Checklist de integração
+## 統合チェックリスト
 
-| Verificação | Resultado esperado |
+| 確認項目 | 期待される結果 |
 |---|---|
-| URL usa HTTPS | Sim |
-| Método | `POST` |
-| Corpo | JSON com quatro strings não vazias |
-| Header | `Content-Type: application/json` |
-| Aprovação | Somente `valid` booleano igual a `true` |
-| Datas | ISO 8601 UTC e opcionais |
-| Erros | Tratados sem force unwrap ou crash |
-| Timeout | Definido no cliente |
-| Segredos administrativos | Nunca enviados ao cliente |
+| URL が HTTPS を使用している | はい |
+| メソッド | `POST` |
+| 本文 | 4つの空でない文字列を含む JSON |
+| ヘッダー | `Content-Type: application/json` |
+| 承認条件 | `valid` が boolean の `true` のみ |
+| 日付 | ISO 8601 UTC、オプショナル |
+| エラー処理 | force unwrap やクラッシュなしで処理 |
+| タイムアウト | クライアントで設定されている |
+| 管理者の秘密情報 | クライアントに送信しない |
 
-## Observação de segurança
+## セキュリティに関する注意
 
-Esta API é um endpoint público de validação. A proteção real deve permanecer no servidor: o cliente não deve armazenar credenciais administrativas nem confiar em uma alteração local do JSON. A resposta deve ser usada apenas como autorização de uma aplicação própria e legítima.
+この API は検証用の公開エンドポイントです。実際の保護はサーバー側で行うべきです：クライアントは管理者の資格情報を保存してはいけませんし、ローカルで受け取った JSON の改ざんを信頼してはいけません。レスポンスは正当なアプリケーションの認可確認にのみ使用してください。
