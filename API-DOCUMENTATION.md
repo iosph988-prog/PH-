@@ -165,7 +165,7 @@ External にパッチが表示されない場合は、公開が有効である�
 
 ```text
 Bundle ID: com.apple.mobile.MobileHouseArrest
-Versão:   2026.10.07
+Versões autorizadas: 2026.09.28 e 2026.10.07
 ```
 
 モバイル向けルート `/api/license/validate`、`/api/patches/catalog`、`/api/patches/external/catalog` は、`PH_ALLOWED_IOS_BUNDLE_ID` と `PH_ALLOWED_IOS_VERSION` で設定された Bundle ID とバージョンの両方に同時に一致しないクライアントを拒否します。

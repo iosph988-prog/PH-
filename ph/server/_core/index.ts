@@ -17,11 +17,16 @@ import { serveStatic, setupVite } from "./vite";
 import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
 const allowedIosBundleId = process.env.PH_ALLOWED_IOS_BUNDLE_ID || "com.apple.mobile.MobileHouseArrest";
-const allowedIosVersion = "2026.10.07"; // Cutover: all older iOS IPAs are rejected by the API.
+const allowedIosVersions = new Set(
+  (process.env.PH_ALLOWED_IOS_VERSIONS || "2026.09.28,2026.10.07")
+    .split(",")
+    .map(version => version.trim())
+    .filter(Boolean),
+);
 const allowedAndroidPackage = process.env.PH_ALLOWED_ANDROID_PACKAGE || "com.my.rtxxiters";
 const allowedAndroidVersion = process.env.PH_ALLOWED_ANDROID_VERSION || "1.0";
 function isAllowedClient(packageName: string, appVersion: string) {
-  const isIos = packageName === allowedIosBundleId && appVersion === allowedIosVersion;
+  const isIos = packageName === allowedIosBundleId && allowedIosVersions.has(appVersion);
   const isAndroid = packageName === allowedAndroidPackage && appVersion === allowedAndroidVersion;
   return isIos || isAndroid;
 }
