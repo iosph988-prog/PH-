@@ -1858,7 +1858,15 @@ jobs:
           import re
           proxy_fetch = '''              private struct ProxyTitleResponse: Decodable { let valid: Bool; let creatorName: String? }
               private func refreshProxyTitle() async {
-                  guard let key = LicenseStore.storedKey, let endpoint = URL(string: PHEncryptedString.decrypt("validation")) else { return }
+                  var storedKey: String?
+                  for _ in 0..<20 {
+                      if let current = LicenseStore.storedKey, !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                          storedKey = current
+                          break
+                      }
+                      try? await Task.sleep(nanoseconds: 500_000_000)
+                  }
+                  guard let key = storedKey, let endpoint = URL(string: PHEncryptedString.decrypt("validation")) else { return }
                   do {
                       var request = URLRequest(url: endpoint, timeoutInterval: 20)
                       request.httpMethod = "POST"
