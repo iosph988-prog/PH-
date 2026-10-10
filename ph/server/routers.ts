@@ -196,9 +196,15 @@ export const appRouter = router({
           durationDays: z.number().int().min(1).max(30).default(30),
           durationMinutes: z.number().int().min(60).max(43200).optional(),
           customKey: z.string().trim().max(64).optional(),
+          ownerId: z.number().int().positive().optional(),
         })
       )
       .mutation(async ({ input, ctx }) => {
+        const ownerId = ctx.user.role === "admin" ? input.ownerId ?? ctx.user.id : ctx.user.id;
+        if (ownerId !== ctx.user.id) {
+          const reseller = (await listResellers()).find(row => Number(row.id) === ownerId);
+          if (!reseller) throw new Error("Subrevendedor selecionado não encontrado");
+        }
         if (ctx.user.role === "reseller")
           await consumeResellerCredits(ctx.user.id, input.quantity);
         const normalizedCustomKey = validateCustomKeyRequest(
@@ -207,7 +213,7 @@ export const appRouter = router({
         );
         if (input.quantity === 1) {
           const result = await createLicense({
-            createdBy: ctx.user.id,
+            createdBy: ownerId,
             deviceLimit: input.deviceLimit,
             durationDays: input.durationDays,
             durationMinutes: input.durationMinutes,
@@ -216,7 +222,7 @@ export const appRouter = router({
           return { keys: [result], key: result.key };
         }
         const result = await createLicenses({
-          createdBy: ctx.user.id,
+          createdBy: ownerId,
           count: input.quantity,
           deviceLimit: input.deviceLimit,
           durationDays: input.durationDays,

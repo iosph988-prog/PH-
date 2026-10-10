@@ -118,6 +118,7 @@ function AdminPanel() {
   const [durationUnit, setDurationUnit] = useState<"hours" | "days">("days");
   const [durationValue, setDurationValue] = useState("30");
   const [customKey, setCustomKey] = useState("");
+  const [selectedOwnerId, setSelectedOwnerId] = useState("");
   const [createdKeys, setCreatedKeys] = useState<string[]>([]);
   const [batchDeleteInput, setBatchDeleteInput] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -1248,6 +1249,24 @@ function AdminPanel() {
                       />
                     </div>
                   </div>
+                  {user?.role === "admin" && (
+                    <div>
+                      <Label className="text-slate-300">Proprietário da key</Label>
+                      <select
+                        value={selectedOwnerId}
+                        onChange={event => setSelectedOwnerId(event.target.value)}
+                        className="mt-2 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white"
+                      >
+                        <option value="">Minha conta (Administrador)</option>
+                        {(activeResellers.data ?? []).map(reseller => (
+                          <option key={reseller.id} value={String(reseller.id)}>
+                            {reseller.name || reseller.username || reseller.email || `Revendedor ${reseller.id}`}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-xs text-slate-400">O nome deste proprietário será exibido online no PROXY.</p>
+                    </div>
+                  )}
                   {Number(quantity) === 1 && (
                     <div>
                       <Label className="text-slate-300">
@@ -1324,6 +1343,10 @@ function AdminPanel() {
                         customKey:
                           Number(quantity) === 1
                             ? customKey.trim() || undefined
+                            : undefined,
+                        ownerId:
+                          user?.role === "admin" && selectedOwnerId
+                            ? Number(selectedOwnerId)
                             : undefined,
                       });
                     }}
