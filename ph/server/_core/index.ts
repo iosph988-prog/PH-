@@ -138,7 +138,7 @@ async function startServer() {
   });
 
   app.post("/api/patches/catalog", async (req, res) => {
-    const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion, section } = req.body ?? {};
     if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
     if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
       return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
@@ -147,7 +147,8 @@ async function startServer() {
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
-      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl });
+      const requestedSection = section === "texture" ? "texture" : undefined;
+      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl, section: requestedSection });
       return res.status(result.valid ? 200 : 403).json(result);
     } catch (error) {
       console.error("[Patch API] Catalog failed", error);

@@ -81,7 +81,7 @@ export const appRouter = router({
     list: adminProcedure
       .input(
         z
-          .object({ section: z.enum(["patches", "external"]).optional() })
+          .object({ section: z.enum(["patches", "external", "texture"]).optional() })
           .optional()
       )
       .query(({ input }) => listRemotePatches(input?.section, true)),
@@ -93,6 +93,8 @@ export const appRouter = router({
           game: z.string().trim().min(1).max(64),
           section: z.enum(["patches", "external"]).default("patches"),
           interfaceTab: z.string().trim().max(64).optional(),
+          logoDataBase64: z.string().max(7_000_000).optional(),
+          logoContentType: z.enum(["image/png", "image/jpeg", "image/webp"]).optional(),
           fileName: z
             .string()
             .trim()
@@ -110,6 +112,8 @@ export const appRouter = router({
           interfaceTab: input.interfaceTab,
           fileName: input.fileName,
           data: Buffer.from(input.dataBase64, "base64"),
+          logoData: input.logoDataBase64 ? Buffer.from(input.logoDataBase64, "base64") : undefined,
+          logoContentType: input.logoContentType,
         })
       ),
     edit: adminProcedure
@@ -119,6 +123,8 @@ export const appRouter = router({
           title: z.string().trim().min(1).max(160).optional(),
           game: z.string().trim().min(1).max(64).optional(),
           interfaceTab: z.string().trim().max(64).nullable().optional(),
+          logoDataBase64: z.string().max(7_000_000).optional(),
+          logoContentType: z.enum(["image/png", "image/jpeg", "image/webp"]).optional(),
           fileName: z
             .string()
             .trim()
@@ -138,6 +144,8 @@ export const appRouter = router({
           data: input.dataBase64
             ? Buffer.from(input.dataBase64, "base64")
             : undefined,
+          logoData: input.logoDataBase64 ? Buffer.from(input.logoDataBase64, "base64") : undefined,
+          logoContentType: input.logoContentType,
         })
       ),
     activate: adminProcedure

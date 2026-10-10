@@ -42,9 +42,9 @@ export function isRemotePatchUpload(value: unknown): value is { slug: string; ti
   return [candidate.slug, candidate.title, candidate.game, candidate.fileName, candidate.data].every(item => typeof item === "string" && item.trim().length > 0);
 }
 
-export type PatchSection = "patches" | "external";
+export type PatchSection = "patches" | "external" | "texture";
 
-const normalizeSection = (value: string | undefined): PatchSection => value === "external" ? "external" : "patches";
+const normalizeSection = (value: string | undefined): PatchSection => value === "external" ? "external" : value === "texture" ? "texture" : "patches";
 const normalizeGame = (value: string) => {
   const normalized = value.trim().toLowerCase().replace(/\s+/g, "-");
   return normalized === "freefire" || normalized === "free-fire" ? "free-fire" : "free-fire-max";
@@ -59,8 +59,10 @@ async function ensurePatchSchema() {
       if (!db) return;
       const [columns] = await db.execute(sql.raw("SHOW COLUMNS FROM remote_patches")) as any;
       const existing = new Set((columns as any[]).map(column => String(column.Field || column.field)));
-      if (!existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external') NOT NULL DEFAULT 'patches'"));
+      if (!existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external','texture') NOT NULL DEFAULT 'patches'"));
+      if (existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches MODIFY COLUMN section ENUM('patches','external','texture') NOT NULL DEFAULT 'patches'"));
       if (!existing.has("interfaceTab")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN interfaceTab VARCHAR(64) NULL"));
+      if (!existing.has("logoStorageKey")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN logoStorageKey VARCHAR(512) NULL"));
     })().catch(error => { patchSchemaReady = null; throw error; });
   }
   return patchSchemaReady;
@@ -77,7 +79,7 @@ async function createVersion(input: { patchId: number; createdBy: number; slug: 
   return { versionId: Number(inserted[0].insertId), version, sha256: digest, sizeBytes: input.data.length };
 }
 
-export async function publishRemotePatch(input: { createdBy: number; slug: string; title: string; game: string; fileName: string; data: Buffer; section?: PatchSection; interfaceTab?: string | null }) {
+export async function publishRemotePatch(input: { createdBy: number; slug: string; title: string; game: string; fileName: string; data: Buffer; section?: PatchSection; interfaceTab?: string | null; logoData?: Buffer; logoContentType?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   await ensurePatchSchema();
@@ -90,13 +92,15 @@ export async function publishRemotePatch(input: { createdBy: number; slug: strin
   if (!/^[a-z0-9][a-z0-9_-]{2,95}$/.test(slug)) throw new Error("Slug inválido");
   if (!title || title.length > 160 || !isValidPatchFileName(fileName)) throw new Error("Nome ou título inválido");
   if (section === "external" && (!interfaceTab || interfaceTab.length > 64)) throw new Error("A aba do Online separado é obrigatória");
+  if (input.logoData && input.logoData.length > 5 * 1024 * 1024) throw new Error("A logo deve ter no máximo 5 MB");
   if (input.data.length === 0 || input.data.length > 50 * 1024 * 1024) throw new Error("O arquivo deve ter entre 1 byte e 50 MB");
 
   const existing = (await db.select().from(remotePatches).where(eq(remotePatches.slug, slug)).limit(1))[0];
-  const patchId = existing?.id ?? Number((await db.insert(remotePatches).values({ slug, title, game, section, interfaceTab, createdBy: input.createdBy }).$returningId())[0]?.id);
+  const logoUpload = input.logoData ? await storagePut(`remote-patches/${slug}/logo`, input.logoData, input.logoContentType || "image/png") : null;
+  const patchId = existing?.id ?? Number((await db.insert(remotePatches).values({ slug, title, game, section, interfaceTab, logoStorageKey: logoUpload?.key ?? null, createdBy: input.createdBy }).$returningId())[0]?.id);
   if (!patchId) throw new Error("Não foi possível criar o patch");
   const created = await createVersion({ patchId, createdBy: input.createdBy, slug, fileName, data: input.data });
-  await db.update(remotePatches).set({ title, game, section, interfaceTab, currentVersionId: created.versionId }).where(eq(remotePatches.id, patchId));
+  await db.update(remotePatches).set({ title, game, section, interfaceTab, logoStorageKey: logoUpload?.key ?? existing?.logoStorageKey ?? null, currentVersionId: created.versionId }).where(eq(remotePatches.id, patchId));
   return { patchId, ...created, slug, fileName, section, interfaceTab };
 }
 
@@ -108,10 +112,10 @@ export async function listRemotePatches(section?: PatchSection, includeInactive 
   if (section === "external") filters.push(or(eq(remotePatches.section, "external"), isNotNull(remotePatches.interfaceTab))!);
   else if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
   const rows = await db.select({ patch: remotePatches, version: remotePatchVersions }).from(remotePatches).innerJoin(remotePatchVersions, eq(remotePatchVersions.id, remotePatches.currentVersionId)).where(and(...filters)).orderBy(remotePatches.game, remotePatches.slug);
-  return rows.map(({ patch, version }) => ({ id: patch.id, slug: patch.slug, title: patch.title, game: patch.game, section: patch.section, interfaceTab: patch.interfaceTab, versionId: version.id, version: version.version, fileName: version.fileName, sha256: version.sha256, sizeBytes: version.sizeBytes, status: version.status, publishedAt: version.publishedAt }));
+  return Promise.all(rows.map(async ({ patch, version }) => ({ id: patch.id, slug: patch.slug, title: patch.title, game: patch.game, section: patch.section, interfaceTab: patch.interfaceTab, logoUrl: patch.logoStorageKey ? await storageGetSignedUrl(patch.logoStorageKey) : null, versionId: version.id, version: version.version, fileName: version.fileName, sha256: version.sha256, sizeBytes: version.sizeBytes, status: version.status, publishedAt: version.publishedAt })));
 }
 
-export async function updateRemotePatch(input: { id: number; updatedBy: number; title?: string; game?: string; fileName?: string; data?: Buffer; interfaceTab?: string | null }) {
+export async function updateRemotePatch(input: { id: number; updatedBy: number; title?: string; game?: string; fileName?: string; data?: Buffer; interfaceTab?: string | null; logoData?: Buffer; logoContentType?: string }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   await ensurePatchSchema();
@@ -123,13 +127,18 @@ export async function updateRemotePatch(input: { id: number; updatedBy: number; 
   if (!title || title.length > 160) throw new Error("Título inválido");
   if (patch.section === "external" && !interfaceTab) throw new Error("A aba do Online separado é obrigatória");
   let currentVersionId = patch.currentVersionId;
+  let logoStorageKey = patch.logoStorageKey;
+  if (input.logoData) {
+    if (input.logoData.length > 5 * 1024 * 1024) throw new Error("A logo deve ter no máximo 5 MB");
+    logoStorageKey = (await storagePut(`remote-patches/${patch.slug}/logo`, input.logoData, input.logoContentType || "image/png")).key;
+  }
   if (input.data) {
     const fileName = input.fileName?.trim() || "updated.3105";
     if (!isValidPatchFileName(fileName) || input.data.length > 50 * 1024 * 1024) throw new Error("Arquivo .3105 inválido");
     const created = await createVersion({ patchId: patch.id, createdBy: input.updatedBy, slug: patch.slug, fileName, data: input.data });
     currentVersionId = created.versionId;
   }
-  await db.update(remotePatches).set({ title, game, interfaceTab, currentVersionId }).where(eq(remotePatches.id, patch.id));
+  await db.update(remotePatches).set({ title, game, interfaceTab, logoStorageKey, currentVersionId }).where(eq(remotePatches.id, patch.id));
   return { success: true, id: patch.id, versionId: currentVersionId } as const;
 }
 

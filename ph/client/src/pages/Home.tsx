@@ -13,6 +13,7 @@ import {
   Plus,
   Power,
   PowerOff,
+  Paintbrush,
   RefreshCw,
   RotateCcw,
   Search,
@@ -105,7 +106,7 @@ export function RemainingTime({ row }: { row: any }) {
 function AdminPanel() {
   const { user } = useAuth();
   const [activeView, setActiveView] = useState<
-    "home" | "generate" | "keys" | "patches" | "external"
+    "home" | "generate" | "keys" | "patches" | "external" | "texture"
   >("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -467,6 +468,19 @@ function AdminPanel() {
               >
                 <Power className="mr-2 h-4 w-4" />
                 Online separado
+              </Button>
+            )}
+            {user?.role === "admin" && (
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${activeView === "texture" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+                onClick={() => {
+                  setActiveView("texture");
+                  setSidebarOpen(false);
+                }}
+              >
+                <Paintbrush className="mr-2 h-4 w-4" />
+                TEXTURA
               </Button>
             )}
           </div>
@@ -965,6 +979,9 @@ function AdminPanel() {
           {user?.role === "admin" && activeView === "external" && (
             <RemotePatchesPanel section="external" />
           )}
+          {user?.role === "admin" && activeView === "texture" && (
+            <RemotePatchesPanel section="texture" />
+          )}
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
             <Card
               className={
@@ -1412,13 +1429,15 @@ EXTERNAL-..."
   );
 }
 
-function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
+function RemotePatchesPanel({ section }: { section: "patches" | "external" | "texture" }) {
   const isExternal = section === "external";
+  const isTexture = section === "texture";
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [game, setGame] = useState("free-fire");
   const [interfaceTab, setInterfaceTab] = useState("Funções");
   const [file, setFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const patches = trpc.patches.list.useQuery({ section });
   const publish = trpc.patches.publish.useMutation({
@@ -1427,6 +1446,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
         isExternal ? "Online separado publicado" : "Patch publicado online"
       );
       setFile(null);
+      setLogoFile(null);
       setSlug("");
       setTitle("");
       void patches.refetch();
@@ -1481,12 +1501,15 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
       return;
     }
     const dataBase64 = file ? await readFile(file) : undefined;
+    const logoDataBase64 = logoFile ? await readFile(logoFile) : undefined;
     if (editingId)
       edit.mutate({
         id: editingId,
         title,
         game,
         interfaceTab: isExternal ? interfaceTab : null,
+        logoDataBase64,
+        logoContentType: logoFile?.type === "image/jpeg" ? "image/jpeg" : logoFile?.type === "image/webp" ? "image/webp" : "image/png",
         fileName: file?.name,
         dataBase64: dataBase64 ?? "",
       });
@@ -1497,6 +1520,8 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
         game,
         section,
         interfaceTab: isExternal ? interfaceTab : undefined,
+        logoDataBase64,
+        logoContentType: logoFile?.type === "image/jpeg" ? "image/jpeg" : logoFile?.type === "image/webp" ? "image/webp" : "image/png",
         fileName: file.name,
         dataBase64: dataBase64 ?? "",
       });
@@ -1508,17 +1533,20 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
     setGame("free-fire");
     setInterfaceTab(patch.interfaceTab || "Funções");
     setFile(null);
+    setLogoFile(null);
   };
   return (
     <Card className="border border-white/10 bg-[#0b0d18] text-white shadow-2xl shadow-black/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
-          {isExternal ? (
+          {isTexture ? (
+            <Paintbrush className="h-5 w-5 text-[#ef3c75]" />
+          ) : isExternal ? (
             <Power className="h-5 w-5 text-[#ef3c75]" />
           ) : (
             <FileUp className="h-5 w-5 text-[#ef3c75]" />
           )}
-          {isExternal ? "Online separado" : "Patches online"}
+          {isTexture ? "TEXTURA online" : isExternal ? "Online separado" : "Patches online"}
         </CardTitle>
         <p className="text-sm text-slate-400">
           Publique e gerencie arquivos já existentes sem recompilar a IPA.
@@ -1581,6 +1609,17 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" }) {
               className="mt-2 border-white/10 bg-white/5 text-slate-300 file:text-white"
             />
           </div>
+          {isTexture && (
+            <div>
+              <Label className="text-slate-300">Logo ao lado do nome</Label>
+              <Input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={event => setLogoFile(event.target.files?.[0] ?? null)}
+                className="mt-2 border-white/10 bg-white/5 text-slate-300 file:text-white"
+              />
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button
