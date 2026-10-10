@@ -17,6 +17,7 @@ import {
   removeResellerAndLicenses,
   revokeResellerAccess,
   revokeResellerInvitation,
+  updateDisplayName,
   updateResellerAccount,
 } from "./db";
 import {
@@ -308,6 +309,7 @@ export const appRouter = router({
             id: z.number().int().positive(),
             credits: z.number().int().min(0).max(1_000_000),
             expiresAt: z.string().datetime().nullable(),
+            name: z.string().trim().min(1).max(160),
           })
         )
         .mutation(({ input }) =>
@@ -315,8 +317,15 @@ export const appRouter = router({
             id: input.id,
             credits: input.credits,
             expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+            name: input.name,
           })
         ),
+      updateAdminName: adminProcedure
+        .input(z.object({ name: z.string().trim().min(1).max(160) }))
+        .mutation(({ input, ctx }) => updateDisplayName(ctx.user.id, input.name)),
+      updateMyName: staffProcedure
+        .input(z.object({ name: z.string().trim().min(1).max(160) }))
+        .mutation(({ input, ctx }) => updateDisplayName(ctx.user.id, input.name)),
       remove: adminProcedure
         .input(z.object({ id: z.number().int().positive() }))
         .mutation(({ input }) => removeResellerAndLicenses(input.id)),

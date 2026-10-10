@@ -338,6 +338,8 @@ export async function validateLicense(input: { key: string; deviceId: string; pa
   }
   if (validation.linked) await recordEvent({ licenseId: license.id, eventType: "device_linked", deviceId: input.deviceId, packageName: input.packageName, appVersion: input.appVersion, ipAddress: input.ipAddress });
   await recordEvent({ licenseId: license.id, eventType: "validated", deviceId: input.deviceId, packageName: input.packageName, appVersion: input.appVersion, ipAddress: input.ipAddress });
+  const creator = (await db.select({ name: users.name, username: users.username, email: users.email, role: users.role }).from(users).where(eq(users.id, license.createdBy)).limit(1))[0] ?? null;
+  const creatorName = creator?.name?.trim() || creator?.username?.trim() || creator?.email?.trim() || (creator?.role === "admin" ? "Administrador" : "PROXY CHEATS");
   return {
     valid: true,
     code: "valid",
@@ -347,5 +349,6 @@ export async function validateLicense(input: { key: string; deviceId: string; pa
     durationDays: license.durationDays,
     durationMinutes: license.durationMinutes,
     deviceLimit: license.deviceLimit,
+    creatorName,
   } as const;
 }

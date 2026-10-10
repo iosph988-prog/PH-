@@ -145,10 +145,12 @@ function AdminPanel() {
   const [resellerPassword, setResellerPassword] = useState("");
   const [resellerCredits, setResellerCredits] = useState("10");
   const [resellerExpiresAt, setResellerExpiresAt] = useState("");
+  const [adminDisplayName, setAdminDisplayName] = useState("");
   const [resellerSearch, setResellerSearch] = useState("");
   const [editingResellerId, setEditingResellerId] = useState<number | null>(
     null
   );
+  const [editingResellerName, setEditingResellerName] = useState("");
   const [editingResellerCredits, setEditingResellerCredits] = useState("");
   const [editingResellerExpiresAt, setEditingResellerExpiresAt] = useState("");
   const [announcementText, setAnnouncementText] = useState("");
@@ -280,6 +282,20 @@ function AdminPanel() {
     },
     onError: error => toast.error(error.message),
   });
+  const updateAdminName = trpc.licenses.invitations.updateAdminName.useMutation({
+    onSuccess: () => {
+      toast.success("Nome do administrador atualizado");
+      void utils.auth.me.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const updateMyName = trpc.licenses.invitations.updateMyName.useMutation({
+    onSuccess: () => {
+      toast.success("Seu nome foi atualizado na IPA");
+      void utils.auth.me.invalidate();
+    },
+    onError: error => toast.error(error.message),
+  });
   const removeReseller = trpc.licenses.invitations.remove.useMutation({
     onSuccess: result => {
       toast.success(
@@ -328,6 +344,9 @@ function AdminPanel() {
     licensePage * PAGE_SIZE,
     (licensePage + 1) * PAGE_SIZE
   );
+  useEffect(() => {
+    if (user?.role === "admin" && user.name) setAdminDisplayName(user.name);
+  }, [user?.id, user?.name, user?.role]);
   useEffect(() => {
     setLicensePage(0);
     setSelectedId(null);
@@ -633,6 +652,18 @@ function AdminPanel() {
               icon={<Users className="h-5 w-5 text-emerald-600" />}
             />
           </div>
+          {activeView === "home" && (user?.role === "admin" || user?.role === "reseller") && (
+            <Card className="mb-4 border border-violet-500/30 bg-violet-950/20 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Nome exibido na IPA</CardTitle>
+                <p className="text-sm text-slate-400">Este nome aparecerá no título do PROXY para as keys geradas pela sua conta.</p>
+              </CardHeader>
+              <CardContent className="flex gap-2">
+                <Input value={adminDisplayName} onChange={event => setAdminDisplayName(event.target.value)} placeholder="Escolha o nome que aparecerá no PROXY" />
+                <Button disabled={!adminDisplayName.trim() || updateAdminName.isPending || updateMyName.isPending} onClick={() => user?.role === "admin" ? updateAdminName.mutate({ name: adminDisplayName.trim() }) : updateMyName.mutate({ name: adminDisplayName.trim() })}>Salvar nome</Button>
+              </CardContent>
+            </Card>
+          )}
           {activeView === "home" && user?.role === "admin" && (
             <Card className="border border-emerald-500/30 bg-emerald-950/20 shadow-sm">
               <CardHeader>
@@ -646,7 +677,12 @@ function AdminPanel() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 md:grid-cols-5">
+                <div className="grid gap-3 md:grid-cols-6">
+                  <Input
+                    value={resellerName}
+                    onChange={event => setResellerName(event.target.value)}
+                    placeholder="Nome exibido na IPA"
+                  />
                   <Input
                     value={resellerUsername}
                     onChange={event =>
@@ -683,6 +719,7 @@ function AdminPanel() {
                         username: resellerUsername,
                         password: resellerPassword,
                         credits: Number(resellerCredits) || 0,
+                        name: resellerName.trim() || resellerUsername,
                         expiresAt: resellerExpiresAt
                           ? new Date(
                               resellerExpiresAt + "T23:59:59.000Z"
@@ -863,7 +900,17 @@ function AdminPanel() {
                                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                                   Editar créditos e validade
                                 </p>
-                                <div className="grid gap-2 sm:grid-cols-2">
+                                <div className="grid gap-2 sm:grid-cols-3">
+                                  <label className="text-xs text-slate-600">
+                                    Nome na IPA
+                                    <Input
+                                      value={editingResellerName}
+                                      onChange={event =>
+                                        setEditingResellerName(event.target.value)
+                                      }
+                                      className="mt-1 h-9"
+                                    />
+                                  </label>
                                   <label className="text-xs text-slate-600">
                                     Créditos
                                     <Input
@@ -903,6 +950,7 @@ function AdminPanel() {
                                     onClick={() =>
                                       editReseller.mutate({
                                         id: reseller.id,
+                                        name: editingResellerName.trim(),
                                         credits: Number(editingResellerCredits),
                                         expiresAt: editingResellerExpiresAt
                                           ? new Date(
@@ -930,6 +978,9 @@ function AdminPanel() {
                                 size="sm"
                                 onClick={() => {
                                   setEditingResellerId(reseller.id);
+                                  setEditingResellerName(
+                                    reseller.name || reseller.username || ""
+                                  );
                                   setEditingResellerCredits(
                                     String(reseller.credits ?? 0)
                                   );

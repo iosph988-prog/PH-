@@ -282,17 +282,33 @@ export async function updateResellerAccount(input: {
   id: number;
   credits: number;
   expiresAt: Date | null;
+  name?: string;
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const credits = Math.max(0, Math.min(1_000_000, Math.trunc(input.credits)));
   const result = await db
     .update(users)
-    .set({ credits, resellerExpiresAt: input.expiresAt })
+    .set({
+      credits,
+      resellerExpiresAt: input.expiresAt,
+      ...(input.name !== undefined
+        ? { name: input.name.trim().slice(0, 160) || null }
+        : {}),
+    })
     .where(and(eq(users.id, input.id), eq(users.role, "reseller")));
   if (!result[0].affectedRows)
     throw new Error("Subrevendedor não encontrado ou já revogado");
   return { success: true, credits, expiresAt: input.expiresAt } as const;
+}
+
+export async function updateDisplayName(id: number, name: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const displayName = name.trim().slice(0, 160);
+  if (!displayName) throw new Error("Informe um nome para exibição");
+  await db.update(users).set({ name: displayName }).where(eq(users.id, id));
+  return { success: true, name: displayName } as const;
 }
 
 export async function removeResellerAndLicenses(id: number) {

@@ -1825,6 +1825,9 @@ jobs:
           import sys
           p = Path(sys.argv[1])
           t = p.read_text()
+          t = t.replace('@State private var selectedGameID = "free-fire"', '@State private var selectedGameID = "free-fire"\n              @State private var proxyTitle = "PROXY"', 1)
+          t = t.replace('                      logoURLs = await logos\n', '                      logoURLs = await logos\n                      await refreshProxyTitle()\n', 1)
+          t = t.replace('                              Text("PROXY")\n', '                              Text(proxyTitle)\n', 1)
           replacements = {
               '@AppStorage("patchesDarkMode") private var darkMode = false': '@AppStorage("patchesDarkMode") private var darkMode = true',
               '(darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()': '(darkMode ? LinearGradient(colors: [Color.black, Color(red: 0.035, green: 0.045, blue: 0.055)], startPoint: .top, endPoint: .bottom) : LinearGradient(colors: [Color.white, Color(red: 0.91, green: 0.94, blue: 0.97)], startPoint: .top, endPoint: .bottom)).ignoresSafeArea()',
@@ -1842,6 +1845,20 @@ jobs:
               if old in t:
                   t = t.replace(old, new)
           import re
+          proxy_fetch = '''              private struct ProxyTitleResponse: Decodable { let valid: Bool; let creatorName: String? }
+              private func refreshProxyTitle() async {
+                  guard let key = LicenseStore.storedKey, let endpoint = URL(string: "https://api-production-182c.up.railway.app/api/license/validate") else { return }
+                  do {
+                      var request = URLRequest(url: endpoint, timeoutInterval: 20)
+                      request.httpMethod = "POST"
+                      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key, "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "proxy-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"])
+                      let (data, response) = try await URLSession.shared.data(for: request)
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let result = try? JSONDecoder().decode(ProxyTitleResponse.self, from: data), result.valid, let name = result.creatorName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else { return }
+                      await MainActor.run { proxyTitle = name.uppercased() }
+                  } catch { }
+              }
+          '''
           header = '''              private var header: some View {
                   VStack(spacing: 4) {
                       HStack(alignment: .center, spacing: 8) {
