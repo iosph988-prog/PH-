@@ -254,7 +254,7 @@ jobs:
               var body: some View {
                   NavigationStack {
                       ZStack {
-                          (darkMode ? LinearGradient(colors: [Color.black, Color(red: 0.035, green: 0.045, blue: 0.055)], startPoint: .top, endPoint: .bottom) : LinearGradient(colors: [Color.white, Color(red: 0.93, green: 0.95, blue: 0.98)], startPoint: .top, endPoint: .bottom)).ignoresSafeArea()
+                          (darkMode ? Color.black : Color.white).ignoresSafeArea()
                           ScrollView {
                           VStack(alignment: .leading, spacing: 14) {
                               VStack(spacing: 4) {
@@ -295,8 +295,8 @@ jobs:
                                   }
                                   .frame(maxWidth: .infinity)
                                   .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                                  .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                  .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
+                                  .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                  .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
                                   .shadow(color: accentColor.opacity(0.18), radius: 12, y: 4)
                               }
                               Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
@@ -311,9 +311,7 @@ jobs:
                                       Toggle("", isOn: Binding(get: { activeIDs.contains(item.id) }, set: { _ in Task { await applyOrRestore(item) } }))
                                           .labelsHidden()
                                           .tint(accentColor)
-                                  }.padding(12)
-                                      .background(darkMode ? Color.white.opacity(0.075) : Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                      .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(accentColor.opacity(0.12), lineWidth: 1))
+                                  }.padding(12).background(darkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 16))
                               }
                           }.padding(20)
                       }
