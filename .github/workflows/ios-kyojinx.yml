@@ -1837,6 +1837,7 @@ jobs:
           t = p.read_text()
           t = t.replace('@State private var selectedGameID = "free-fire"', '@State private var selectedGameID = "free-fire"\n              @State private var proxyTitle = "PROXY"', 1)
           t = t.replace('                      logoURLs = await logos\n', '                      logoURLs = await logos\n                      await refreshProxyTitle()\n', 1)
+          t = t.replace('.task { await load() }', '.task { await load(); await refreshProxyTitle() }', 1)
           t = t.replace('                              Text("PROXY")\n', '                              Text(proxyTitle)\n', 1)
           replacements = {
               '@AppStorage("patchesDarkMode") private var darkMode = false': '@AppStorage("patchesDarkMode") private var darkMode = true',
