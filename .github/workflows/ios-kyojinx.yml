@@ -1860,7 +1860,7 @@ jobs:
               if old in t:
                   t = t.replace(old, new)
           import re
-          proxy_fetch = '''              private struct ProxyTitleResponse: Decodable { let valid: Bool; let creatorName: String? }
+          proxy_fetch = '''              private struct ProxyTitleResponse: Decodable { let valid: Bool; let code: String?; let creatorName: String? }
               private func refreshProxyTitle() async {
                   if let cached = LicenseStore.profileSnapshot?.creatorName?.trimmingCharacters(in: .whitespacesAndNewlines), !cached.isEmpty {
                       await MainActor.run { proxyTitle = cached }
@@ -1881,7 +1881,7 @@ jobs:
                       request.setValue(PHEncryptedString.decrypt("token"), forHTTPHeaderField: "X-PH-IOS-Token")
                       request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "proxy-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"])
                       let (data, response) = try await URLSession.shared.data(for: request)
-                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let result = try? JSONDecoder().decode(ProxyTitleResponse.self, from: data), result.valid, let name = result.creatorName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else { return }
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let result = try? JSONDecoder().decode(ProxyTitleResponse.self, from: data), (result.valid || result.code == "device_limit"), let name = result.creatorName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else { return }
                       await MainActor.run { proxyTitle = name }
                   } catch { }
               }

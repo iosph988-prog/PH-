@@ -330,11 +330,14 @@ export async function validateLicense(input: { key: string; deviceId: string; pa
   });
   if (!validation.ok) {
     await recordEvent({ licenseId: license.id, eventType: "rejected", deviceId: input.deviceId, packageName: input.packageName, appVersion: input.appVersion, ipAddress: input.ipAddress, metadata: JSON.stringify({ code: validation.code }) });
-    return validation.code === "device_limit"
-      ? invalidLicenseResponse("device_limit", "Limite de dispositivos atingido")
-      : validation.code === "expired"
-        ? invalidLicenseResponse("expired", "Chave expirada")
-        : invalidLicenseResponse("revoked", "Chave revogada");
+    if (validation.code === "device_limit") {
+      const owner = (await db.select({ name: users.name, username: users.username, email: users.email }).from(users).where(eq(users.id, license.createdBy)).limit(1))[0] ?? null;
+      const creatorName = owner?.name?.trim() || owner?.username?.trim() || owner?.email?.trim() || null;
+      return { ...invalidLicenseResponse("device_limit", "Limite de dispositivos atingido"), creatorName } as const;
+    }
+    return validation.code === "expired"
+      ? invalidLicenseResponse("expired", "Chave expirada")
+      : invalidLicenseResponse("revoked", "Chave revogada");
   }
   if (validation.linked) await recordEvent({ licenseId: license.id, eventType: "device_linked", deviceId: input.deviceId, packageName: input.packageName, appVersion: input.appVersion, ipAddress: input.ipAddress });
   await recordEvent({ licenseId: license.id, eventType: "validated", deviceId: input.deviceId, packageName: input.packageName, appVersion: input.appVersion, ipAddress: input.ipAddress });
