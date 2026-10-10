@@ -257,12 +257,12 @@ jobs:
                               HStack(spacing: 8) {
                                   Label("TEXTURA", systemImage: "paintbrush.fill")
                                       .font(.system(size: 28, weight: .bold, design: .rounded))
-                                      .foregroundStyle(darkMode ? .white : .black)
+                                      .foregroundStyle(accentColor)
                                   Spacer()
                                   Button { darkMode.toggle() } label: {
                                       Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
                                           .font(.system(size: 16, weight: .bold))
-                                          .foregroundStyle(darkMode ? .white : .black)
+                                          .foregroundStyle(accentColor)
                                           .frame(width: 38, height: 38)
                                           .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
                                   }
@@ -272,15 +272,15 @@ jobs:
                                       .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
                               }
                               Text("Pinturas e texturas online")
-                                  .foregroundStyle(darkMode ? Color.white.opacity(0.62) : Color.black.opacity(0.58))
-                              Text(message).font(.caption).foregroundStyle(.secondary)
+                                  .foregroundStyle(accentColor.opacity(0.82))
+                              Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
                               ForEach(items) { item in
                                   HStack(spacing: 12) {
                                       if let raw = item.logoUrl, let url = URL(string: raw) {
                                           AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { Color.gray.opacity(0.25) }
                                               .frame(width: 58, height: 58).clipShape(RoundedRectangle(cornerRadius: 12))
                                       } else { Image(systemName: "paintbrush.fill").foregroundStyle(accentColor).frame(width: 58, height: 58).background(Color.white.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 12)) }
-                                      VStack(alignment: .leading, spacing: 3) { Text(item.title).font(.headline).foregroundStyle(.white) }
+                                      VStack(alignment: .leading, spacing: 3) { Text(item.title).font(.headline).foregroundStyle(accentColor) }
                                       Spacer()
                                       Toggle("", isOn: Binding(get: { activeIDs.contains(item.id) }, set: { _ in Task { await applyOrRestore(item) } }))
                                           .labelsHidden()
