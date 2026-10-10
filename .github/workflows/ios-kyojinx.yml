@@ -303,7 +303,7 @@ jobs:
           c = c.replace('case .external: return "gamecontroller.fill"', 'case .external: return "gamecontroller.fill"\n        case .texture: return "paintbrush.fill"', 1)
           content.write_text(c)
           n = nav.read_text()
-          n = n.replace('return [.patches, .external].filter(isVisible)', 'return [.patches, .external, .texture].filter(isVisible)', 1)
+          n = n.replace('return [.patches, .external, .texture].filter(isVisible)', 'return [.patches, .external, .texture].filter(isVisible)', 1)
           nav.write_text(n)
           PYTEXTURE
       - name: Add game card images only (online patches)
@@ -1660,6 +1660,7 @@ jobs:
           python3 /tmp/fix_tabs.py "$CONTENT_SWIFT"
           grep -q "sectionContent(.patches)" "$CONTENT_SWIFT"
           grep -q "sectionContent(.external)" "$CONTENT_SWIFT"
+          grep -q "sectionContent(.texture)" "$CONTENT_SWIFT"
           grep -q scope "$CONTENT_SWIFT"
       - name: Fix ColorPicker deployment compatibility
         shell: bash
@@ -1696,8 +1697,8 @@ jobs:
           import re, sys
           nav, content, patch = map(Path, sys.argv[1:])
           n = nav.read_text()
-          n = re.sub(r'(?s)(var visibleSections: \[AppSection\] \{).*?\n    \}', r'\1\n        [.patches, .external].filter(isVisible)\n    }', n, count=1)
-          n = n.replace('AppSection.allCases.filter(isVisible)', '[.patches, .external].filter(isVisible)')
+          n = re.sub(r'(?s)(var visibleSections: \[AppSection\] \{).*?\n    \}', r'\1\n        [.patches, .external, .texture].filter(isVisible)\n    }', n, count=1)
+          n = n.replace('AppSection.allCases.filter(isVisible)', '[.patches, .external, .texture].filter(isVisible)')
           n = re.sub(r'(init\(\s*\n\s*selectedTab: Int = )0(,)', r'\1AppSection.patches.rawValue\2', n, count=1)
           n = n.replace('selectedTab = AppSection.home.rawValue', 'selectedTab = AppSection.patches.rawValue')
           nav.write_text(n)
@@ -1705,8 +1706,8 @@ jobs:
           c = c.replace('} ?? .home', '} ?? .patches')
           c = c.replace('?? .home', '?? .patches')
           c = c.replace('initialTab = 0', 'initialTab = AppSection.patches.rawValue')
-          c = c.replace('AppSection.allCases.filter(isVisible)', '[.patches, .external].filter(isVisible)')
-          c = c.replace('ForEach(featureVisibility.visibleSections)', 'ForEach([AppSection.patches, .external])')
+          c = c.replace('AppSection.allCases.filter(isVisible)', '[.patches, .external, .texture].filter(isVisible)')
+          c = c.replace('ForEach(featureVisibility.visibleSections)', 'ForEach([AppSection.patches, .external, .texture])')
           compact = '''    private var compactLayout: some View {
           TabView(selection: tabSelection) {
               sectionContent(.patches)
@@ -1715,6 +1716,9 @@ jobs:
               sectionContent(.external)
                   .tabItem { CompactTabLabel(title: "External", systemImage: "gamecontroller.fill") }
                   .tag(AppSection.external.rawValue)
+              sectionContent(.texture)
+                  .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
+                  .tag(AppSection.texture.rawValue)
           }
           }
           '''
@@ -1723,7 +1727,7 @@ jobs:
           if compact_start >= 0 and regular_start > compact_start:
               c = c[:compact_start] + compact + c[regular_start:]
           else:
-              c = c.replace('ForEach(featureVisibility.visibleSections)', 'ForEach([AppSection.patches, .external])')
+              c = c.replace('ForEach(featureVisibility.visibleSections)', 'ForEach([AppSection.patches, .external, .texture])')
           content.write_text(c)
           p = patch.read_text()
           p, removed = re.subn(r'(?m)^\s*navItem\(title: "(?:Início|Home)".*\n', '', p)
