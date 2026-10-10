@@ -254,25 +254,38 @@ jobs:
               var body: some View {
                   NavigationStack {
                       ZStack {
-                          (darkMode ? Color.black : Color.white).ignoresSafeArea()
+                          (darkMode ? LinearGradient(colors: [Color.black, Color(red: 0.035, green: 0.045, blue: 0.055)], startPoint: .top, endPoint: .bottom) : LinearGradient(colors: [Color.white, Color(red: 0.93, green: 0.95, blue: 0.98)], startPoint: .top, endPoint: .bottom)).ignoresSafeArea()
                           ScrollView {
                           VStack(alignment: .leading, spacing: 14) {
-                              HStack(spacing: 8) {
-                                  Label("EXTERNAL TEXTURA E HOLOGRAMA", systemImage: "paintbrush.fill")
-                                      .font(.system(size: 19, weight: .bold, design: .rounded))
-                                      .foregroundStyle(accentColor)
-                                  Spacer()
-                                  Button { darkMode.toggle() } label: {
-                                      Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
-                                          .font(.system(size: 16, weight: .bold))
+                              VStack(spacing: 4) {
+                                  HStack(alignment: .center, spacing: 8) {
+                                      Image(systemName: "paintbrush.fill")
+                                          .font(.system(size: 34, weight: .bold))
                                           .foregroundStyle(accentColor)
+                                      VStack(alignment: .leading, spacing: -2) {
+                                          Text("EXTERNAL")
+                                              .font(.system(size: 27, weight: .black, design: .rounded))
+                                              .italic()
+                                              .foregroundStyle(accentColor)
+                                          Text("TEXTURA E HOLOGRAMA")
+                                              .font(.system(size: 13, weight: .black, design: .rounded))
+                                              .italic()
+                                              .foregroundStyle(accentColor)
+                                      }
+                                      Spacer()
+                                      Button { darkMode.toggle() } label: {
+                                          Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
+                                              .font(.system(size: 16, weight: .bold))
+                                              .foregroundStyle(accentColor)
+                                              .frame(width: 38, height: 38)
+                                              .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
+                                      }
+                                      ColorPicker("", selection: $accentColor, supportsOpacity: false)
+                                          .labelsHidden()
                                           .frame(width: 38, height: 38)
                                           .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
                                   }
-                                  ColorPicker("", selection: $accentColor, supportsOpacity: false)
-                                      .labelsHidden()
-                                      .frame(width: 38, height: 38)
-                                      .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
+                                  .frame(maxWidth: .infinity)
                               }
                               Text("texturas e holograma online")
                                   .foregroundStyle(accentColor.opacity(0.82))
@@ -282,8 +295,8 @@ jobs:
                                   }
                                   .frame(maxWidth: .infinity)
                                   .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                                  .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                  .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
+                                  .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                  .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
                                   .shadow(color: accentColor.opacity(0.18), radius: 12, y: 4)
                               }
                               Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
@@ -298,7 +311,9 @@ jobs:
                                       Toggle("", isOn: Binding(get: { activeIDs.contains(item.id) }, set: { _ in Task { await applyOrRestore(item) } }))
                                           .labelsHidden()
                                           .tint(accentColor)
-                                  }.padding(12).background(darkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 16))
+                                  }.padding(12)
+                                      .background(darkMode ? Color.white.opacity(0.075) : Color.white.opacity(0.92), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                      .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(accentColor.opacity(0.12), lineWidth: 1))
                               }
                           }.padding(20)
                       }
