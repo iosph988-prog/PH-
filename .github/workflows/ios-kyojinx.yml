@@ -289,6 +289,24 @@ jobs:
 
           cat "$APP_DIR/views/TextureOnlineView.swift" >> "$APP_DIR/views/PatchProjectsView.swift"
           rm "$APP_DIR/views/TextureOnlineView.swift"
+      - name: Finalize TEXTURA navigation
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          python3 - "$APP_DIR/ContentView.swift" "$APP_DIR/helpers/AppTabNavigationState.swift" <<'PYTEXTURE'
+          from pathlib import Path
+          import sys
+          content, nav = map(Path, sys.argv[1:])
+          c = content.read_text()
+          c = c.replace("        case .external:\n            ExternalPanelView()", "        case .external:\n            ExternalPanelView()\n        case .texture:\n            TextureOnlineView()", 1)
+          c = c.replace('case .external: return "External"', 'case .external: return "External"\n        case .texture: return "TEXTURA"', 1)
+          c = c.replace('case .external: return "gamecontroller.fill"', 'case .external: return "gamecontroller.fill"\n        case .texture: return "paintbrush.fill"', 1)
+          content.write_text(c)
+          n = nav.read_text()
+          n = n.replace('return [.patches, .external].filter(isVisible)', 'return [.patches, .external, .texture].filter(isVisible)', 1)
+          nav.write_text(n)
+          PYTEXTURE
       - name: Add game card images only (online patches)
         shell: bash
         run: |
