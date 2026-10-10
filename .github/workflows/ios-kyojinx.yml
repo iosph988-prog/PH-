@@ -247,6 +247,7 @@ jobs:
           struct TextureOnlineView: View {
               @State private var items: [TextureCatalogItem] = []
               @State private var message = "Carregando texturas..."
+              @State private var activeIDs: Set<Int> = []
               var body: some View {
                   NavigationStack {
                       ScrollView {
@@ -262,7 +263,7 @@ jobs:
                                       } else { Image(systemName: "paintbrush.fill").foregroundStyle(.pink).frame(width: 58, height: 58).background(Color.white.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 12)) }
                                       VStack(alignment: .leading, spacing: 3) { Text(item.title).font(.headline).foregroundStyle(.white); Text(item.fileName).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
                                       Spacer()
-                                      Button("Baixar") { Task { await download(item) } }.buttonStyle(.borderedProminent).tint(.pink)
+                                      Button(activeIDs.contains(item.id) ? "Restaurar" : "Aplicar") { Task { await applyOrRestore(item) } }.buttonStyle(.borderedProminent).tint(activeIDs.contains(item.id) ? .gray : .pink)
                                   }.padding(12).background(Color.white.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 16))
                               }
                           }.padding(20)
@@ -280,9 +281,32 @@ jobs:
                       let catalog = try JSONDecoder().decode(TextureCatalogResponse.self, from: data); items = catalog.patches ?? []; message = items.isEmpty ? "Nenhuma textura publicada ainda." : ""
                   } catch { message = "Não foi possível carregar o catálogo agora." }
               }
-              private func download(_ item: TextureCatalogItem) async {
-                  guard let url = URL(string: item.downloadUrl) else { return }
-                  do { let (data, response) = try await URLSession.shared.data(from: url); guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return }; let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true); try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true); try data.write(to: dir.appendingPathComponent(item.fileName), options: .atomic); await MainActor.run { message = "Baixado: \(item.fileName)" } } catch { await MainActor.run { message = "Falha ao baixar o arquivo." } }
+              private func applyOrRestore(_ item: TextureCatalogItem) async {
+                  if activeIDs.contains(item.id) { await restore(item); return }
+                  do {
+                      guard let url = URL(string: item.downloadUrl) else { throw URLError(.badURL) }
+                      let (data, response) = try await URLSession.shared.data(from: url)
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }
+                      let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
+                      try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                      let localURL = dir.appendingPathComponent(item.fileName)
+                      try data.write(to: localURL, options: .atomic)
+                      let packageData = try PatchProjectLibrary.readPackage(at: localURL)
+                      let decoded = try PatchPackageCodec.decode(packageData, password: nil)
+                      _ = try DevicePatchService.apply(project: decoded.project)
+                      await MainActor.run { activeIDs.insert(item.id); message = "Aplicado: \(item.title)" }
+                  } catch { await MainActor.run { message = "Não foi possível aplicar: \(error.localizedDescription)" } }
+              }
+              private func restore(_ item: TextureCatalogItem) async {
+                  do {
+                      let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
+                      let localURL = dir.appendingPathComponent(item.fileName)
+                      let packageData = try PatchProjectLibrary.readPackage(at: localURL)
+                      let decoded = try PatchPackageCodec.decode(packageData, password: nil)
+                      guard let receipt = DevicePatchService.latestReceipt(projectID: decoded.project.id) else { throw NSError(domain: "Texture", code: 404, userInfo: [NSLocalizedDescriptionKey: "Nenhum backup encontrado"]) }
+                      try DevicePatchService.restore(receipt: receipt)
+                      await MainActor.run { activeIDs.remove(item.id); message = "Restaurado: \(item.title)" }
+                  } catch { await MainActor.run { message = "Não foi possível restaurar: \(error.localizedDescription)" } }
               }
           }
           SWIFT
