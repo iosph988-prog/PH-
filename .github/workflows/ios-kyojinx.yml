@@ -234,7 +234,7 @@ jobs:
           import SwiftUI
           import UIKit
 
-          private struct TextureCatalogResponse: Decodable { let valid: Bool; let patches: [TextureCatalogItem]? }
+          private struct TextureCatalogResponse: Decodable { let valid: Bool; let patches: [TextureCatalogItem]?; let textureBannerUrl: String? }
           private struct TextureCatalogItem: Decodable, Identifiable {
               let id: Int
               let title: String
@@ -248,6 +248,7 @@ jobs:
               @State private var items: [TextureCatalogItem] = []
               @State private var message = "Carregando texturas..."
               @State private var activeIDs: Set<Int> = []
+              @State private var textureBannerUrl: String?
               @AppStorage("textureDarkMode") private var darkMode = true
               @State private var accentColor = Color.pink
               var body: some View {
@@ -275,6 +276,16 @@ jobs:
                               }
                               Text("Pinturas e texturas online")
                                   .foregroundStyle(accentColor.opacity(0.82))
+                              if let banner = textureBannerUrl, let url = URL(string: banner) {
+                                  AsyncImage(url: url) { phase in
+                                      if let image = phase.image { image.resizable().scaledToFill() } else { Color.clear }
+                                  }
+                                  .frame(maxWidth: .infinity)
+                                  .frame(height: 150)
+                                  .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                  .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
+                                  .shadow(color: accentColor.opacity(0.18), radius: 12, y: 4)
+                              }
                               Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
                               ForEach(items) { item in
                                   HStack(spacing: 12) {
@@ -306,7 +317,7 @@ jobs:
                       request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key, "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "texture-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0", "section": "texture"])
                       let (data, response) = try await URLSession.shared.data(for: request)
                       guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }
-                      let catalog = try JSONDecoder().decode(TextureCatalogResponse.self, from: data); items = catalog.patches ?? []; message = items.isEmpty ? "Nenhuma textura publicada ainda." : ""
+                      let catalog = try JSONDecoder().decode(TextureCatalogResponse.self, from: data); textureBannerUrl = catalog.textureBannerUrl; items = catalog.patches ?? []; message = items.isEmpty ? "Nenhuma textura publicada ainda." : ""
                   } catch { message = "Não foi possível carregar o catálogo agora." }
               }
               private func applyOrRestore(_ item: TextureCatalogItem) async {

@@ -63,6 +63,7 @@ export const appRouter = router({
           url: z.string().trim().max(512).nullable().optional(),
           freeFireLogoUrl: z.string().trim().max(1024).nullable().optional(),
           freeFireMaxLogoUrl: z.string().trim().max(1024).nullable().optional(),
+          textureBannerUrl: z.string().url().max(2048).nullable().optional(),
           targetResellerId: z.number().int().positive().nullable().optional(),
         })
       )

@@ -153,6 +153,7 @@ function AdminPanel() {
   const [editingResellerExpiresAt, setEditingResellerExpiresAt] = useState("");
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementUrl, setAnnouncementUrl] = useState("");
+  const [textureBannerUrl, setTextureBannerUrl] = useState("");
   const [announcementTarget, setAnnouncementTarget] = useState("");
   const create = trpc.licenses.create.useMutation({
     onSuccess: result => {
@@ -751,14 +752,22 @@ function AdminPanel() {
                     ))}
                   </select>
                 </div>
+                <Input
+                  value={textureBannerUrl}
+                  onChange={event => setTextureBannerUrl(event.target.value)}
+                  placeholder="URL da imagem do card TEXTURA (opcional)"
+                  className="border-white/10 bg-white/5 text-white placeholder:text-slate-500"
+                />
                 <Button
                   disabled={
-                    updateAnnouncement.isPending || !announcementUrl.trim()
+                    updateAnnouncement.isPending ||
+                    (!announcementUrl.trim() && !textureBannerUrl.trim())
                   }
                   onClick={() =>
                     updateAnnouncement.mutate({
                       announcement: announcementText.trim(),
                       url: announcementUrl.trim(),
+                      textureBannerUrl: textureBannerUrl.trim() || null,
                       targetResellerId: announcementTarget
                         ? Number(announcementTarget)
                         : null,

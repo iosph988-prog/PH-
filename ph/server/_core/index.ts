@@ -25,6 +25,7 @@ const allowedIosVersions = new Set(
 );
 const allowedAndroidPackage = process.env.PH_ALLOWED_ANDROID_PACKAGE || "com.my.rtxxiters";
 const allowedAndroidVersion = process.env.PH_ALLOWED_ANDROID_VERSION || "1.0";
+const defaultTextureBannerUrl = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663161437792/rGYWRwEhCnpDbvlU.JPG";
 function isAllowedClient(packageName: string, appVersion: string) {
   const isIos = packageName === allowedIosBundleId && allowedIosVersions.has(appVersion);
   const isAndroid = packageName === allowedAndroidPackage && appVersion === allowedAndroidVersion;
@@ -149,7 +150,10 @@ async function startServer() {
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
       const requestedSection = section === "texture" ? "texture" : undefined;
       const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl, section: requestedSection });
-      return res.status(result.valid ? 200 : 403).json(result);
+      const textureBannerUrl = requestedSection === "texture"
+        ? ((await getAnnouncement())?.textureBannerUrl || defaultTextureBannerUrl)
+        : undefined;
+      return res.status(result.valid ? 200 : 403).json({ ...result, textureBannerUrl });
     } catch (error) {
       console.error("[Patch API] Catalog failed", error);
       return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
