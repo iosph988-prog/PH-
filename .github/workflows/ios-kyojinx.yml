@@ -287,7 +287,7 @@ jobs:
                                   }
                                   .frame(maxWidth: .infinity)
                               }
-                              Text("texturas e holograma online")
+                              Text("Antes de ativar, baixe a skin do personagem. Após concluir o download, você poderá ativar e usar normalmente.")
                                   .foregroundStyle(accentColor.opacity(0.82))
                               if let banner = textureBannerUrl, let url = URL(string: banner) {
                                   AsyncImage(url: url) { phase in
