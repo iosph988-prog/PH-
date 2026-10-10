@@ -1905,7 +1905,6 @@ jobs:
                   .frame(maxWidth: .infinity)
                   .padding(.top, 4)
               .padding(.bottom, 2)
-                  .task { await refreshProxyTitle() }
           }
           '''
           t, count = re.subn(r'\s*private var header: some View \{.*?\s*private func sectionTitle', '\n' + header + '              private func sectionTitle', t, count=1, flags=re.S)
