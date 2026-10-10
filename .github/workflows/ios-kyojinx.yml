@@ -278,10 +278,10 @@ jobs:
                                   .foregroundStyle(accentColor.opacity(0.82))
                               if let banner = textureBannerUrl, let url = URL(string: banner) {
                                   AsyncImage(url: url) { phase in
-                                      if let image = phase.image { image.resizable().scaledToFill() } else { Color.clear }
+                                      if let image = phase.image { image.resizable().scaledToFit() } else { Color.clear }
                                   }
                                   .frame(maxWidth: .infinity)
-                                  .frame(height: 150)
+                                  .aspectRatio(16.0 / 9.0, contentMode: .fit)
                                   .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                                   .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
                                   .shadow(color: accentColor.opacity(0.18), radius: 12, y: 4)
