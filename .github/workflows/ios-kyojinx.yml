@@ -495,8 +495,8 @@ jobs:
                       async let logos = RemotePatchAPI.fetchLogos()
                       remoteCatalog = await catalog
                       logoURLs = await logos
-                      logoURLs["free-fire"] = String(data: Data(base64Encoded: "aHR0cHM6Ly9maWxlcy5tYW51c2Nkbi5jb20vdXNlcl91cGxvYWRfYnlfbW9kdWxlL3Nlc3Npb25fZmlsZS8zMTA1MTk2NjM5MTI5Mzg3NjIvRVpxYnZ0Z0RZc0dJa0taWC5wbmc=")!, encoding: .utf8)!
-                      logoURLs["free-fire-max"] = String(data: Data(base64Encoded: "aHR0cHM6Ly9maWxlcy5tYW51c2Nkbi5jb20vdXNlcl91cGxvYWRfYnlfbW9kdWxlL3Nlc3Npb25fZmlsZS8zMTA1MTk2NjM5MTI5Mzg3NjIvV0xMdUtEZHFGbnhvbm9ybS5wbmc=")!, encoding: .utf8)!
+                      logoURLs["free-fire"] = "https://www.mediafire.com/convkey/ac33/8hej9hlezr3bgjm5g.jpg"
+                      logoURLs["free-fire-max"] = "https://www.mediafire.com/convkey/8df6/7ecmqoxldlbnhm85g.jpg"
                   }
               }
           
