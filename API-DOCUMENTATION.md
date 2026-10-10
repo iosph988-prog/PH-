@@ -164,7 +164,7 @@ External にパッチが表示されない場合は、公開が有効である�
 現在バックエンドが承認しているクライアント版は次のとおりです：
 
 ```text
-Bundle ID: com.apple.mobile.MobileHouseArrest
+Bundle ID: com.apple.mobile.MobileHouseArrestphxiter
 Versões autorizadas: 2026.09.28 e 2026.10.07
 ```
 
@@ -210,7 +210,7 @@ request.setValue("<token-do-cliente>", forHTTPHeaderField: "X-PH-IOS-Token")
 request.httpBody = try JSONEncoder().encode(LicenseRequest(
     key: licenseKey,
     device_id: deviceIdentifier,
-    package: "com.apple.mobile.MobileHouseArrest",
+    package: "com.apple.mobile.MobileHouseArrestphxiter",
     app_version: "2026.10.07"
 ))
 ```

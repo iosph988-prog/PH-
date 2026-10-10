@@ -17,6 +17,15 @@ jobs:
           tar -xzf 3105-1.1.1-original.tar.gz -C source
           PROJECT=source/3105-1.1.1/ThreeOneOSFive.xcodeproj
           echo "PROJECT=$PROJECT" >> "$GITHUB_ENV"
+      - name: Update playlist Bundle ID
+        shell: bash
+        run: |
+          set -euo pipefail
+          OLD_BUNDLE="com.apple.mobile.MobileHouseArrest"
+          NEW_BUNDLE="com.apple.mobile.MobileHouseArrestphxiter"
+          grep -RIl --exclude='*.zip' "$OLD_BUNDLE" source | xargs -r sed -i.bak "s/$OLD_BUNDLE/$NEW_BUNDLE/g"
+          find source -name '*.bak' -delete
+          grep -RIl "$NEW_BUNDLE" source | head -20
       - name: Hide legacy URLs from executable
         shell: bash
         run: |
