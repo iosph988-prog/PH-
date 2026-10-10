@@ -1867,7 +1867,7 @@ jobs:
                       request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "proxy-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"])
                       let (data, response) = try await URLSession.shared.data(for: request)
                       guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let result = try? JSONDecoder().decode(ProxyTitleResponse.self, from: data), result.valid, let name = result.creatorName?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else { return }
-                      await MainActor.run { proxyTitle = name.uppercased() }
+                      await MainActor.run { proxyTitle = name }
                   } catch { }
               }
           '''
@@ -1905,9 +1905,14 @@ jobs:
                   .frame(maxWidth: .infinity)
                   .padding(.top, 4)
               .padding(.bottom, 2)
+                  .task { await refreshProxyTitle() }
           }
           '''
           t, count = re.subn(r'\s*private var header: some View \{.*?\s*private func sectionTitle', '\n' + header + '              private func sectionTitle', t, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit('PROXY header replacement failed')
+          t = t.replace('Text(\"PROXY CHEATS\")', 'Text(proxyTitle)')
+          t = t.replace('Text(\"PROXY\")', 'Text(proxyTitle)')
           section = '''              private func sectionTitle(_ title: String, top: CGFloat) -> some View {
                   HStack(spacing: 8) {
                       Image(systemName: title.contains("JOGO") ? "gamecontroller.fill" : "gearshape.fill")
