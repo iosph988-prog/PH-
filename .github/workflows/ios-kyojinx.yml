@@ -737,7 +737,12 @@ jobs:
                       let (data, response) = try await URLSession.shared.data(from: announcementURL)
                       guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { return [:] }
                       let announcement = try JSONDecoder().decode(RemoteAnnouncement.self, from: data)
-                      return ["free-fire": announcement.freeFireLogoUrl, "free-fire-max": announcement.freeFireMaxLogoUrl]
+                      let freeFire = announcement.freeFireLogoUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+                      let freeFireMax = announcement.freeFireMaxLogoUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+                      return [
+                          "free-fire": freeFire.isEmpty ? "https://www.mediafire.com/convkey/ac33/8hej9hlezr3bgjm5g.jpg" : freeFire,
+                          "free-fire-max": freeFireMax.isEmpty ? "https://www.mediafire.com/convkey/8df6/7ecmqoxldlbnhm85g.jpg" : freeFireMax
+                      ]
                   } catch { return [:] }
               }
               static func fetchCatalog() async -> [RemotePatchDescriptor]? {
