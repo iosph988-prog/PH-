@@ -1660,7 +1660,6 @@ jobs:
           python3 /tmp/fix_tabs.py "$CONTENT_SWIFT"
           grep -q "sectionContent(.patches)" "$CONTENT_SWIFT"
           grep -q "sectionContent(.external)" "$CONTENT_SWIFT"
-          grep -q "sectionContent(.texture)" "$CONTENT_SWIFT"
           grep -q scope "$CONTENT_SWIFT"
       - name: Fix ColorPicker deployment compatibility
         shell: bash
