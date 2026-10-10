@@ -1859,6 +1859,7 @@ jobs:
                   } catch { }
               }
           '''
+          t = t.replace('              private var header: some View {', proxy_fetch + '              private var header: some View {', 1)
           header = '''              private var header: some View {
                   VStack(spacing: 4) {
                       HStack(alignment: .center, spacing: 8) {
@@ -1866,7 +1867,7 @@ jobs:
                               .font(.system(size: 34, weight: .bold))
                               .foregroundStyle(fg)
                           VStack(alignment: .leading, spacing: -2) {
-                              Text("PROXY")
+                              Text(proxyTitle)
                                   .font(.system(size: 31, weight: .black, design: .rounded))
                                   .italic()
                                   .foregroundStyle(fg)
