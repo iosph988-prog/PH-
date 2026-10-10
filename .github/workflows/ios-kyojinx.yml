@@ -263,7 +263,9 @@ jobs:
                                       } else { Image(systemName: "paintbrush.fill").foregroundStyle(.pink).frame(width: 58, height: 58).background(Color.white.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 12)) }
                                       VStack(alignment: .leading, spacing: 3) { Text(item.title).font(.headline).foregroundStyle(.white) }
                                       Spacer()
-                                      Button(activeIDs.contains(item.id) ? "DESATIVAR" : "ATIVAR") { Task { await applyOrRestore(item) } }.buttonStyle(.borderedProminent).tint(activeIDs.contains(item.id) ? .gray : .pink)
+                                      Toggle("", isOn: Binding(get: { activeIDs.contains(item.id) }, set: { _ in Task { await applyOrRestore(item) } }))
+                                          .labelsHidden()
+                                          .tint(.white)
                                   }.padding(12).background(Color.white.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 16))
                               }
                           }.padding(20)
