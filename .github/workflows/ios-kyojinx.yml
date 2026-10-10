@@ -291,8 +291,11 @@ jobs:
                               }
                           }.padding(20)
                       }
+                      .scrollContentBackground(.hidden)
                       }
-                  }.preferredColorScheme(darkMode ? .dark : .light)
+                  }
+                  .background(darkMode ? Color.black : Color.white)
+                  .preferredColorScheme(darkMode ? .dark : .light)
                    .task { await load() }
               }
               private func load() async {
