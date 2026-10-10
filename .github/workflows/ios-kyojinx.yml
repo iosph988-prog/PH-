@@ -248,29 +248,49 @@ jobs:
               @State private var items: [TextureCatalogItem] = []
               @State private var message = "Carregando texturas..."
               @State private var activeIDs: Set<Int> = []
+              @AppStorage("textureDarkMode") private var darkMode = true
+              @State private var accentColor = Color.pink
               var body: some View {
                   NavigationStack {
                       ScrollView {
                           VStack(alignment: .leading, spacing: 14) {
-                              Label("TEXTURA", systemImage: "paintbrush.fill").font(.title.bold()).foregroundStyle(.white)
-                              Text("Pinturas e texturas online").foregroundStyle(.secondary)
+                              HStack(spacing: 8) {
+                                  Label("TEXTURA", systemImage: "paintbrush.fill")
+                                      .font(.system(size: 28, weight: .bold, design: .rounded))
+                                      .foregroundStyle(darkMode ? .white : .black)
+                                  Spacer()
+                                  Button { darkMode.toggle() } label: {
+                                      Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
+                                          .font(.system(size: 16, weight: .bold))
+                                          .foregroundStyle(darkMode ? .white : .black)
+                                          .frame(width: 38, height: 38)
+                                          .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
+                                  }
+                                  ColorPicker("", selection: $accentColor, supportsOpacity: false)
+                                      .labelsHidden()
+                                      .frame(width: 38, height: 38)
+                                      .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
+                              }
+                              Text("Pinturas e texturas online")
+                                  .foregroundStyle(darkMode ? Color.white.opacity(0.62) : Color.black.opacity(0.58))
                               Text(message).font(.caption).foregroundStyle(.secondary)
                               ForEach(items) { item in
                                   HStack(spacing: 12) {
                                       if let raw = item.logoUrl, let url = URL(string: raw) {
                                           AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { Color.gray.opacity(0.25) }
                                               .frame(width: 58, height: 58).clipShape(RoundedRectangle(cornerRadius: 12))
-                                      } else { Image(systemName: "paintbrush.fill").foregroundStyle(.pink).frame(width: 58, height: 58).background(Color.white.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 12)) }
+                                      } else { Image(systemName: "paintbrush.fill").foregroundStyle(accentColor).frame(width: 58, height: 58).background(Color.white.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 12)) }
                                       VStack(alignment: .leading, spacing: 3) { Text(item.title).font(.headline).foregroundStyle(.white) }
                                       Spacer()
                                       Toggle("", isOn: Binding(get: { activeIDs.contains(item.id) }, set: { _ in Task { await applyOrRestore(item) } }))
                                           .labelsHidden()
-                                          .tint(.white)
-                                  }.padding(12).background(Color.white.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 16))
+                                          .tint(accentColor)
+                                  }.padding(12).background(darkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 16))
                               }
                           }.padding(20)
-                      }.background(Color.black.ignoresSafeArea())
-                  }.task { await load() }
+                      }.background((darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea())
+                  }.preferredColorScheme(darkMode ? .dark : .light)
+                   .task { await load() }
               }
               private func load() async {
                   guard let key = LicenseStore.storedKey else { message = "Faça login para carregar as texturas."; return }
