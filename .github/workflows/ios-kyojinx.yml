@@ -1835,14 +1835,14 @@ jobs:
           import sys
           p = Path(sys.argv[1])
           t = p.read_text()
-          t = t.replace('@State private var selectedGameID = "free-fire"', '@State private var selectedGameID = "free-fire"\n              @State private var proxyTitle = "PROXY"', 1)
+          t = t.replace('@State private var selectedGameID = "free-fire"', '@State private var selectedGameID = "free-fire"\n              @State private var proxyTitle = ""', 1)
           t = t.replace('                      logoURLs = await logos\n', '                      logoURLs = await logos\n                      await refreshProxyTitle()\n', 1)
           t = t.replace('.task { await load() }', '.task { await load(); await refreshProxyTitle() }', 1)
           t = t.replace('                              Text("PROXY")\n', '                              Text(proxyTitle)\n', 1)
           replacements = {
               '@AppStorage("patchesDarkMode") private var darkMode = false': '@AppStorage("patchesDarkMode") private var darkMode = true',
               '(darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()': '(darkMode ? LinearGradient(colors: [Color.black, Color(red: 0.035, green: 0.045, blue: 0.055)], startPoint: .top, endPoint: .bottom) : LinearGradient(colors: [Color.white, Color(red: 0.91, green: 0.94, blue: 0.97)], startPoint: .top, endPoint: .bottom)).ignoresSafeArea()',
-              'Text("FUNÇÕES EXTERNAL")': 'Text("PROXY CHEATS")',
+              'Text("FUNÇÕES EXTERNAL")': 'Text(proxyTitle)',
               '.frame(height: 116)': '.frame(height: 108)',
               '.frame(minHeight: 72)': '.frame(minHeight: 64)',
               '.padding(.horizontal, 14)': '.padding(.horizontal, 12)',
@@ -1886,16 +1886,12 @@ jobs:
                           Image(systemName: "shield.lefthalf.filled")
                               .font(.system(size: 34, weight: .bold))
                               .foregroundStyle(fg)
-                          VStack(alignment: .leading, spacing: -2) {
-                              Text(proxyTitle)
-                                  .font(.system(size: 31, weight: .black, design: .rounded))
-                                  .italic()
-                                  .foregroundStyle(fg)
-                              Text("CHEATS")
-                                  .font(.system(size: 15, weight: .black, design: .rounded))
-                                  .italic()
-                                  .foregroundStyle(fg)
-                          }
+                          Text(proxyTitle)
+                              .font(.system(size: 31, weight: .black, design: .rounded))
+                              .italic()
+                              .foregroundStyle(fg)
+                              .lineLimit(1)
+                              .minimumScaleFactor(0.55)
                           Spacer()
                           Button { darkMode.toggle() } label: {
                               Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
