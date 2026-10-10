@@ -42,9 +42,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     };
     const updateSet: Record<string, unknown> = {};
     let invitedReseller = false;
+    let invitedDisplayName: string | null = null;
     if (user.email && user.openId !== ENV.ownerOpenId) {
       const pendingInvite = await db
-        .select({ id: resellerInvitations.id })
+        .select({ id: resellerInvitations.id, displayName: resellerInvitations.displayName })
         .from(resellerInvitations)
         .where(
           and(
@@ -55,6 +56,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
         .limit(1);
       invitedReseller = pendingInvite.length > 0;
       if (invitedReseller) {
+        invitedDisplayName = pendingInvite[0]?.displayName?.trim() || null;
         values.role = "reseller";
         updateSet.role = "reseller";
       }
@@ -72,6 +74,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     };
 
     textFields.forEach(assignNullable);
+    if (invitedReseller && invitedDisplayName) {
+      values.name = invitedDisplayName;
+      updateSet.name = invitedDisplayName;
+    }
 
     if (user.lastSignedIn !== undefined) {
       values.lastSignedIn = user.lastSignedIn;
