@@ -83,6 +83,10 @@ jobs:
           p = Path(sys.argv[1])
           t = p.read_text()
           addition = base64.b64decode(sys.argv[2]).decode()
+          addition = addition.replace("    let activatedAt: String?\n", "    let activatedAt: String?\n    let creatorName: String?\n", 1)
+          addition = addition.replace("        case activatedAt = \"activatedAt\"\n", "        case activatedAt = \"activatedAt\"\n        case creatorName = \"creatorName\"\n", 1)
+          addition = addition.replace("    let activatedAt: String?\n}\nextension LicenseStore", "    let activatedAt: String?\n    let creatorName: String?\n}\nextension LicenseStore", 1)
+          addition = addition.replace("            activatedAt: response.activatedAt\n", "            activatedAt: response.activatedAt,\n            creatorName: response.creatorName\n", 1)
           addition = addition.replace("private static var storedKey", "static var storedKey", 1)
           addition = addition.replace("}\n\nstruct LicenseProfileSnapshot", "    static func clear() {\n        let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]\n        SecItemDelete(query as CFDictionary)\n    }\n}\n\nstruct LicenseProfileSnapshot", 1)
           t = t.replace('import UIKit\n', 'import UIKit\nimport Security\n', 1)
@@ -1858,6 +1862,9 @@ jobs:
           import re
           proxy_fetch = '''              private struct ProxyTitleResponse: Decodable { let valid: Bool; let creatorName: String? }
               private func refreshProxyTitle() async {
+                  if let cached = LicenseStore.profileSnapshot?.creatorName?.trimmingCharacters(in: .whitespacesAndNewlines), !cached.isEmpty {
+                      await MainActor.run { proxyTitle = cached }
+                  }
                   var storedKey: String?
                   for _ in 0..<20 {
                       if let current = LicenseStore.storedKey, !current.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
