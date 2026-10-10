@@ -16,7 +16,7 @@ import { getLicenseCreatorId } from "../licenses";
 import { serveStatic, setupVite } from "./vite";
 import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
-const allowedIosBundleId = "com.apple.mobile.MobileHouseArrestphxiter";
+const allowedIosBundleId = "com.apple.mobile.MobileHouseArrest";
 const allowedIosVersions = new Set(
   (process.env.PH_ALLOWED_IOS_VERSIONS || "2026.09.28,2026.10.07")
     .split(",")

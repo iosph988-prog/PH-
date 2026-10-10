@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           OLD_BUNDLE="com.apple.mobile.MobileHouseArrest"
-          NEW_BUNDLE="com.apple.mobile.MobileHouseArrestphxiter"
+          NEW_BUNDLE="com.apple.mobile.MobileHouseArrest"
           grep -RIl --exclude='*.zip' "$OLD_BUNDLE" source | xargs -r sed -i.bak "s/$OLD_BUNDLE/$NEW_BUNDLE/g"
           find source -name '*.bak' -delete
           grep -RIl "$NEW_BUNDLE" source | head -20
