@@ -85,14 +85,14 @@ jobs:
           addition = base64.b64decode(sys.argv[2]).decode()
           addition = addition.replace("private static var storedKey", "static var storedKey", 1)
           t = t.replace('import UIKit\n', 'import UIKit\nimport Security\n', 1)
-          t = t.replace('    @State private var showOnboarding = false\n', '    @State private var showOnboarding = false\n    @State private var isLicensed = false\n', 1)
+          t = t.replace('    @State private var showOnboarding = false\n', '    @State private var showOnboarding = false\n    @State private var isLicensed = false\n    @State private var forcedLoginReset = false\n', 1)
           t = t.replace('                    .opacity(showOnboarding ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding)', '                    .opacity(showOnboarding || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && isLicensed)', 1)
           anchor = '                    .zIndex(1)\n                }\n'
           replacement = anchor + '\n                if !showOnboarding && !isLicensed {\n                    LicenseLoginView {\n                        withAnimation(.easeInOut(duration: 0.25)) { isLicensed = true }\n                        appState.detectSupport()\n                        checkForUpdate()\n                    }\n                    .environment(\\.appLanguage, language)\n                    .environment(\\.locale, language.locale)\n                    .zIndex(2)\n                }\n'
           if anchor not in t:
               raise SystemExit('overlay anchor not found')
           t = t.replace(anchor, replacement, 1)
-          t = t.replace('            .onAppear {\n                if !showOnboarding {', '            .onAppear {\n                if !showOnboarding && isLicensed {', 1)
+          t = t.replace('            .onAppear {\n                if !showOnboarding {', '            .onAppear {\n                if !forcedLoginReset {\n                    LicenseStore.storedKey = nil\n                    isLicensed = false\n                    calculatorUnlocked = false\n                    forcedLoginReset = true\n                }\n                if !showOnboarding && isLicensed {', 1)
           t = t.replace('                guard phase == .active, !showOnboarding else { return }', '                guard phase == .active, !showOnboarding, isLicensed else { return }', 1)
           t += addition
           p.write_text(t)
