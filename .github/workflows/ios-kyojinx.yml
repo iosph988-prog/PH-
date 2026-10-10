@@ -288,7 +288,6 @@ jobs:
           SWIFT
 
           cat "$APP_DIR/views/TextureOnlineView.swift" >> "$APP_DIR/views/PatchProjectsView.swift"
-          rm "$APP_DIR/views/TextureOnlineView.swift"
       - name: Finalize TEXTURA navigation
         shell: bash
         run: |
@@ -1857,6 +1856,12 @@ jobs:
           t, count = re.subn(r'\s*private var gameCards: some View \{.*?\s*private var featureList', '\n' + cards + '              private var featureList', t, count=1, flags=re.S)
           p.write_text(t)
           PY
+      - name: Attach TEXTURA view after all Swift patches
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          cat "$APP_DIR/views/TextureOnlineView.swift" >> "$APP_DIR/views/PatchProjectsView.swift"
       - name: Build original archive and IPA
         shell: bash
         run: |
