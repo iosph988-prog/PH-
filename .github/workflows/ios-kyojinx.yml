@@ -247,6 +247,7 @@ jobs:
           cat > "$APP_DIR/views/TextureOnlineView.swift" <<'SWIFT'
           import SwiftUI
           import UIKit
+          import CryptoKit
 
           private struct TextureCatalogResponse: Decodable { let valid: Bool; let patches: [TextureCatalogItem]?; let textureBannerUrl: String? }
           private struct TextureCatalogItem: Decodable, Identifiable {
@@ -256,6 +257,7 @@ jobs:
               let logoUrl: String?
               let downloadUrl: String
               let sizeBytes: Int
+              let sha256: String
           }
 
           struct TextureOnlineView: View {
@@ -265,6 +267,9 @@ jobs:
               @State private var textureBannerUrl: String?
               @AppStorage("textureDarkMode") private var darkMode = true
               @State private var accentColor = Color.pink
+              @State private var pendingPasswordItem: TextureCatalogItem?
+              @State private var pendingPasswordURL: URL?
+              @State private var texturePassword = ""
               var body: some View {
                   NavigationStack {
                       ZStack {
@@ -335,6 +340,20 @@ jobs:
                   .background(darkMode ? Color.black : Color.white)
                   .preferredColorScheme(darkMode ? .dark : .light)
                    .task { await load() }
+                   .alert("Senha da textura", isPresented: Binding(get: { pendingPasswordItem != nil }, set: { visible in
+                       if !visible { clearPasswordPrompt() }
+                   })) {
+                       SecureField("Digite a senha", text: $texturePassword)
+                       Button("Cancelar", role: .cancel) { clearPasswordPrompt() }
+                       Button("Aplicar") {
+                           guard let item = pendingPasswordItem, let url = pendingPasswordURL else { return }
+                           let password = texturePassword
+                           clearPasswordPrompt()
+                           Task { await decodeAndApply(item: item, url: url, password: password) }
+                       }
+                   } message: {
+                       Text("Este pacote TEXTURA está protegido. A senha não é enviada para a API.")
+                   }
               }
               private func load() async {
                   guard let key = LicenseStore.storedKey else { message = "Faça login para carregar as texturas."; return }
@@ -353,15 +372,40 @@ jobs:
                       guard let url = URL(string: item.downloadUrl) else { throw URLError(.badURL) }
                       let (data, response) = try await URLSession.shared.data(from: url)
                       guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }
+                      let actualHash = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+                      guard data.count == item.sizeBytes, actualHash.caseInsensitiveCompare(item.sha256) == .orderedSame else {
+                          throw NSError(domain: "Texture", code: 422, userInfo: [NSLocalizedDescriptionKey: "O arquivo TEXTURA foi alterado ou baixado incompleto."])
+                      }
                       let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
                       try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
                       let localURL = dir.appendingPathComponent(item.fileName)
                       try data.write(to: localURL, options: .atomic)
                       let packageData = try PatchProjectLibrary.readPackage(at: localURL)
-                      let decoded = try PatchPackageCodec.decode(packageData, password: nil)
+                      let summary = try PatchPackageCodec.inspect(packageData)
+                      if summary.isPasswordProtected {
+                          await MainActor.run {
+                              pendingPasswordItem = item
+                              pendingPasswordURL = localURL
+                              texturePassword = ""
+                              message = "Digite a senha para aplicar esta textura."
+                          }
+                          return
+                      }
+                      await decodeAndApply(item: item, url: localURL, password: nil)
+                  } catch { await MainActor.run { message = "Não foi possível aplicar: \(error.localizedDescription)" } }
+              }
+              private func decodeAndApply(item: TextureCatalogItem, url: URL, password: String?) async {
+                  do {
+                      let packageData = try PatchProjectLibrary.readPackage(at: url)
+                      let decoded = try PatchPackageCodec.decode(packageData, password: password)
                       _ = try DevicePatchService.apply(project: decoded.project)
                       await MainActor.run { activeIDs.insert(item.id); message = "Aplicado: \(item.title)" }
                   } catch { await MainActor.run { message = "Não foi possível aplicar: \(error.localizedDescription)" } }
+              }
+              private func clearPasswordPrompt() {
+                  pendingPasswordItem = nil
+                  pendingPasswordURL = nil
+                  texturePassword = ""
               }
               private func restore(_ item: TextureCatalogItem) async {
                   do {
