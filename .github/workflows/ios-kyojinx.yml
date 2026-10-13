@@ -2354,7 +2354,7 @@ jobs:
           for name in ("App.swift", "views/PatchProjectsView.swift"):
               path = Path("source/3105-1.1.1/ThreeOneOSFive") / name
               text = path.read_text()
-              text = text.replace("UIDevice.current.identifierForVendor?.uuidString", "await UIDevice.current.identifierForVendor?.uuidString")
+              text = text.replace("UIDevice.current.identifierForVendor?.uuidString", "(await UIDevice.current.identifierForVendor)?.uuidString")
               path.write_text(text)
           PYFIX
 
