@@ -2133,7 +2133,7 @@ jobs:
 
               private var instructionCard: some View {
                   HStack(alignment: .top, spacing: 11) {
-                      Image(systemName: "hand.raised.fill")
+                      Image(systemName: "exclamationmark.triangle.fill")
                           .font(.system(size: 20, weight: .bold))
                           .foregroundStyle(.black)
                           .frame(width: 48, height: 48)
@@ -2148,7 +2148,7 @@ jobs:
                               .font(.system(size: 11.5, weight: .bold, design: .rounded))
                               .foregroundStyle(.white)
                               .fixedSize(horizontal: false, vertical: true)
-                          Text("2. Depois de entrar no treinamento, volte ao ProjectX e toque em LIMPAR DADOS.")
+                          Text("2. Depois de entrar no treinamento, volte ao external e toque em LIMPAR DADOS.")
                               .font(.system(size: 11.5, weight: .bold, design: .rounded))
                               .foregroundStyle(.white)
                               .fixedSize(horizontal: false, vertical: true)
