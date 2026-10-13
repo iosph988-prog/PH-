@@ -2357,9 +2357,12 @@ jobs:
               text = text.replace("UIDevice.current.identifierForVendor?.uuidString", "(await UIDevice.current.identifierForVendor)?.uuidString")
               if name == "App.swift":
                   import re
+                  def replace_device_id(match):
+                      indent = match.group(1)
+                      return indent + "let vendorID = await UIDevice.current.identifierForVendor\n" + indent + 'let deviceID = vendorID?.uuidString ?? "unknown-device"'
                   text = re.sub(
                       r"(?m)^(\s*)let deviceID = .*identifierForVendor.*$",
-                      r"\1let vendorID = await UIDevice.current.identifierForVendor\n\1let deviceID = vendorID?.uuidString ?? \"unknown-device\"",
+                      replace_device_id,
                       text,
                   )
               path.write_text(text)
