@@ -2054,7 +2054,13 @@ jobs:
               @State private var isWorking = false
               @State private var normalApplied = false
               @State private var maxApplied = false
-              private let red = Color(red: 1.0, green: 0.05, blue: 0.10)
+              @State private var rgbPhase = 0.0
+              private var red: Color {
+                  let r = (sin(rgbPhase) + 1.0) / 2.0
+                  let g = (sin(rgbPhase + 2.094) + 1.0) / 2.0
+                  let b = (sin(rgbPhase + 4.188) + 1.0) / 2.0
+                  return Color(red: 0.82 + (0.18 * r), green: 0.03 + (0.22 * g), blue: 0.05 + (0.24 * b))
+              }
               private let cyan = Color(red: 0.05, green: 0.75, blue: 1.0)
               private let background = Color(red: 0.025, green: 0.025, blue: 0.035)
 
@@ -2121,7 +2127,10 @@ jobs:
                   }
                   .background(background.ignoresSafeArea())
                   .overlay(Rectangle().stroke(red.opacity(0.72), lineWidth: 1.2).padding(9).ignoresSafeArea())
-                  .task { await loadCatalog() }
+                  .task {
+                      await loadCatalog()
+                      await animateRGB()
+                  }
                   .alert("Limpar dados", isPresented: $showClearConfirmation) {
                       Button("Cancelar", role: .cancel) { }
                       Button("Limpar", role: .destructive) { Task { await restoreAndClear() } }
@@ -2129,6 +2138,14 @@ jobs:
                       Text("Isso remove somente os pacotes MISC armazenados nesta IPA.")
                   }
                   .navigationBarHidden(true)
+              }
+
+              private func animateRGB() async {
+                  while !Task.isCancelled {
+                      rgbPhase += 0.055
+                      if rgbPhase > 6.283 { rgbPhase -= 6.283 }
+                      try? await Task.sleep(nanoseconds: 55_000_000)
+                  }
               }
 
               private var instructionCard: some View {
