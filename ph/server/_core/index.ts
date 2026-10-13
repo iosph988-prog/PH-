@@ -148,7 +148,7 @@ async function startServer() {
     try {
       const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
       const baseUrl = `${forwardedProto}://${req.get("host")}`;
-      const requestedSection = section === "texture" ? "texture" : undefined;
+      const requestedSection = section === "texture" ? "texture" : section === "misc" ? "misc" : undefined;
       const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl, section: requestedSection });
       const textureBannerUrl = requestedSection === "texture"
         ? ((await getAnnouncement())?.textureBannerUrl || defaultTextureBannerUrl)

@@ -1607,7 +1607,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
         id: editingId,
         title,
         game,
-        interfaceTab: isExternal ? interfaceTab : null,
+        interfaceTab: isExternal || isMisc ? "MISC" : null,
         logoDataBase64,
         logoContentType: logoFile?.type === "image/jpeg" ? "image/jpeg" : logoFile?.type === "image/webp" ? "image/webp" : "image/png",
         fileName: file?.name,
@@ -1683,7 +1683,8 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
               onChange={event => setGame(event.target.value)}
               className="mt-2 h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 text-sm text-white"
             >
-              <option value="free-fire">Free Fire</option>
+              <option value="free-fire">Free Fire (Normal)</option>
+              <option value="free-fire-max">Free Fire MAX</option>
             </select>
           </div>
           {isExternal && (
