@@ -2046,50 +2046,129 @@ jobs:
           cat >> "$PATCH_SWIFT" <<'SWIFTMISC'
 
           struct MiscToolsView: View {
-              @AppStorage("miscDarkMode") private var darkMode = false
+              @State private var status = "Pronto para preparar o Free Fire."
+              @State private var showClearConfirmation = false
+              private let red = Color(red: 1.0, green: 0.05, blue: 0.10)
+              private let cyan = Color(red: 0.05, green: 0.75, blue: 1.0)
+              private let background = Color(red: 0.025, green: 0.025, blue: 0.035)
+
               var body: some View {
                   ZStack {
-                      (darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()
-                      ScrollView {
-                          VStack(alignment: .leading, spacing: 16) {
-                              HStack(spacing: 12) {
-                                  Image(systemName: "eye.fill")
-                                      .font(.system(size: 30, weight: .bold))
-                                      .foregroundStyle(darkMode ? .white : .black)
-                                  VStack(alignment: .leading, spacing: 2) {
-                                      Text("MISC")
-                                          .font(.system(size: 25, weight: .black, design: .rounded))
-                                          .foregroundStyle(darkMode ? .white : .black)
-                                      Text("Ferramentas e opções adicionais")
-                                          .font(.system(size: 13, weight: .medium))
-                                          .foregroundStyle(darkMode ? Color.white.opacity(0.60) : Color.black.opacity(0.55))
-                                  }
-                                  Spacer()
-                                  Button { darkMode.toggle() } label: {
-                                      Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
-                                          .foregroundStyle(darkMode ? .white : .black)
-                                          .frame(width: 38, height: 38)
-                                          .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
-                                  }
+                      background.ignoresSafeArea()
+                      ScrollView(.vertical, showsIndicators: false) {
+                          VStack(spacing: 0) {
+                              VStack(spacing: 12) {
+                                  Image(systemName: "gamecontroller.fill")
+                                      .font(.system(size: 66, weight: .bold))
+                                      .foregroundStyle(red)
+                                      .shadow(color: red.opacity(0.80), radius: 22)
+                                  Text("ESCOLHA O JOGO")
+                                      .font(.system(size: 29, weight: .black, design: .rounded))
+                                      .tracking(1.2)
+                                      .foregroundStyle(.white)
+                                  Text("Pronto para iniciar.")
+                                      .font(.system(size: 20, weight: .medium, design: .rounded))
+                                      .foregroundStyle(Color.white.opacity(0.58))
                               }
-                              VStack(alignment: .leading, spacing: 8) {
-                                  Text("MISC")
-                                      .font(.system(size: 17, weight: .bold, design: .rounded))
-                                      .foregroundStyle(darkMode ? .white : .black)
-                                  Text("A aba está pronta para receber ferramentas adicionais pela API.")
-                                      .font(.system(size: 13, weight: .medium))
-                                      .foregroundStyle(darkMode ? Color.white.opacity(0.60) : Color.black.opacity(0.55))
+                              instructionCard
+                                  .padding(.top, 42)
+                              startButton(title: "INICIAR NORMAL", icon: "play.fill") {
+                                  status = "Normal selecionado. Pronto para iniciar."
                               }
-                              .padding(16)
+                              .padding(.top, 40)
+                              startButton(title: "INICIAR MAX", icon: "bolt.fill") {
+                                  status = "Max selecionado. Pronto para iniciar."
+                              }
+                              .padding(.top, 24)
+                              HStack(spacing: 16) {
+                                  Circle().fill(red).frame(width: 16, height: 16)
+                                  Text(status)
+                                      .font(.system(size: 16, weight: .bold, design: .rounded))
+                                      .foregroundStyle(Color.white.opacity(0.68))
+                                  Spacer(minLength: 0)
+                              }
+                              .padding(.horizontal, 24)
+                              .frame(minHeight: 76)
                               .frame(maxWidth: .infinity, alignment: .leading)
-                              .background(darkMode ? Color.white.opacity(0.10) : .white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                              .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke((darkMode ? Color.white : Color.black).opacity(0.10), lineWidth: 1))
+                              .background(background, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                              .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.18), lineWidth: 1.5))
+                              .padding(.top, 44)
+                              Button { showClearConfirmation = true } label: {
+                                  HStack(spacing: 18) {
+                                      Image(systemName: "trash.fill")
+                                          .font(.system(size: 28, weight: .bold))
+                                      Text("LIMPAR DADOS")
+                                          .font(.system(size: 21, weight: .black, design: .rounded))
+                                          .tracking(0.8)
+                                  }
+                                  .foregroundStyle(.white)
+                                  .frame(maxWidth: .infinity)
+                                  .frame(height: 102)
+                                  .background(background, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                                  .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(red, lineWidth: 2))
+                              }
+                              .buttonStyle(.plain)
+                              .padding(.top, 214)
+                              .padding(.bottom, 38)
                           }
-                          .padding(20)
+                          .padding(.horizontal, 35)
+                          .padding(.top, 30)
                       }
                   }
-                  .preferredColorScheme(darkMode ? .dark : .light)
+                  .overlay(Rectangle().stroke(red.opacity(0.72), lineWidth: 1.5).padding(17).ignoresSafeArea())
+                  .alert("Limpar dados", isPresented: $showClearConfirmation) {
+                      Button("Cancelar", role: .cancel) { }
+                      Button("Limpar", role: .destructive) { status = "Dados locais limpos." }
+                  } message: {
+                      Text("Isso limpa apenas o estado local desta tela.")
+                  }
                   .navigationBarHidden(true)
+              }
+
+              private var instructionCard: some View {
+                  HStack(alignment: .top, spacing: 18) {
+                      Image(systemName: "hand.raised.fill")
+                          .font(.system(size: 28, weight: .bold))
+                          .foregroundStyle(.black)
+                          .frame(width: 72, height: 72)
+                          .background(cyan, in: Circle())
+                          .shadow(color: cyan.opacity(0.75), radius: 14)
+                      VStack(alignment: .leading, spacing: 10) {
+                          Text("INSTRUÇÕES IMPORTANTES")
+                              .font(.system(size: 16, weight: .black, design: .rounded))
+                              .tracking(1.0)
+                              .foregroundStyle(cyan)
+                          Text("1. Na partida ou treinamento, toque rápido com 4 dedos para abrir o menu.")
+                              .font(.system(size: 16, weight: .bold, design: .rounded))
+                              .foregroundStyle(.white)
+                          Text("2. Depois de entrar no treinamento, volte ao ProjectX e toque em LIMPAR DADOS.")
+                              .font(.system(size: 16, weight: .bold, design: .rounded))
+                              .foregroundStyle(.white)
+                      }
+                  }
+                  .padding(22)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .background(Color(red: 0.035, green: 0.10, blue: 0.13), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                  .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(cyan, lineWidth: 2.5))
+                  .shadow(color: cyan.opacity(0.28), radius: 14)
+              }
+
+              private func startButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+                  Button(action: action) {
+                      HStack(spacing: 18) {
+                          Image(systemName: icon).font(.system(size: 27, weight: .bold))
+                          Text(title).font(.system(size: 22, weight: .black, design: .rounded)).tracking(0.8)
+                          Spacer()
+                          Image(systemName: "chevron.right").font(.system(size: 22, weight: .bold))
+                      }
+                      .foregroundStyle(.white)
+                      .padding(.horizontal, 28)
+                      .frame(height: 104)
+                      .frame(maxWidth: .infinity)
+                      .background(red, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                      .shadow(color: red.opacity(0.42), radius: 16, y: 8)
+                  }
+                  .buttonStyle(.plain)
               }
           }
           SWIFTMISC
