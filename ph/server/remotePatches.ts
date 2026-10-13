@@ -109,7 +109,7 @@ export async function listRemotePatches(section?: PatchSection, includeInactive 
   if (!db) return [];
   await ensurePatchSchema();
   const filters = includeInactive ? [] : [eq(remotePatchVersions.status, "published")];
-  if (section === "external") filters.push(or(eq(remotePatches.section, "external"), isNotNull(remotePatches.interfaceTab))!);
+  if (section === "external") filters.push(eq(remotePatches.section, "external"));
   else if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
   const rows = await db.select({ patch: remotePatches, version: remotePatchVersions }).from(remotePatches).innerJoin(remotePatchVersions, eq(remotePatchVersions.id, remotePatches.currentVersionId)).where(and(...filters)).orderBy(remotePatches.game, remotePatches.slug);
   return Promise.all(rows.map(async ({ patch, version }) => ({ id: patch.id, slug: patch.slug, title: patch.title, game: patch.game, section: patch.section, interfaceTab: patch.interfaceTab, logoUrl: patch.logoStorageKey ? await storageGetSignedUrl(patch.logoStorageKey) : null, versionId: version.id, version: version.version, fileName: version.fileName, sha256: version.sha256, sizeBytes: version.sizeBytes, status: version.status, publishedAt: version.publishedAt })));
