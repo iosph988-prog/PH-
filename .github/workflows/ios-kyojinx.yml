@@ -2053,7 +2053,7 @@ jobs:
                       ScrollView {
                           VStack(alignment: .leading, spacing: 16) {
                               HStack(spacing: 12) {
-                                  Image(systemName: "ellipsis.circle.fill")
+                                  Image(systemName: "eye.fill")
                                       .font(.system(size: 30, weight: .bold))
                                       .foregroundStyle(darkMode ? .white : .black)
                                   VStack(alignment: .leading, spacing: 2) {
@@ -2115,14 +2115,14 @@ jobs:
                   .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
                   .tag(AppSection.texture.rawValue)
               sectionContent(.misc)
-                  .tabItem { CompactTabLabel(title: "MISC", systemImage: "ellipsis.circle.fill") }
+                  .tabItem { CompactTabLabel(title: "MISC", systemImage: "eye.fill") }
                   .tag(AppSection.misc.rawValue)'''
           texture = '''              sectionContent(.texture)
                   .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
                   .tag(AppSection.texture.rawValue)'''
           c = c.replace(texture, compact, 1)
           c = c.replace('case .texture: return "TEXTURA"', 'case .texture: return "TEXTURA"\n        case .misc: return "MISC"', 1)
-          c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "ellipsis.circle.fill"', 1)
+          c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "eye.fill"', 1)
           content.write_text(c)
           PYMISC
       - name: Finalize MISC navigation beside TEXTURA
@@ -2159,7 +2159,7 @@ jobs:
                   .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
                   .tag(AppSection.texture.rawValue)
               sectionContent(.misc)
-                  .tabItem { CompactTabLabel(title: "MISC", systemImage: "ellipsis.circle.fill") }
+                  .tabItem { CompactTabLabel(title: "MISC", systemImage: "eye.fill") }
                   .tag(AppSection.misc.rawValue)
           }
           }
@@ -2168,7 +2168,7 @@ jobs:
           if count == 0:
               raise SystemExit("compact layout not found")
           c = c.replace('case .texture: return "TEXTURA"', 'case .texture: return "TEXTURA"\n        case .misc: return "MISC"', 1)
-          c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "ellipsis.circle.fill"', 1)
+          c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "eye.fill"', 1)
           content.write_text(c)
           PYMISCFINAL
       - name: Build original archive and IPA
