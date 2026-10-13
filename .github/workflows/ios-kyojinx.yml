@@ -2125,6 +2125,52 @@ jobs:
           c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "ellipsis.circle.fill"', 1)
           content.write_text(c)
           PYMISC
+      - name: Finalize MISC navigation beside TEXTURA
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          NAV_SWIFT="$APP_DIR/helpers/AppTabNavigationState.swift"
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" <<'PYMISCFINAL'
+          from pathlib import Path
+          import re, sys
+          nav, content = map(Path, sys.argv[1:])
+          n = nav.read_text()
+          if "    case misc\n" not in n:
+              n = n.replace("    case texture\n", "    case texture\n    case misc\n", 1)
+          n = n.replace("[.patches, .external, .texture].filter(isVisible)", "[.patches, .external, .texture, .misc].filter(isVisible)")
+          n = n.replace("case .home, .files, .patches, .external, .texture:", "case .home, .files, .patches, .external, .texture, .misc:")
+          nav.write_text(n)
+          c = content.read_text()
+          if "case .misc:\n            MiscToolsView()" not in c:
+              c = c.replace("        case .texture:\n            TextureOnlineView()", "        case .texture:\n            TextureOnlineView()\n        case .misc:\n            MiscToolsView()", 1)
+          c = c.replace("[.patches, .external, .texture]", "[.patches, .external, .texture, .misc]")
+          c = c.replace("ForEach([AppSection.patches, .external, .texture])", "ForEach([AppSection.patches, .external, .texture, .misc])")
+          compact = '''    private var compactLayout: some View {
+          TabView(selection: tabSelection) {
+              sectionContent(.patches)
+                  .tabItem { CompactTabLabel(title: "PROXY", systemImage: "scope") }
+                  .tag(AppSection.patches.rawValue)
+              sectionContent(.external)
+                  .tabItem { CompactTabLabel(title: "External", systemImage: "gamecontroller.fill") }
+                  .tag(AppSection.external.rawValue)
+              sectionContent(.texture)
+                  .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
+                  .tag(AppSection.texture.rawValue)
+              sectionContent(.misc)
+                  .tabItem { CompactTabLabel(title: "MISC", systemImage: "ellipsis.circle.fill") }
+                  .tag(AppSection.misc.rawValue)
+          }
+          }
+          '''
+          c, count = re.subn(r"(?s)    private var compactLayout: some View \{.*?    private var regularLayout", compact + "    private var regularLayout", c, count=1)
+          if count == 0:
+              raise SystemExit("compact layout not found")
+          c = c.replace('case .texture: return "TEXTURA"', 'case .texture: return "TEXTURA"\n        case .misc: return "MISC"', 1)
+          c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "ellipsis.circle.fill"', 1)
+          content.write_text(c)
+          PYMISCFINAL
       - name: Build original archive and IPA
         shell: bash
         run: |
