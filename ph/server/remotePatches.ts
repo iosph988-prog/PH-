@@ -42,9 +42,9 @@ export function isRemotePatchUpload(value: unknown): value is { slug: string; ti
   return [candidate.slug, candidate.title, candidate.game, candidate.fileName, candidate.data].every(item => typeof item === "string" && item.trim().length > 0);
 }
 
-export type PatchSection = "patches" | "external" | "texture";
+export type PatchSection = "patches" | "external" | "texture" | "misc";
 
-const normalizeSection = (value: string | undefined): PatchSection => value === "external" ? "external" : value === "texture" ? "texture" : "patches";
+const normalizeSection = (value: string | undefined): PatchSection => value === "external" ? "external" : value === "texture" ? "texture" : value === "misc" ? "misc" : "patches";
 const normalizeGame = (value: string) => {
   const normalized = value.trim().toLowerCase().replace(/\s+/g, "-");
   return normalized === "freefire" || normalized === "free-fire" ? "free-fire" : "free-fire-max";
@@ -59,8 +59,8 @@ async function ensurePatchSchema() {
       if (!db) return;
       const [columns] = await db.execute(sql.raw("SHOW COLUMNS FROM remote_patches")) as any;
       const existing = new Set((columns as any[]).map(column => String(column.Field || column.field)));
-      if (!existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external','texture') NOT NULL DEFAULT 'patches'"));
-      if (existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches MODIFY COLUMN section ENUM('patches','external','texture') NOT NULL DEFAULT 'patches'"));
+      if (!existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN section ENUM('patches','external','texture','misc') NOT NULL DEFAULT 'patches'"));
+      if (existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches MODIFY COLUMN section ENUM('patches','external','texture','misc') NOT NULL DEFAULT 'patches'"));
       if (!existing.has("interfaceTab")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN interfaceTab VARCHAR(64) NULL"));
       if (!existing.has("logoStorageKey")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN logoStorageKey VARCHAR(512) NULL"));
     })().catch(error => { patchSchemaReady = null; throw error; });

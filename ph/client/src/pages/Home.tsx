@@ -106,7 +106,7 @@ export function RemainingTime({ row }: { row: any }) {
 function AdminPanel() {
   const { user } = useAuth();
   const [activeView, setActiveView] = useState<
-    "home" | "generate" | "keys" | "patches" | "external" | "texture"
+    "home" | "generate" | "keys" | "patches" | "external" | "texture" | "misc"
   >("home");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -502,6 +502,19 @@ function AdminPanel() {
               >
                 <Paintbrush className="mr-2 h-4 w-4" />
                 TEXTURA
+              </Button>
+            )}
+            {user?.role === "admin" && (
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${activeView === "misc" ? "bg-[#3a1329] text-white" : "text-slate-400 hover:bg-white/5 hover:text-white"}`}
+                onClick={() => {
+                  setActiveView("misc");
+                  setSidebarOpen(false);
+                }}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                MISC ONLINE
               </Button>
             )}
           </div>
@@ -1043,6 +1056,9 @@ function AdminPanel() {
           {user?.role === "admin" && activeView === "texture" && (
             <RemotePatchesPanel section="texture" />
           )}
+          {user?.role === "admin" && activeView === "misc" && (
+            <RemotePatchesPanel section="misc" />
+          )}
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
             <Card
               className={
@@ -1512,9 +1528,10 @@ EXTERNAL-..."
   );
 }
 
-function RemotePatchesPanel({ section }: { section: "patches" | "external" | "texture" }) {
+function RemotePatchesPanel({ section }: { section: "patches" | "external" | "texture" | "misc" }) {
   const isExternal = section === "external";
   const isTexture = section === "texture";
+  const isMisc = section === "misc";
   const [slug, setSlug] = useState("");
   const [title, setTitle] = useState("");
   const [game, setGame] = useState("free-fire");
@@ -1526,7 +1543,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
   const publish = trpc.patches.publish.useMutation({
     onSuccess: () => {
       toast.success(
-        isExternal ? "Online separado publicado" : "Patch publicado online"
+        isMisc ? "MISC ONLINE publicado" : isExternal ? "Online separado publicado" : "Patch publicado online"
       );
       setFile(null);
       setLogoFile(null);
@@ -1602,7 +1619,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
         title,
         game,
         section,
-        interfaceTab: isExternal ? interfaceTab : undefined,
+        interfaceTab: isExternal || isMisc ? "MISC" : undefined,
         logoDataBase64,
         logoContentType: logoFile?.type === "image/jpeg" ? "image/jpeg" : logoFile?.type === "image/webp" ? "image/webp" : "image/png",
         fileName: file.name,
@@ -1622,14 +1639,16 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
     <Card className="border border-white/10 bg-[#0b0d18] text-white shadow-2xl shadow-black/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
-          {isTexture ? (
+          {isMisc ? (
+            <Eye className="h-5 w-5 text-[#ef3c75]" />
+          ) : isTexture ? (
             <Paintbrush className="h-5 w-5 text-[#ef3c75]" />
           ) : isExternal ? (
             <Power className="h-5 w-5 text-[#ef3c75]" />
           ) : (
             <FileUp className="h-5 w-5 text-[#ef3c75]" />
           )}
-          {isTexture ? "TEXTURA online" : isExternal ? "Online separado" : "Patches online"}
+          {isMisc ? "MISC ONLINE" : isTexture ? "TEXTURA online" : isExternal ? "Online separado" : "Patches online"}
         </CardTitle>
         <p className="text-sm text-slate-400">
           Publique e gerencie arquivos já existentes sem recompilar a IPA.
@@ -1643,7 +1662,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
               <Input
                 value={slug}
                 onChange={event => setSlug(event.target.value)}
-                placeholder="hs-alto"
+                placeholder={isMisc ? "misc-normal" : "hs-alto"}
                 className="mt-2 border-white/10 bg-white/5 text-white"
               />
             </div>
@@ -1653,7 +1672,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
             <Input
               value={title}
               onChange={event => setTitle(event.target.value)}
-              placeholder="HS ALTO"
+              placeholder={isMisc ? "MISC NORMAL / MAX" : "HS ALTO"}
               className="mt-2 border-white/10 bg-white/5 text-white"
             />
           </div>
@@ -1692,7 +1711,7 @@ function RemotePatchesPanel({ section }: { section: "patches" | "external" | "te
               className="mt-2 border-white/10 bg-white/5 text-slate-300 file:text-white"
             />
           </div>
-          {isTexture && (
+          {(isTexture || isMisc) && (
             <div>
               <Label className="text-slate-300">Logo ao lado do nome</Label>
               <Input

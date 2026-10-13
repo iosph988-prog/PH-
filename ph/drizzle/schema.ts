@@ -114,7 +114,7 @@ export const remotePatches = mysqlTable("remote_patches", {
   slug: varchar("slug", { length: 96 }).notNull().unique(),
   title: varchar("title", { length: 160 }).notNull(),
   game: varchar("game", { length: 64 }).notNull(),
-  section: mysqlEnum("section", ["patches", "external", "texture"]).default("patches").notNull(),
+  section: mysqlEnum("section", ["patches", "external", "texture", "misc"]).default("patches").notNull(),
   interfaceTab: varchar("interfaceTab", { length: 64 }),
   logoStorageKey: varchar("logoStorageKey", { length: 512 }),
   currentVersionId: int("currentVersionId"),

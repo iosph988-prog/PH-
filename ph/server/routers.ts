@@ -83,7 +83,7 @@ export const appRouter = router({
     list: adminProcedure
       .input(
         z
-          .object({ section: z.enum(["patches", "external", "texture"]).optional() })
+          .object({ section: z.enum(["patches", "external", "texture", "misc"]).optional() })
           .optional()
       )
       .query(({ input }) => listRemotePatches(input?.section, true)),
@@ -93,7 +93,7 @@ export const appRouter = router({
           slug: z.string().trim().min(3).max(96),
           title: z.string().trim().min(1).max(160),
           game: z.string().trim().min(1).max(64),
-          section: z.enum(["patches", "external", "texture"]).default("patches"),
+          section: z.enum(["patches", "external", "texture", "misc"]).default("patches"),
           interfaceTab: z.string().trim().max(64).optional(),
           logoDataBase64: z.string().max(7_000_000).optional(),
           logoContentType: z.enum(["image/png", "image/jpeg", "image/webp"]).optional(),
