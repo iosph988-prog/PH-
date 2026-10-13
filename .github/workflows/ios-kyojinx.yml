@@ -2035,6 +2035,96 @@ jobs:
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
           cat "$APP_DIR/views/TextureOnlineView.swift" >> "$APP_DIR/views/PatchProjectsView.swift"
+      - name: Add MISC tab
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          NAV_SWIFT="$APP_DIR/helpers/AppTabNavigationState.swift"
+          CONTENT_SWIFT="$APP_DIR/ContentView.swift"
+          PATCH_SWIFT="$APP_DIR/views/PatchProjectsView.swift"
+          cat >> "$PATCH_SWIFT" <<'SWIFTMISC'
+
+          struct MiscToolsView: View {
+              @AppStorage("miscDarkMode") private var darkMode = false
+              var body: some View {
+                  ZStack {
+                      (darkMode ? Color.black : Color(.systemGroupedBackground)).ignoresSafeArea()
+                      ScrollView {
+                          VStack(alignment: .leading, spacing: 16) {
+                              HStack(spacing: 12) {
+                                  Image(systemName: "ellipsis.circle.fill")
+                                      .font(.system(size: 30, weight: .bold))
+                                      .foregroundStyle(darkMode ? .white : .black)
+                                  VStack(alignment: .leading, spacing: 2) {
+                                      Text("MISC")
+                                          .font(.system(size: 25, weight: .black, design: .rounded))
+                                          .foregroundStyle(darkMode ? .white : .black)
+                                      Text("Ferramentas e opções adicionais")
+                                          .font(.system(size: 13, weight: .medium))
+                                          .foregroundStyle(darkMode ? Color.white.opacity(0.60) : Color.black.opacity(0.55))
+                                  }
+                                  Spacer()
+                                  Button { darkMode.toggle() } label: {
+                                      Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
+                                          .foregroundStyle(darkMode ? .white : .black)
+                                          .frame(width: 38, height: 38)
+                                          .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
+                                  }
+                              }
+                              VStack(alignment: .leading, spacing: 8) {
+                                  Text("MISC")
+                                      .font(.system(size: 17, weight: .bold, design: .rounded))
+                                      .foregroundStyle(darkMode ? .white : .black)
+                                  Text("A aba está pronta para receber ferramentas adicionais pela API.")
+                                      .font(.system(size: 13, weight: .medium))
+                                      .foregroundStyle(darkMode ? Color.white.opacity(0.60) : Color.black.opacity(0.55))
+                              }
+                              .padding(16)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                              .background(darkMode ? Color.white.opacity(0.10) : .white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                              .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke((darkMode ? Color.white : Color.black).opacity(0.10), lineWidth: 1))
+                          }
+                          .padding(20)
+                      }
+                  }
+                  .preferredColorScheme(darkMode ? .dark : .light)
+                  .navigationBarHidden(true)
+              }
+          }
+          SWIFTMISC
+          python3 - "$NAV_SWIFT" "$CONTENT_SWIFT" <<'PYMISC'
+          from pathlib import Path
+          import sys
+          nav, content = map(Path, sys.argv[1:])
+          n = nav.read_text()
+          if '    case misc\n' not in n:
+              if '    case texture\n' in n:
+                  n = n.replace('    case texture\n', '    case texture\n    case misc\n', 1)
+              else:
+                  raise SystemExit('texture enum case not found')
+          n = n.replace('case .home, .files, .patches, .external, .texture:', 'case .home, .files, .patches, .external, .texture, .misc:', 1)
+          n = n.replace('[.patches, .external, .texture].filter(isVisible)', '[.patches, .external, .texture, .misc].filter(isVisible)')
+          nav.write_text(n)
+          c = content.read_text()
+          if 'case .misc:\n            MiscToolsView()' not in c:
+              c = c.replace('        case .texture:\n            TextureOnlineView()', '        case .texture:\n            TextureOnlineView()\n        case .misc:\n            MiscToolsView()', 1)
+          c = c.replace('[.patches, .external, .texture]', '[.patches, .external, .texture, .misc]')
+          c = c.replace('ForEach([AppSection.patches, .external, .texture])', 'ForEach([AppSection.patches, .external, .texture, .misc])')
+          compact = '''              sectionContent(.texture)
+                  .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
+                  .tag(AppSection.texture.rawValue)
+              sectionContent(.misc)
+                  .tabItem { CompactTabLabel(title: "MISC", systemImage: "ellipsis.circle.fill") }
+                  .tag(AppSection.misc.rawValue)'''
+          texture = '''              sectionContent(.texture)
+                  .tabItem { CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill") }
+                  .tag(AppSection.texture.rawValue)'''
+          c = c.replace(texture, compact, 1)
+          c = c.replace('case .texture: return "TEXTURA"', 'case .texture: return "TEXTURA"\n        case .misc: return "MISC"', 1)
+          c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "ellipsis.circle.fill"', 1)
+          content.write_text(c)
+          PYMISC
       - name: Build original archive and IPA
         shell: bash
         run: |
