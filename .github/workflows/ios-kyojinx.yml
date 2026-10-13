@@ -2046,8 +2046,12 @@ jobs:
           cat >> "$PATCH_SWIFT" <<'SWIFTMISC'
 
           struct MiscToolsView: View {
-              @State private var status = "Pronto para preparar o Free Fire."
+              @State private var status = "Carregando opções..."
+              @State private var normalItem: RemotePatchDescriptor?
+              @State private var maxItem: RemotePatchDescriptor?
+              @State private var activeGame: String?
               @State private var showClearConfirmation = false
+              @State private var isWorking = false
               private let red = Color(red: 1.0, green: 0.05, blue: 0.10)
               private let cyan = Color(red: 0.05, green: 0.75, blue: 1.0)
               private let background = Color(red: 0.025, green: 0.025, blue: 0.035)
@@ -2070,12 +2074,12 @@ jobs:
                           }
                           instructionCard
                               .padding(.top, 14)
-                          startButton(title: "INICIAR NORMAL", icon: "play.fill") {
-                              status = "Normal selecionado. Pronto para iniciar."
+                          startButton(title: "INICIAR NORMAL", icon: "play.fill", available: normalItem != nil) {
+                              Task { await activate(game: "free-fire") }
                           }
                           .padding(.top, 14)
-                          startButton(title: "INICIAR MAX", icon: "bolt.fill") {
-                              status = "Max selecionado. Pronto para iniciar."
+                          startButton(title: "INICIAR MAX", icon: "bolt.fill", available: maxItem != nil) {
+                              Task { await activate(game: "free-fire-max") }
                           }
                           .padding(.top, 10)
                           HStack(spacing: 10) {
@@ -2083,7 +2087,7 @@ jobs:
                               Text(status)
                                   .font(.system(size: 13, weight: .bold, design: .rounded))
                                   .foregroundStyle(Color.white.opacity(0.68))
-                                  .lineLimit(1)
+                                  .lineLimit(2)
                               Spacer(minLength: 0)
                           }
                           .padding(.horizontal, 16)
@@ -2115,11 +2119,12 @@ jobs:
                   }
                   .background(background.ignoresSafeArea())
                   .overlay(Rectangle().stroke(red.opacity(0.72), lineWidth: 1.2).padding(9).ignoresSafeArea())
+                  .task { await loadCatalog() }
                   .alert("Limpar dados", isPresented: $showClearConfirmation) {
                       Button("Cancelar", role: .cancel) { }
-                      Button("Limpar", role: .destructive) { status = "Dados locais limpos." }
+                      Button("Limpar", role: .destructive) { clearLocalData() }
                   } message: {
-                      Text("Isso limpa apenas o estado local desta tela.")
+                      Text("Isso remove somente os pacotes MISC armazenados nesta IPA.")
                   }
                   .navigationBarHidden(true)
               }
@@ -2154,7 +2159,7 @@ jobs:
                   .shadow(color: cyan.opacity(0.22), radius: 9)
               }
 
-              private func startButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+              private func startButton(title: String, icon: String, available: Bool, action: @escaping () -> Void) -> some View {
                   Button(action: action) {
                       HStack(spacing: 12) {
                           Image(systemName: icon).font(.system(size: 20, weight: .bold))
@@ -2170,6 +2175,71 @@ jobs:
                       .shadow(color: red.opacity(0.34), radius: 10, y: 5)
                   }
                   .buttonStyle(.plain)
+                  .opacity(available && !isWorking ? 1 : 0.48)
+                  .disabled(!available || isWorking)
+              }
+
+              private func loadCatalog() async {
+                  guard let catalog = await RemotePatchAPI.fetchCatalog() else {
+                      await MainActor.run { status = "Faça login para carregar as opções MISC." }
+                      return
+                  }
+                  let misc = catalog.filter { item in
+                      let tab = item.interfaceTab?.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+                      return tab == "MISC" || (item.title ?? "").uppercased().contains("MISC")
+                  }
+                  await MainActor.run {
+                      normalItem = misc.first { !$0.game.lowercased().contains("max") }
+                      maxItem = misc.first { $0.game.lowercased().contains("max") }
+                      if normalItem == nil && maxItem == nil {
+                          status = "Nenhum pacote MISC publicado na API."
+                      } else {
+                          status = "Pronto para preparar o Free Fire."
+                      }
+                  }
+              }
+
+              private func activate(game: String) async {
+                  guard !isWorking else { return }
+                  let item = game == "free-fire-max" ? maxItem : normalItem
+                  guard let item else {
+                      await MainActor.run { status = "Pacote MISC não publicado para este jogo." }
+                      return
+                  }
+                  await MainActor.run { isWorking = true; status = "Baixando e validando..." }
+                  do {
+                      let localURL = try await download(item: item)
+                      let packageData = try PatchProjectLibrary.readPackage(at: localURL)
+                      _ = try PatchPackageCodec.decode(packageData, password: nil)
+                      await MainActor.run {
+                          activeGame = game
+                          isWorking = false
+                          status = game == "free-fire-max" ? "MAX preparado localmente." : "Normal preparado localmente."
+                      }
+                  } catch {
+                      await MainActor.run { isWorking = false; status = "Não foi possível preparar: \\(error.localizedDescription)" }
+                  }
+              }
+
+              private func download(item: RemotePatchDescriptor) async throws -> URL {
+                  guard let url = URL(string: item.downloadUrl) else { throw URLError(.badURL) }
+                  let (data, response) = try await URLSession.shared.data(from: url)
+                  guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw URLError(.badServerResponse) }
+                  guard data.count == item.sizeBytes else { throw NSError(domain: "MISC", code: 422, userInfo: [NSLocalizedDescriptionKey: "O pacote MISC foi baixado incompleto."]) }
+                  let digest = SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+                  guard digest.caseInsensitiveCompare(item.sha256) == .orderedSame else { throw NSError(domain: "MISC", code: 422, userInfo: [NSLocalizedDescriptionKey: "A integridade do pacote MISC não confere."]) }
+                  let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("MiscCatalog", isDirectory: true)
+                  try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+                  let localURL = dir.appendingPathComponent(item.fileName)
+                  try data.write(to: localURL, options: .atomic)
+                  return localURL
+              }
+
+              private func clearLocalData() {
+                  let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("MiscCatalog", isDirectory: true)
+                  try? FileManager.default.removeItem(at: dir)
+                  activeGame = nil
+                  status = "Dados locais MISC limpos."
               }
           }
           SWIFTMISC
