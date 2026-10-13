@@ -2371,6 +2371,15 @@ jobs:
                       text,
                   )
               path.write_text(text)
+          exploit = Path("source/3105-1.1.1/ThreeOneOSFive/kexploit/kexploit_opa334.m")
+          if exploit.exists():
+              source = exploit.read_text()
+              source = source.replace(
+                  "#import <sys/fileport.h>",
+                  "#if __has_include(<sys/fileport.h>)\n#import <sys/fileport.h>\n#else\ntypedef mach_port_t fileport_t;\nextern int fileport_makeport(int fd, fileport_t *port);\n#endif",
+                  1,
+              )
+              exploit.write_text(source)
           PYFIX
 
       - name: Build original archive and IPA
