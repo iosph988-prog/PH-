@@ -308,7 +308,9 @@ export async function validateLicense(input: { key: string; deviceId: string; pa
     const linked = await tx.select().from(licenseDevices).where(and(eq(licenseDevices.licenseId, current.id), eq(licenseDevices.deviceId, input.deviceId))).limit(1);
     if (linked.length === 0) {
       const countRows = await tx.select({ count: sql<number>`count(*)` }).from(licenseDevices).where(eq(licenseDevices.licenseId, current.id));
-      if (Number(countRows[0]?.count ?? 0) >= current.deviceLimit) return { ok: false as const, code: "device_limit" as const };
+      // As keys do app iOS são vinculadas permanentemente ao primeiro UID que as ativa.
+      // O limite efetivo é 1 mesmo que uma key antiga tenha sido criada com limite maior.
+      if (Number(countRows[0]?.count ?? 0) >= 1) return { ok: false as const, code: "device_limit" as const };
       if (!current.activatedAt && !current.expiresAt) {
         const expiresAt = calculateActivationExpiry(now, current.durationDays, current.durationMinutes);
         const activationResult: any = await tx.update(licenseKeys).set({ activatedAt: now, expiresAt }).where(and(eq(licenseKeys.id, current.id), isNull(licenseKeys.activatedAt), isNull(licenseKeys.expiresAt)));
