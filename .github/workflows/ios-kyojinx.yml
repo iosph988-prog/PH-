@@ -2052,8 +2052,6 @@ jobs:
               @State private var activeGame: String?
               @State private var showClearConfirmation = false
               @State private var isWorking = false
-              @State private var normalApplied = false
-              @State private var maxApplied = false
               private let red = Color(red: 1.0, green: 0.05, blue: 0.10)
               private let cyan = Color(red: 0.05, green: 0.75, blue: 1.0)
               private let background = Color(red: 0.025, green: 0.025, blue: 0.035)
@@ -2124,7 +2122,7 @@ jobs:
                   .task { await loadCatalog() }
                   .alert("Limpar dados", isPresented: $showClearConfirmation) {
                       Button("Cancelar", role: .cancel) { }
-                      Button("Limpar", role: .destructive) { Task { await restoreAndClear() } }
+                      Button("Limpar", role: .destructive) { clearLocalData() }
                   } message: {
                       Text("Isso remove somente os pacotes MISC armazenados nesta IPA.")
                   }
@@ -2208,19 +2206,18 @@ jobs:
                       await MainActor.run { status = "Pacote MISC não publicado para este jogo." }
                       return
                   }
-                  await MainActor.run { isWorking = true; status = "Baixando, validando e aplicando..." }
+                  await MainActor.run { isWorking = true; status = "Baixando e validando..." }
                   do {
                       let localURL = try await download(item: item)
                       let packageData = try PatchProjectLibrary.readPackage(at: localURL)
-                      let decoded = try PatchPackageCodec.decode(packageData, password: nil)
-                      _ = try DevicePatchService.apply(project: decoded.project)
+                      _ = try PatchPackageCodec.decode(packageData, password: nil)
                       await MainActor.run {
-                          if game == "free-fire-max" { maxApplied = true } else { normalApplied = true }
+                          activeGame = game
                           isWorking = false
-                          status = game == "free-fire-max" ? "MAX aplicado." : "Normal aplicado."
+                          status = game == "free-fire-max" ? "MAX preparado localmente." : "Normal preparado localmente."
                       }
                   } catch {
-                      await MainActor.run { isWorking = false; status = "Não foi possível aplicar: \(error.localizedDescription)" }
+                      await MainActor.run { isWorking = false; status = "Não foi possível preparar: \\(error.localizedDescription)" }
                   }
               }
 
@@ -2238,26 +2235,11 @@ jobs:
                   return localURL
               }
 
-              private func restoreAndClear() async {
-                  guard !isWorking else { return }
-                  await MainActor.run { isWorking = true; status = "Restaurando aplicações..." }
-                  do {
-                      for item in [normalItem, maxItem].compactMap({ $0 }) {
-                          let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("MiscCatalog", isDirectory: true)
-                          let localURL = dir.appendingPathComponent(item.fileName)
-                          guard FileManager.default.fileExists(atPath: localURL.path) else { continue }
-                          let packageData = try PatchProjectLibrary.readPackage(at: localURL)
-                          let decoded = try PatchPackageCodec.decode(packageData, password: nil)
-                          if let receipt = DevicePatchService.latestReceipt(projectID: decoded.project.id) {
-                              try DevicePatchService.restore(receipt: receipt)
-                          }
-                      }
-                      let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("MiscCatalog", isDirectory: true)
-                      try? FileManager.default.removeItem(at: dir)
-                      await MainActor.run { normalApplied = false; maxApplied = false; activeGame = nil; isWorking = false; status = "Aplicações MISC restauradas." }
-                  } catch {
-                      await MainActor.run { isWorking = false; status = "Não foi possível restaurar: \(error.localizedDescription)" }
-                  }
+              private func clearLocalData() {
+                  let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("MiscCatalog", isDirectory: true)
+                  try? FileManager.default.removeItem(at: dir)
+                  activeGame = nil
+                  status = "Dados locais MISC limpos."
               }
           }
           SWIFTMISC
