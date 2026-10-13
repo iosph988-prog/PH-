@@ -2365,6 +2365,11 @@ jobs:
                       replace_device_id,
                       text,
                   )
+                  text = re.sub(
+                      r"(?m)^(\s*)let value = snapshot\?\.deviceID .*identifierForVendor.*$",
+                      r'\1let value = snapshot?.deviceID ?? "Indisponível"',
+                      text,
+                  )
               path.write_text(text)
           PYFIX
 
