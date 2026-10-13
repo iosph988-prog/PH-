@@ -2376,7 +2376,7 @@ jobs:
               source = exploit.read_text()
               source = source.replace(
                   "#import <sys/fileport.h>",
-                  "#if __has_include(<sys/fileport.h>)\n#import <sys/fileport.h>\n#else\ntypedef mach_port_t fileport_t;\nextern int fileport_makeport(int fd, fileport_t *port);\n#endif",
+                  "#if __has_include(<sys/fileport.h>)\n#import <sys/fileport.h>\n#else\ntypedef mach_port_t fileport_t;\nextern int fileport_makeport(int fd, fileport_t *port);\nextern int fileport_makefd(fileport_t port);\n#endif",
                   1,
               )
               exploit.write_text(source)
