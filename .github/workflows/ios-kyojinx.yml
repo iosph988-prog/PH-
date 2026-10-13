@@ -3,9 +3,9 @@ permissions:
 
 name: 3105 - Nubank Build Without API
 on: [push, workflow_dispatch]
-jobs: 
-  build: 
-    runs-on: macos-latest 
+jobs:
+  build:
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Extract original project
@@ -450,23 +450,23 @@ jobs:
           import SwiftUI
           import UIKit
           import CryptoKit
-          
+
           private struct PreloadedGame: Identifiable {
               let id: String
               let title: String
               let bundleID: String
               let patches: [PreloadedPatch]
           }
-          
+
           private struct PreloadedPatch: Identifiable, Hashable {
               let id: String
               let title: String
               let fileName: String
               let replacementCount: Int
           }
-          
+
           private let patchCatalog: [PreloadedPatch] = []
-          
+
           private let freeFirePatchCatalog: [PreloadedPatch] = [
               PreloadedPatch(id: "free-fire-0", title: "BALA MAGICA - ANTENA", fileName: "BALA MAGICA - ANTENA.3105", replacementCount: 1),
               PreloadedPatch(id: "free-fire-1", title: "HS ALTO + PESCOCÇO", fileName: "HS ALTO + PESCOÇO .3105", replacementCount: 1),
@@ -486,7 +486,7 @@ jobs:
               PreloadedGame(id: "free-fire", title: "FREE FIRE", bundleID: "com.dts.freefireth", patches: freeFirePatchCatalog),
               PreloadedGame(id: "free-fire-max", title: "FREE FIRE MAX", bundleID: "com.dts.freefiremax", patches: patchCatalog)
           ]
-          
+
           private struct CompactFeature: Identifiable {
               let id: String
               let title: String
@@ -494,18 +494,18 @@ jobs:
               let icon: String
               let patch: PreloadedPatch
           }
-          
+
           struct PatchProjectsView: View {
               @StateObject private var store = PatchProjectStore()
               @State private var selectedGameID = "free-fire"
               @State private var remoteCatalog: [RemotePatchDescriptor]?
               @State private var logoURLs: [String: String] = [:]
               @AppStorage("patchesDarkMode") private var darkMode = false
-          
+
               private var selectedGame: PreloadedGame {
                   preloadedGames.first(where: { $0.id == selectedGameID }) ?? preloadedGames[0]
               }
-          
+
               private var features: [CompactFeature] {
                   let visiblePatches: [PreloadedPatch] = {
                       guard let remoteCatalog else { return selectedGame.patches }
@@ -557,11 +557,11 @@ jobs:
                       logoURLs["free-fire-max"] = "https://www.mediafire.com/convkey/8df6/7ecmqoxldlbnhm85g.jpg"
                   }
               }
-          
+
               private var fg: Color { darkMode ? .white : .black }
               private var muted: Color { darkMode ? Color.white.opacity(0.56) : Color.black.opacity(0.54) }
               private var panel: Color { darkMode ? Color.white.opacity(0.10) : .white }
-          
+
               private var header: some View {
                   ZStack {
                       Text("FUNÇÕES EXTERNAL")
@@ -582,14 +582,14 @@ jobs:
                   }
                   .frame(height: 42)
               }
-          
+
               private func sectionTitle(_ title: String, top: CGFloat) -> some View {
                   Text(title)
                       .font(.system(size: 18, weight: .bold, design: .rounded))
                       .foregroundStyle(fg)
                       .padding(.top, top)
               }
-          
+
               private var gameCards: some View {
                   GeometryReader { proxy in
                       let width = max(145, (proxy.size.width - 10) / 2)
@@ -622,7 +622,7 @@ jobs:
                   .frame(height: 116)
                   .padding(.top, 14)
               }
-          
+
               private var featureList: some View {
                   VStack(spacing: 9) {
                       ForEach(features) { feature in
@@ -630,7 +630,7 @@ jobs:
                       }
                   }
               }
-          
+
               private var bottomNav: some View {
                   HStack(spacing: 4) {
                       navItem(title: "Início", icon: "house.fill", active: false)
@@ -642,7 +642,7 @@ jobs:
                   .overlay(Capsule().stroke(fg.opacity(0.12), lineWidth: 1))
                   .padding(.bottom, 14)
               }
-          
+
               private func navItem(title: String, icon: String, active: Bool) -> some View {
                   VStack(spacing: 3) {
                       Image(systemName: icon).font(.system(size: 17, weight: .semibold))
@@ -652,7 +652,7 @@ jobs:
                   .frame(maxWidth: .infinity, maxHeight: .infinity)
                   .background(active ? fg.opacity(0.10) : .clear, in: Capsule())
               }
-          
+
               @ViewBuilder
               private func remoteLogo(url: String?) -> some View {
                   if let url, let remoteURL = URL(string: url) {
@@ -668,7 +668,7 @@ jobs:
                   }
               }
           }
-          
+
           private struct CompactPatchCard: View {
               let feature: CompactFeature
               @ObservedObject var store: PatchProjectStore
@@ -678,7 +678,7 @@ jobs:
               @State private var isWorking = false
               @State private var alertMessage: String?
               @State private var activationToken = UUID()
-          
+
               var body: some View {
                   HStack(spacing: 12) {
                       Image(systemName: feature.icon)
@@ -707,7 +707,7 @@ jobs:
                       Button("OK", role: .cancel) { alertMessage = nil }
                   } message: { Text(alertMessage ?? "") }
               }
-          
+
                   private func applyPatch() {
                       isWorking = true
                       let token = UUID()
@@ -731,7 +731,7 @@ jobs:
                       }
                   }
               }
-          
+
               private func restorePatch() {
                   activationToken = UUID()
                   guard let receipt = activeReceipt ?? findAppliedProjectID().flatMap({ DevicePatchService.latestReceipt(projectID: $0) }) else { isActive = false; return }
@@ -745,20 +745,20 @@ jobs:
                       }
                   }
               }
-          
+
               private func synchronizeAppliedState() {
                   guard let projectID = findAppliedProjectID() else { return }
                   let latest = DevicePatchService.latestReceipt(projectID: projectID)
                   activeReceipt = latest
                   isActive = latest != nil
               }
-          
+
               private func findAppliedProjectID() -> UUID? {
                   guard let url = RemotePatchAPI.cachedFile(named: feature.patch.fileName), let data = try? PatchProjectLibrary.readPackage(at: url), let decoded = try? PatchPackageCodec.decode(data, password: nil) else { return nil }
                   return decoded.project.id
               }
           }
-          
+
           private struct RemotePatchDescriptor: Decodable {
               let id: Int
               let slug: String
@@ -771,7 +771,7 @@ jobs:
               let interfaceTab: String?
               let section: String?
           }
-          
+
           private struct RemoteAnnouncement: Decodable {
               let freeFireLogoUrl: String
               let freeFireMaxLogoUrl: String
@@ -781,7 +781,7 @@ jobs:
               let valid: Bool
               let patches: [RemotePatchDescriptor]?
           }
-          
+
           private enum RemotePatchAPI {
               private static let catalogURL = URL(string: String(data: Data(base64Encoded: "aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9wYXRjaGVzL2NhdGFsb2c=")!, encoding: .utf8)!)!
               private static let announcementURL = URL(string: String(data: Data(base64Encoded: "aHR0cHM6Ly9hcGktcHJvZHVjdGlvbi0xODJjLnVwLnJhaWx3YXkuYXBwL2FwaS9hbm5vdW5jZW1lbnQ=")!, encoding: .utf8)!)!
