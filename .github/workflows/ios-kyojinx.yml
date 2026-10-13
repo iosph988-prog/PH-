@@ -2345,6 +2345,19 @@ jobs:
           c = c.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintbrush.fill"\n        case .misc: return "eye.fill"', 1)
           content.write_text(c)
           PYMISCFINAL
+      - name: Fix Swift concurrency for generated device identity calls
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYFIX'
+          from pathlib import Path
+          for name in ("App.swift", "views/PatchProjectsView.swift"):
+              path = Path("source/3105-1.1.1/ThreeOneOSFive") / name
+              text = path.read_text()
+              text = text.replace("UIDevice.current.identifierForVendor?.uuidString", "await UIDevice.current.identifierForVendor?.uuidString")
+              path.write_text(text)
+          PYFIX
+
       - name: Build original archive and IPA
         shell: bash
         run: |
