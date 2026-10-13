@@ -2355,6 +2355,13 @@ jobs:
               path = Path("source/3105-1.1.1/ThreeOneOSFive") / name
               text = path.read_text()
               text = text.replace("UIDevice.current.identifierForVendor?.uuidString", "(await UIDevice.current.identifierForVendor)?.uuidString")
+              if name == "App.swift":
+                  import re
+                  text = re.sub(
+                      r"(?m)^(\s*)let deviceID = .*identifierForVendor.*$",
+                      r"\1let vendorID = await UIDevice.current.identifierForVendor\n\1let deviceID = vendorID?.uuidString ?? \"unknown-device\"",
+                      text,
+                  )
               path.write_text(text)
           PYFIX
 
