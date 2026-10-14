@@ -63,6 +63,9 @@ async function ensurePatchSchema() {
       if (existing.has("section")) await db.execute(sql.raw("ALTER TABLE remote_patches MODIFY COLUMN section ENUM('patches','external','texture','misc') NOT NULL DEFAULT 'patches'"));
       if (!existing.has("interfaceTab")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN interfaceTab VARCHAR(64) NULL"));
       if (!existing.has("logoStorageKey")) await db.execute(sql.raw("ALTER TABLE remote_patches ADD COLUMN logoStorageKey VARCHAR(512) NULL"));
+      // Older dashboard builds accidentally saved External uploads as MISC.
+      // External uses only its category tabs, so migrate those legacy rows to Funções.
+      await db.execute(sql.raw("UPDATE remote_patches SET interfaceTab='FUNÇÕES' WHERE section='external' AND (interfaceTab IS NULL OR UPPER(interfaceTab)='MISC')"));
     })().catch(error => { patchSchemaReady = null; throw error; });
   }
   return patchSchemaReady;
