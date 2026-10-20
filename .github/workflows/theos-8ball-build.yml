@@ -1,0 +1,46 @@
+name: Build Theos 8Ball
+"on":
+  workflow_dispatch:
+  push:
+    paths:
+      - '8Ball-2.zip'
+      - '.github/workflows/theos-8ball-build.yml'
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Theos and SDKs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/theos/theos.git "$HOME/theos"
+          rm -rf "$HOME/theos/sdks"
+          git clone --depth 1 https://github.com/theos/sdks.git "$HOME/theos/sdks"
+          export THEOS="$HOME/theos"
+          "$THEOS/bin/update-theos"
+      - name: Extract project
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf work dist
+          mkdir -p work dist
+          unzip -q 8Ball-2.zip -d work
+      - name: Build rootless package with Theos
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd work/8Ball
+          export THEOS="$HOME/theos"
+          export THEOS_MAKE_PATH="$THEOS/makefiles"
+          make -e clean
+          make -e package FINALPACKAGE=1
+          find packages -maxdepth 1 -type f -name '*.deb' -exec cp {} "$GITHUB_WORKSPACE/dist/" \;
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 8ball-rootless-deb
+          path: dist/*.deb
+          if-no-files-found: error
+          retention-days: 7
