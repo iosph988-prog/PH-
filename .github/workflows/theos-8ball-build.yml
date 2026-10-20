@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install Theos packaging tools
+        run: brew install ldid dpkg
       - name: Setup Theos and SDKs
         shell: bash
         run: |
