@@ -16,7 +16,6 @@ import { getLicenseCreatorId } from "../licenses";
 import { serveStatic, setupVite } from "./vite";
 import { localAuthConfigured, loginLocalAdmin, logoutLocal } from "./localAuth";
 
-
 const allowedIosBundleId = "com.apple.mobile.MobileHouseArrest";
 const allowedIosVersions = new Set(
   (process.env.PH_ALLOWED_IOS_VERSIONS || "2026.09.28,2026.10.07")
@@ -40,7 +39,6 @@ function unsupportedClient() {
   return { valid: false, code: "unsupported_client", message: "Cliente não autorizado. Package e versão não correspondem a um build autorizado." } as const;
 }
 
-
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -51,7 +49,6 @@ function isPortAvailable(port: number): Promise<boolean> {
   });
 }
 
-
 async function findAvailablePort(startPort: number = 3000): Promise<number> {
   for (let port = startPort; port < startPort + 20; port++) {
     if (await isPortAvailable(port)) {
@@ -61,7 +58,6 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-
 async function startServer() {
   const app = express();
   const server = createServer(app);
@@ -69,3 +65,145 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
+  registerOAuthRoutes(app);
+  app.post("/api/auth/local/login", async (req, res) => {
+    if (!localAuthConfigured()) return res.status(503).json({ ok: false, error: "Login local não configurado" });
+    const email = typeof req.body?.email === "string" ? req.body.email : (typeof req.body?.username === "string" ? req.body.username : "");
+    const password = typeof req.body?.password === "string" ? req.body.password : "";
+    if (!email || !password) return res.status(400).json({ ok: false, error: "Usuário e senha são obrigatórios" });
+    try {
+      const ok = await loginLocalAdmin(req, res, email, password);
+      return ok ? res.status(200).json({ ok: true }) : res.status(401).json({ ok: false, error: "E-mail ou senha inválidos" });
+    } catch (error) {
+      console.error("[Local Auth] Login failed", error);
+      return res.status(503).json({ ok: false, error: "Serviço temporariamente indisponível" });
+    }
+  });
+  app.post("/api/auth/local/logout", (req, res) => { logoutLocal(req, res); return res.status(200).json({ ok: true }); });
+  app.post("/api/announcement", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
+    try {
+      const validation = await validateLicense({ key, deviceId, packageName, appVersion, ipAddress: req.ip });
+      if (!validation.valid) return res.status(403).json(validation);
+      const creatorId = await getLicenseCreatorId(key);
+      const announcement = await getAnnouncement(creatorId);
+      return res.status(200).json(announcement ?? { announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" });
+    } catch (error) {
+      console.error("[Announcement API] Failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
+  });
+
+  app.get("/api/announcement", async (_req, res) => {
+    try { return res.status(200).json((await getAnnouncement()) ?? { announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" }); }
+    catch { return res.status(503).json({ announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" }); }
+  });
+
+  app.post("/api/license/validate", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
+    if (typeof key !== "string" || typeof deviceId !== "string" || typeof packageName !== "string" || typeof appVersion !== "string" || !key.trim() || !deviceId.trim() || !packageName.trim() || !appVersion.trim()) {
+      return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
+    }
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
+    try {
+      const result = await validateLicense({ key, deviceId, packageName, appVersion, ipAddress: req.ip });
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("[License API] Validation failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
+  });
+
+  app.post("/api/patches/external/catalog", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
+    if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
+      return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
+    }
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
+    try {
+      const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
+      const baseUrl = `${forwardedProto}://${req.get("host")}`;
+      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl, section: "external" });
+      if (!result.valid) return res.status(403).json(result);
+      return res.status(200).json(result);
+    } catch (error) {
+      console.error("[External Patch API] Catalog failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
+  });
+
+  app.post("/api/patches/catalog", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion, section } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
+    if ([key, deviceId, packageName, appVersion].some(value => typeof value !== "string" || !value.trim())) {
+      return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package e app_version" });
+    }
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
+    try {
+      const forwardedProto = String(req.headers["x-forwarded-proto"] || req.protocol).split(",")[0];
+      const baseUrl = `${forwardedProto}://${req.get("host")}`;
+      const requestedSection = section === "texture" ? "texture" : section === "misc" ? "misc" : undefined;
+      const result = await listRemotePatchesForLicense({ key, deviceId, packageName, appVersion, baseUrl, section: requestedSection });
+      const textureBannerUrl = requestedSection === "texture"
+        ? ((await getAnnouncement())?.textureBannerUrl || defaultTextureBannerUrl)
+        : undefined;
+      return res.status(result.valid ? 200 : 403).json({ ...result, textureBannerUrl });
+    } catch (error) {
+      console.error("[Patch API] Catalog failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
+  });
+  app.post("/api/scheduled/cleanupExpiredLicenses", async (req, res) => {
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user.isCron || !user.taskUid) return res.status(403).json({ ok: false, error: "cron-only" });
+      const job = await findScheduledJob(user.taskUid);
+      if (!job) return res.status(200).json({ ok: true, skipped: "orphan" });
+      const result = await deleteExpiredLicenses();
+      return res.status(200).json({ ok: true, deleted: result.deleted });
+    } catch (error) {
+      console.error("[Scheduled cleanup] Failed", error);
+      return res.status(500).json({ ok: false, error: String(error), timestamp: new Date().toISOString() });
+    }
+  });
+
+  app.get("/api/patches/download", async (req, res) => {
+    const token = typeof req.query.t === "string" ? req.query.t : "";
+    const url = await getAuthorizedPatchUrl(token);
+    if (!url) return res.status(403).json({ valid: false, code: "download_forbidden", message: "Download não autorizado" });
+    res.setHeader("Cache-Control", "private, max-age=300");
+    return res.redirect(307, url);
+  });
+
+  // tRPC API
+  app.use(
+    "/api/trpc",
+    createExpressMiddleware({
+      router: appRouter,
+      createContext,
+    })
+  );
+  // development mode uses Vite, production mode uses static files
+  if (process.env.NODE_ENV === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+
+  const preferredPort = parseInt(process.env.PORT || "3000");
+  const port = await findAvailablePort(preferredPort);
+
+  if (port !== preferredPort) {
+    console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
+  }
+
+  server.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}/`);
+  });
+}
+
+startServer().catch(console.error);
