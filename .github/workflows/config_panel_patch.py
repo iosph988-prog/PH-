@@ -153,7 +153,7 @@ content = content.replace(
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintpalette.fill")',
 )
 content = content.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintpalette.fill"', 1)
-old_tab_icon = 'Image(systemName: title == "Injector" ? "gamecontroller.fill" : systemImage)'
+old_tab_icon = 'Image(systemName: systemImage)'
 new_tab_icon = '''Group {
                 if title == "TEXTURA" {
                     ZStack(alignment: .bottomTrailing) {
@@ -164,7 +164,7 @@ new_tab_icon = '''Group {
                             .offset(x: 3, y: -3)
                     }
                 } else {
-                    Image(systemName: title == "Injector" ? "gamecontroller.fill" : systemImage)
+                    Image(systemName: systemImage)
                 }
             }'''
 if old_tab_icon not in content:
