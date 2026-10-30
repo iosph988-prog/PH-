@@ -33,6 +33,8 @@ def add_app_storage(source: str, struct_name: str) -> str:
 
 
 swift = patch_file.read_text()
+if "import WebKit" not in swift:
+    swift = swift.replace("import SwiftUI", "import SwiftUI\nimport WebKit", 1)
 # Add a persistent, shared color preference to each view that paints a page background.
 # The workflow also concatenates TextureOnlineView into PatchProjectsView.swift.
 for view_name in ("PatchProjectsView", "ExternalPanelView", "TextureOnlineView", "MiscToolsView"):
@@ -192,10 +194,142 @@ func configBackgroundColor(hex rawValue: String) -> Color {
     )
 }
 
+private enum ProxyGIFMediaKind: Equatable {
+    case image
+    case video
+}
+
+private struct ProxyGIFOption: Identifiable {
+    let id: String
+    let title: String
+    let mediaURL: String
+    let kind: ProxyGIFMediaKind
+}
+
+private enum ProxyGIFCatalog {
+    static let options = [
+        ProxyGIFOption(id: "1", title: "GIF 1", mediaURL: "https://i.pinimg.com/originals/02/ab/89/02ab898f20be3892166f1ae186bc9243.gif", kind: .image),
+        ProxyGIFOption(id: "2", title: "GIF 2", mediaURL: "https://i.pinimg.com/originals/fd/c8/e7/fdc8e7325d1b7721762f43d328bbdddf.gif", kind: .image),
+        ProxyGIFOption(id: "3", title: "GIF 3", mediaURL: "https://i.pinimg.com/originals/5f/8e/07/5f8e07af47ce8f1dd0d0198ea1b21169.gif", kind: .image),
+        ProxyGIFOption(id: "4", title: "GIF 4", mediaURL: "https://i.pinimg.com/originals/96/47/25/964725fd73020fc11138ba746fe6a678.gif", kind: .image),
+        ProxyGIFOption(id: "5", title: "GIF 5", mediaURL: "https://i.pinimg.com/originals/fa/1c/2b/fa1c2b1ffd208b4c0bd289d82ecb13d2.gif", kind: .image),
+        ProxyGIFOption(id: "6", title: "6 · vídeo em loop", mediaURL: "https://v1.pinimg.com/videos/iht/expMp4/e1/66/b7/e166b7f3d687d158211a6090d1140582_720w.mp4", kind: .video),
+        ProxyGIFOption(id: "7", title: "GIF 7", mediaURL: "https://i.pinimg.com/originals/66/c1/3a/66c13a51b1a6a109d2eea204a5e99254.gif", kind: .image),
+        ProxyGIFOption(id: "8", title: "GIF 8", mediaURL: "https://i.pinimg.com/originals/63/e6/44/63e6440de2b6020bfc37170d7451caa5.gif", kind: .image),
+        ProxyGIFOption(id: "9", title: "GIF 9", mediaURL: "https://i.pinimg.com/originals/20/ff/e4/20ffe419796909feca129d6ab0e846ee.gif", kind: .image),
+        ProxyGIFOption(id: "10", title: "10 · imagem estática", mediaURL: "https://i.pinimg.com/736x/c1/61/03/c1610317bb282840a2b4d16b9bd4d31d.jpg", kind: .image)
+    ]
+
+    static func localFileURL(named fileName: String) -> URL? {
+        guard !fileName.isEmpty else { return nil }
+        let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+        return support.appendingPathComponent("ProxyGIF", isDirectory: true).appendingPathComponent(fileName)
+    }
+
+    static func mediaKind(for url: URL) -> ProxyGIFMediaKind {
+        ["mp4", "mov", "m4v", "webm"].contains(url.pathExtension.lowercased()) ? .video : .image
+    }
+}
+
+private struct ProxyGIFBannerView: View {
+    @AppStorage("proxyGIFSelection") private var selection = "1"
+    @AppStorage("proxyGIFCustomURL") private var customURL = ""
+    @AppStorage("proxyGIFCustomFileName") private var customFileName = ""
+
+    private var selectedURL: URL? {
+        if selection == "customFile",
+           let url = ProxyGIFCatalog.localFileURL(named: customFileName),
+           FileManager.default.fileExists(atPath: url.path) {
+            return url
+        }
+        if selection == "customURL", let url = URL(string: customURL), url.scheme?.lowercased() == "https" {
+            return url
+        }
+        guard let option = ProxyGIFCatalog.options.first(where: { $0.id == selection }) else { return nil }
+        return URL(string: option.mediaURL)
+    }
+
+    private var selectedKind: ProxyGIFMediaKind {
+        if selection == "customFile" { return .image }
+        if let option = ProxyGIFCatalog.options.first(where: { $0.id == selection }) { return option.kind }
+        if let url = selectedURL { return ProxyGIFCatalog.mediaKind(for: url) }
+        return .image
+    }
+
+    var body: some View {
+        Group {
+            if let url = selectedURL {
+                ProxyGIFMediaView(url: url, kind: selectedKind)
+            } else {
+                ZStack {
+                    Color.white.opacity(0.05)
+                    Image(systemName: "photo")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.45))
+                }
+            }
+        }
+        .background(Color.black.opacity(0.25))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).stroke(Color.white.opacity(0.15), lineWidth: 1))
+        .accessibilityLabel("GIF escolhido para a aba PROXY")
+    }
+}
+
+private struct ProxyGIFMediaView: UIViewRepresentable {
+    let url: URL
+    let kind: ProxyGIFMediaKind
+
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = []
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        webView.scrollView.isScrollEnabled = false
+        webView.scrollView.bounces = false
+        webView.isUserInteractionEnabled = false
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        let key = url.absoluteString
+        guard webView.accessibilityIdentifier != key else { return }
+        webView.accessibilityIdentifier = key
+        if url.isFileURL {
+            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+        } else {
+            webView.loadHTMLString(Self.html(for: url, kind: kind), baseURL: URL(string: "https://i.pinimg.com"))
+        }
+    }
+
+    private static func html(for url: URL, kind: ProxyGIFMediaKind) -> String {
+        let source = url.absoluteString
+            .replacingOccurrences(of: "&", with: "&amp;")
+            .replacingOccurrences(of: "\"", with: "&quot;")
+            .replacingOccurrences(of: "<", with: "&lt;")
+            .replacingOccurrences(of: ">", with: "&gt;")
+        let media = kind == .video
+            ? "<video src=\"\(source)\" autoplay loop muted playsinline webkit-playsinline></video>"
+            : "<img src=\"\(source)\" alt=\"GIF\" />"
+        return """
+        <!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}img,video{display:block;width:100%;height:100%;object-fit:contain}</style></head><body>\(media)</body></html>
+        """
+    }
+}
+
 struct ConfigPanelView: View {
     @AppStorage("globalAppBackgroundHex") private var globalAppBackgroundHex = "05070A"
+    @AppStorage("proxyGIFSelection") private var proxyGIFSelection = "1"
+    @AppStorage("proxyGIFCustomURL") private var proxyGIFCustomURL = ""
+    @AppStorage("proxyGIFCustomFileName") private var proxyGIFCustomFileName = ""
     @StateObject private var fpsMonitor = ExternalFPSMonitor()
     @State private var licenseExpiresAt: Date?
+    @State private var customGIFURLDraft = ""
+    @State private var isImportingGIF = false
+    @State private var gifImportMessage = ""
 
     private let backgroundChoices = [
         ConfigBackgroundChoice(title: "Preto", hex: "05070A"),
@@ -218,6 +352,7 @@ struct ConfigPanelView: View {
             return Self.parseISODate(raw)
         }
         _licenseExpiresAt = State(initialValue: cachedExpiry)
+        _customGIFURLDraft = State(initialValue: UserDefaults.standard.string(forKey: "proxyGIFCustomURL") ?? "")
     }
 
     var body: some View {
@@ -227,6 +362,7 @@ struct ConfigPanelView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     header
                     appearanceSection
+                    proxyGIFSection
                     performanceSection
                     profileSection
                 }
@@ -309,6 +445,68 @@ struct ConfigPanelView: View {
         }
     }
 
+    private var proxyGIFSection: some View {
+        sectionCard("GIF da aba PROXY") {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Escolha qual animação aparece abaixo de PROXY / PATCHES ONLINE.")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.58))
+                    .fixedSize(horizontal: false, vertical: true)
+                Picker("GIF para a aba PROXY", selection: $proxyGIFSelection) {
+                    ForEach(ProxyGIFCatalog.options) { option in
+                        Text(option.title).tag(option.id)
+                    }
+                    if !proxyGIFCustomFileName.isEmpty {
+                        Text("Meu GIF · arquivo").tag("customFile")
+                    }
+                    if !proxyGIFCustomURL.isEmpty {
+                        Text("Meu GIF · link").tag("customURL")
+                    }
+                }
+                .pickerStyle(.menu)
+                .tint(.white)
+                ProxyGIFBannerView()
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 142)
+                Text("O item 6 é um vídeo em loop; o item 10 foi recebido como imagem estática.")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.48))
+                    .fixedSize(horizontal: false, vertical: true)
+                Button {
+                    isImportingGIF = true
+                } label: {
+                    Label("Escolher GIF no app Arquivos", systemImage: "folder.badge.plus")
+                        .font(.system(size: 12, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.10), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                TextField("Link direto .gif, .webp ou .mp4", text: $customGIFURLDraft)
+                    .font(.system(size: 12, weight: .medium))
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .padding(12)
+                    .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                Button("Usar link próprio") {
+                    applyCustomGIFURL()
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Color(red: 0.38, green: 0.72, blue: 1.0))
+                if !gifImportMessage.isEmpty {
+                    Text(gifImportMessage)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(Color.white.opacity(0.72))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .fileImporter(isPresented: $isImportingGIF, allowedContentTypes: [.gif], allowsMultipleSelection: false) { result in
+            handleGIFImport(result)
+        }
+    }
+
     private var performanceSection: some View {
         sectionCard("Dispositivo e desempenho") {
             VStack(spacing: 9) {
@@ -362,6 +560,54 @@ struct ConfigPanelView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white.opacity(0.055), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 15, style: .continuous).stroke(Color.white.opacity(0.09), lineWidth: 1))
+    }
+
+    private func applyCustomGIFURL() {
+        let raw = customGIFURLDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: raw), url.scheme?.lowercased() == "https", url.host != nil,
+              ["gif", "webp", "mp4", "mov", "m4v"].contains(url.pathExtension.lowercased()) else {
+            gifImportMessage = "Cole um link direto HTTPS de GIF, WebP ou vídeo MP4."
+            return
+        }
+        proxyGIFCustomURL = url.absoluteString
+        proxyGIFSelection = "customURL"
+        gifImportMessage = "Link próprio aplicado na aba PROXY."
+    }
+
+    private func handleGIFImport(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let sourceURL = urls.first else { return }
+            let accessed = sourceURL.startAccessingSecurityScopedResource()
+            defer { if accessed { sourceURL.stopAccessingSecurityScopedResource() } }
+            do {
+                let data = try Data(contentsOf: sourceURL)
+                guard data.count <= 25 * 1024 * 1024 else {
+                    gifImportMessage = "O GIF selecionado excede o limite de 25 MB."
+                    return
+                }
+                let signature = String(data: Data(data.prefix(6)), encoding: .ascii)
+                guard signature == "GIF87a" || signature == "GIF89a" else {
+                    gifImportMessage = "O arquivo escolhido não é um GIF válido."
+                    return
+                }
+                let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                    .appendingPathComponent("ProxyGIF", isDirectory: true)
+                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+                let destination = directory.appendingPathComponent("custom-\(UUID().uuidString).gif")
+                try data.write(to: destination, options: .atomic)
+                if let previous = ProxyGIFCatalog.localFileURL(named: proxyGIFCustomFileName), previous != destination {
+                    try? FileManager.default.removeItem(at: previous)
+                }
+                proxyGIFCustomFileName = destination.lastPathComponent
+                proxyGIFSelection = "customFile"
+                gifImportMessage = "GIF importado e aplicado na aba PROXY."
+            } catch {
+                gifImportMessage = "Não foi possível importar o GIF: \(error.localizedDescription)"
+            }
+        case .failure(let error):
+            gifImportMessage = "Não foi possível abrir o arquivo: \(error.localizedDescription)"
+        }
     }
 
     private func brasiliaTime(at date: Date) -> String {

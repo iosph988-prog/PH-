@@ -93,6 +93,9 @@ header = '''private var header: some View {
                 .font(.system(size: 10, weight: .bold, design: .rounded))
                 .tracking(1.1)
                 .foregroundStyle(Color.white.opacity(0.52))
+            ProxyGIFBannerView()
+                .frame(width: 112, height: 64)
+                .padding(.top, 5)
         }
         Spacer()
         HStack(spacing: 6) {

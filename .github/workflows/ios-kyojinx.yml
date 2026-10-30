@@ -2666,7 +2666,7 @@ jobs:
               exploit.write_text(source)
           PYFIX
 
-      - name: Add Config tab and global background preferences
+      - name: Add Config tab, global backgrounds, and Proxy GIF selector
         shell: bash
         run: |
           set -euo pipefail
@@ -2686,6 +2686,11 @@ jobs:
           assert "configBackgroundColor(hex: globalAppBackgroundHex)" in texture
           assert "await refreshProfile()" not in patch
           assert patch.count("ConfigBackgroundChoice(title:") == 12
+          assert patch.count("ProxyGIFOption(id:") == 10
+          assert "ProxyGIFBannerView()" in patch and "proxyGIFSection" in patch
+          assert "Escolher GIF no app Arquivos" in patch and "Usar link próprio" in patch
+          assert "GIF87a" in patch and "GIF89a" in patch
+          assert "10 · imagem estática" in patch and "6 · vídeo em loop" in patch
           assert 'systemImage: "paintpalette.fill"' in content
           assert "paintpalette.fill" in texture and "paintbrush.pointed.fill" in content
           print("Config tab, 12 backgrounds, live profile data, and Texture paint icon are ready.")
