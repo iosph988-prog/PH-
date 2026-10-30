@@ -53,6 +53,15 @@ body, title_count = re.subn(
 )
 assert title_count == 1, "game-selection heading not found"
 
+banner_match = re.search(r'(?m)^([ \t]*)header\s*$', body)
+assert banner_match, "PROXY header call not found in body"
+banner = '''ProxyGIFBannerView()
+.frame(maxWidth: .infinity)
+.frame(height: 220)
+.padding(.top, 12)
+.padding(.bottom, 12)'''
+body = body[:banner_match.end()] + "\n" + block(banner_match.group(1), banner) + body[banner_match.end():]
+
 features_section = re.compile(
     r'(?m)^([ \t]*)sectionTitle\("FUNÇÕES DE AIMBOT", top: 28\).*?^\1featureList\.padding\(\.top, 14\)\s*$',
     re.S | re.M,
@@ -93,9 +102,6 @@ header = '''private var header: some View {
                 .font(.system(size: 10, weight: .bold, design: .rounded))
                 .tracking(1.1)
                 .foregroundStyle(Color.white.opacity(0.52))
-            ProxyGIFBannerView()
-                .frame(width: 112, height: 64)
-                .padding(.top, 5)
         }
         Spacer()
         HStack(spacing: 6) {
@@ -122,48 +128,45 @@ text = text[:header_line] + block(header_indent, header) + "\n\n" + text[section
 
 cards = '''private var gameCards: some View {
     GeometryReader { proxy in
-        let width = max(145, (proxy.size.width - 12) / 2)
+        let width = max(130, (proxy.size.width - 12) / 2)
         HStack(spacing: 12) {
             ForEach(preloadedGames) { game in
                 Button {
                     selectedGameID = game.id
                     showingProxyCatalog = true
                 } label: {
-                    ZStack(alignment: .bottomLeading) {
-                        remoteLogo(url: logoURLs[game.id])
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 176)
-                            .clipped()
-                        LinearGradient(colors: [.clear, Color.black.opacity(0.92)], startPoint: .center, endPoint: .bottom)
-                        VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 9) {
+                        HStack {
                             Text(game.title)
-                                .font(.system(size: 17, weight: .bold, design: .rounded))
+                                .font(.system(size: 15, weight: .black, design: .rounded))
                                 .foregroundStyle(.white)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.75)
-                            Text("Selecionar patches")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(Color.white.opacity(0.68))
+                                .minimumScaleFactor(0.72)
+                            Spacer(minLength: 4)
+                            if selectedGameID == game.id {
+                                Text("SELECIONADO")
+                                    .font(.system(size: 8, weight: .black, design: .rounded))
+                                    .tracking(0.4)
+                                    .foregroundStyle(Color.white.opacity(0.82))
+                            }
                         }
-                        .padding(13)
+                        Text(selectedGameID == game.id ? "Toque para abrir os patches" : "Toque para selecionar")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(Color.white.opacity(0.62))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                        Spacer(minLength: 0)
                     }
-                    .frame(width: width, height: 176)
-                    .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).stroke(Color.white.opacity(selectedGameID == game.id ? 0.36 : 0.11), lineWidth: 1))
-                    .overlay(alignment: .topTrailing) {
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 28, height: 28)
-                            .background(Color.black.opacity(0.52), in: Circle())
-                            .padding(10)
-                    }
+                    .frame(width: width - 26, height: 92, alignment: .leading)
+                    .padding(.horizontal, 13)
+                    .background(Color.white.opacity(selectedGameID == game.id ? 0.13 : 0.065), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(selectedGameID == game.id ? 0.42 : 0.12), lineWidth: selectedGameID == game.id ? 1.5 : 1))
                 }
                 .buttonStyle(.plain)
             }
         }
     }
-    .frame(height: 176)
+    .frame(height: 92)
     .fullScreenCover(isPresented: $showingProxyCatalog) {
         proxyCatalogScreen
     }
@@ -309,4 +312,13 @@ for required in (
 assert text.count("private var proxyCatalogScreen: some View {") == 1
 assert text.count("showingProxyCatalog = true") == 1
 assert "darkMode.toggle()" not in text, "dark theme control should not remain in the TEXTURA-matched PROXY header"
+final_body_start = text.index("var body: some View {")
+final_body_end = text.index("private var fg: Color", final_body_start)
+body_section = text[final_body_start:final_body_end]
+assert body_section.count("ProxyGIFBannerView()") == 1, "large PROXY GIF banner missing or duplicated"
+assert body_section.index("header") < body_section.index("ProxyGIFBannerView()") < body_section.index('sectionTitle("ESCOLHA O JOGO"') < body_section.index("gameCards"), "PROXY GIF and game-card order is incorrect"
+game_start = text.index("private var gameCards: some View {", final_body_end)
+feature_start = text.index("private var featureList: some View {", game_start)
+game_block = text[game_start:feature_start]
+assert "remoteLogo(" not in game_block, "Free Fire game cards must not render background images"
 path.write_text(text, encoding="utf-8")
