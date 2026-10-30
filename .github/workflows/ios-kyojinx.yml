@@ -243,13 +243,26 @@ jobs:
         run: |
           set -euo pipefail
           APP_DIR=source/3105-1.1.1/ThreeOneOSFive
-          mkdir -p "$APP_DIR/views"
+          mkdir -p "$APP_DIR/views" "$APP_DIR/Assets.xcassets/TextureAlok.imageset" "$APP_DIR/Assets.xcassets/TextureDimitri.imageset"
+          cp .github/workflows/texture-ui-assets/alok.png "$APP_DIR/Assets.xcassets/TextureAlok.imageset/alok.png"
+          cp .github/workflows/texture-ui-assets/dimitri.png "$APP_DIR/Assets.xcassets/TextureDimitri.imageset/dimitri.png"
+          cat > "$APP_DIR/Assets.xcassets/TextureAlok.imageset/Contents.json" <<'JSON'
+          {"images":[{"filename":"alok.png","idiom":"universal"}],"info":{"author":"xcode","version":1}}
+          JSON
+          cat > "$APP_DIR/Assets.xcassets/TextureDimitri.imageset/Contents.json" <<'JSON'
+          {"images":[{"filename":"dimitri.png","idiom":"universal"}],"info":{"author":"xcode","version":1}}
+          JSON
           cat > "$APP_DIR/views/TextureOnlineView.swift" <<'SWIFT'
           import SwiftUI
           import UIKit
           import CryptoKit
 
-          private struct TextureCatalogResponse: Decodable { let valid: Bool; let patches: [TextureCatalogItem]?; let textureBannerUrl: String? }
+          private struct TextureCatalogResponse: Decodable {
+              let valid: Bool
+              let patches: [TextureCatalogItem]?
+              let textureBannerUrl: String?
+          }
+
           private struct TextureCatalogItem: Decodable, Identifiable {
               let id: Int
               let title: String
@@ -260,101 +273,341 @@ jobs:
               let sha256: String
           }
 
+          private enum TextureCharacter: String, CaseIterable, Identifiable {
+              case alok
+              case dimitri
+
+              var id: String { rawValue }
+              var title: String { rawValue.capitalized }
+              var imageName: String { rawValue == "alok" ? "TextureAlok" : "TextureDimitri" }
+          }
+
           struct TextureOnlineView: View {
               @State private var items: [TextureCatalogItem] = []
-              @State private var message = "Carregando texturas..."
+              @State private var message = "Carregando texturas online..."
               @State private var activeIDs: Set<Int> = []
               @State private var textureBannerUrl: String?
-              @AppStorage("textureDarkMode") private var darkMode = true
-              @State private var accentColor = Color.pink
+              @State private var selectedCharacter: TextureCharacter?
+              @State private var selectedItemID: Int?
+              @State private var isWorking = false
               @State private var pendingPasswordItem: TextureCatalogItem?
               @State private var pendingPasswordURL: URL?
               @State private var texturePassword = ""
+
+              private var selectedItem: TextureCatalogItem? {
+                  items.first(where: { $0.id == selectedItemID })
+              }
+
               var body: some View {
                   NavigationStack {
                       ZStack {
-                          (darkMode ? Color.black : Color.white).ignoresSafeArea()
-                          ScrollView {
-                          VStack(alignment: .leading, spacing: 14) {
-                              VStack(spacing: 4) {
-                                  HStack(alignment: .center, spacing: 8) {
-                                      Image(systemName: "paintbrush.fill")
-                                          .font(.system(size: 34, weight: .bold))
-                                          .foregroundStyle(accentColor)
-                                      VStack(alignment: .leading, spacing: -2) {
-                                          Text("EXTERNAL")
-                                              .font(.system(size: 27, weight: .black, design: .rounded))
-                                              .italic()
-                                              .foregroundStyle(accentColor)
-                                          Text("TEXTURA E HOLOGRAMA")
-                                              .font(.system(size: 13, weight: .black, design: .rounded))
-                                              .italic()
-                                              .foregroundStyle(accentColor)
-                                      }
-                                      Spacer()
-                                      Button { darkMode.toggle() } label: {
-                                          Image(systemName: darkMode ? "moon.fill" : "sun.max.fill")
-                                              .font(.system(size: 16, weight: .bold))
-                                              .foregroundStyle(accentColor)
-                                              .frame(width: 38, height: 38)
-                                              .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
-                                      }
-                                      ColorPicker("", selection: $accentColor, supportsOpacity: false)
-                                          .labelsHidden()
-                                          .frame(width: 38, height: 38)
-                                          .background((darkMode ? Color.white.opacity(0.10) : Color.black.opacity(0.08)), in: Circle())
+                          Color(red: 0.018, green: 0.020, blue: 0.027).ignoresSafeArea()
+                          ScrollView(showsIndicators: false) {
+                              VStack(alignment: .leading, spacing: 0) {
+                                  header
+                                      .padding(.bottom, 30)
+
+                                  VStack(alignment: .leading, spacing: 7) {
+                                      Text("ESCOLHA SEU PERSONAGEM")
+                                          .font(.system(size: 21, weight: .black, design: .rounded))
+                                          .tracking(0.45)
+                                          .foregroundStyle(.white)
+                                      Text("Selecione um card para ver as skins online")
+                                          .font(.system(size: 14, weight: .medium))
+                                          .foregroundStyle(Color.white.opacity(0.56))
                                   }
-                                  .frame(maxWidth: .infinity)
-                              }
-                              Text("Antes de ativar, baixe a skin do personagem ou da arma e coloque o gráfico padrão. Após concluir o download, você poderá ativar e usar normalmente.")
-                                  .foregroundStyle(accentColor.opacity(0.82))
-                              if let banner = textureBannerUrl, let url = URL(string: banner) {
-                                  AsyncImage(url: url) { phase in
-                                      if let image = phase.image { image.resizable().scaledToFit() } else { Color.clear }
+                                  .padding(.bottom, 17)
+
+                                  LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 14) {
+                                      ForEach(TextureCharacter.allCases) { character in
+                                          characterCard(character)
+                                      }
                                   }
-                                  .frame(maxWidth: .infinity)
-                                  .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                                  .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                  .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accentColor.opacity(0.45), lineWidth: 1))
-                                  .shadow(color: accentColor.opacity(0.18), radius: 12, y: 4)
+
+                                  HStack(spacing: 8) {
+                                      if message.hasPrefix("Carregando") {
+                                          ProgressView().tint(Color.white.opacity(0.7))
+                                      } else {
+                                          Circle()
+                                              .fill(items.isEmpty ? Color.orange : Color.green)
+                                              .frame(width: 7, height: 7)
+                                      }
+                                      Text(message.isEmpty ? "\(items.count) skins disponíveis online" : message)
+                                          .font(.system(size: 12, weight: .medium))
+                                          .foregroundStyle(Color.white.opacity(0.56))
+                                          .lineLimit(2)
+                                      Spacer(minLength: 0)
+                                  }
+                                  .padding(.top, 19)
+                                  .padding(.horizontal, 3)
                               }
-                              Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
-                              ForEach(items) { item in
-                                  HStack(spacing: 12) {
-                                      if let raw = item.logoUrl, let url = URL(string: raw) {
-                                          AsyncImage(url: url) { image in image.resizable().scaledToFill() } placeholder: { Color.gray.opacity(0.25) }
-                                              .frame(width: 58, height: 58).clipShape(RoundedRectangle(cornerRadius: 12))
-                                      } else { Image(systemName: "paintbrush.fill").foregroundStyle(accentColor).frame(width: 58, height: 58).background(Color.white.opacity(0.08)).clipShape(RoundedRectangle(cornerRadius: 12)) }
-                                      VStack(alignment: .leading, spacing: 3) { Text(item.title).font(.headline).foregroundStyle(accentColor) }
-                                      Spacer()
-                                      Toggle("", isOn: Binding(get: { activeIDs.contains(item.id) }, set: { _ in Task { await applyOrRestore(item) } }))
-                                          .labelsHidden()
-                                          .tint(accentColor)
-                                  }.padding(12).background(darkMode ? Color.white.opacity(0.06) : Color.black.opacity(0.05)).clipShape(RoundedRectangle(cornerRadius: 16))
-                              }
-                          }.padding(20)
+                              .padding(.horizontal, 18)
+                              .padding(.top, 18)
+                              .padding(.bottom, 34)
+                          }
                       }
-                      .scrollContentBackground(.hidden)
+                      .background(Color(red: 0.018, green: 0.020, blue: 0.027))
+                      .toolbar(.hidden, for: .navigationBar)
+                  }
+                  .preferredColorScheme(.dark)
+                  .task { await load() }
+                  .fullScreenCover(item: $selectedCharacter) { character in
+                      catalogScreen(for: character)
+                  }
+              }
+
+              private var header: some View {
+                  HStack(spacing: 11) {
+                      Image(systemName: "tshirt.fill")
+                          .font(.system(size: 22, weight: .bold))
+                          .foregroundStyle(.white)
+                          .frame(width: 46, height: 46)
+                          .background(Color.white.opacity(0.09), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                      VStack(alignment: .leading, spacing: 2) {
+                          Text("TEXTURA")
+                              .font(.system(size: 22, weight: .black, design: .rounded))
+                              .tracking(0.7)
+                              .foregroundStyle(.white)
+                          Text("SKINS E HOLOGRAMAS")
+                              .font(.system(size: 10, weight: .bold, design: .rounded))
+                              .tracking(1.1)
+                              .foregroundStyle(Color.white.opacity(0.52))
+                      }
+                      Spacer()
+                      HStack(spacing: 6) {
+                          Circle().fill(Color(red: 0.35, green: 0.91, blue: 0.57)).frame(width: 7, height: 7)
+                          Text("LIVE")
+                              .font(.system(size: 11, weight: .black, design: .rounded))
+                              .tracking(0.7)
+                              .foregroundStyle(.white)
+                      }
+                      .padding(.horizontal, 11)
+                      .padding(.vertical, 8)
+                      .background(Color.white.opacity(0.08), in: Capsule())
+                  }
+              }
+
+              private func characterCard(_ character: TextureCharacter) -> some View {
+                  Button {
+                      selectedItemID = nil
+                      selectedCharacter = character
+                  } label: {
+                      VStack(alignment: .leading, spacing: 0) {
+                          ZStack(alignment: .bottomLeading) {
+                              Image(character.imageName)
+                                  .resizable()
+                                  .scaledToFill()
+                                  .frame(maxWidth: .infinity)
+                                  .frame(height: 176)
+                                  .clipped()
+                              LinearGradient(colors: [.clear, Color.black.opacity(0.92)], startPoint: .center, endPoint: .bottom)
+                              VStack(alignment: .leading, spacing: 4) {
+                                  Text(character.title)
+                                      .font(.system(size: 20, weight: .bold, design: .rounded))
+                                      .foregroundStyle(.white)
+                                  Text("Selecionar skins")
+                                      .font(.system(size: 12, weight: .medium))
+                                      .foregroundStyle(Color.white.opacity(0.68))
+                              }
+                              .padding(13)
+                          }
+                          .frame(height: 176)
+                          .overlay(alignment: .topTrailing) {
+                              Image(systemName: "arrow.up.right")
+                                  .font(.system(size: 11, weight: .bold))
+                                  .foregroundStyle(.white)
+                                  .frame(width: 28, height: 28)
+                                  .background(Color.black.opacity(0.52), in: Circle())
+                                  .padding(10)
+                          }
+                      }
+                      .background(Color(red: 0.075, green: 0.078, blue: 0.090))
+                      .clipShape(RoundedRectangle(cornerRadius: 19, style: .continuous))
+                      .overlay(RoundedRectangle(cornerRadius: 19, style: .continuous).stroke(Color.white.opacity(0.11), lineWidth: 1))
+                  }
+                  .buttonStyle(.plain)
+                  .accessibilityLabel("\(character.title), selecionar skins online")
+              }
+
+              private func catalogScreen(for character: TextureCharacter) -> some View {
+                  ZStack {
+                      Color(red: 0.018, green: 0.020, blue: 0.027).ignoresSafeArea()
+                      VStack(spacing: 0) {
+                          HStack {
+                              Button { selectedCharacter = nil } label: {
+                                  Image(systemName: "xmark")
+                                      .font(.system(size: 14, weight: .bold))
+                                      .foregroundStyle(.white)
+                                      .frame(width: 38, height: 38)
+                                      .background(Color.white.opacity(0.09), in: Circle())
+                              }
+                              .buttonStyle(.plain)
+                              Spacer()
+                              HStack(spacing: 6) {
+                                  Circle().fill(Color(red: 0.35, green: 0.91, blue: 0.57)).frame(width: 7, height: 7)
+                                  Text("ONLINE")
+                                      .font(.system(size: 10, weight: .black, design: .rounded))
+                                      .tracking(0.8)
+                                      .foregroundStyle(Color.white.opacity(0.78))
+                              }
+                          }
+                          .padding(.horizontal, 20)
+                          .padding(.top, 12)
+                          .padding(.bottom, 17)
+
+                          VStack(alignment: .leading, spacing: 5) {
+                              Text("\(character.title) skins")
+                                  .font(.system(size: 27, weight: .black, design: .rounded))
+                                  .foregroundStyle(.white)
+                              Text("Escolha uma textura disponível online")
+                                  .font(.system(size: 13, weight: .medium))
+                                  .foregroundStyle(Color.white.opacity(0.55))
+                          }
+                          .frame(maxWidth: .infinity, alignment: .leading)
+                          .padding(.horizontal, 20)
+                          .padding(.bottom, 15)
+
+                          if items.isEmpty {
+                              VStack(spacing: 10) {
+                                  Image(systemName: "square.stack.3d.up")
+                                      .font(.system(size: 30, weight: .medium))
+                                      .foregroundStyle(Color.white.opacity(0.38))
+                                  Text(message)
+                                      .font(.system(size: 14, weight: .medium))
+                                      .foregroundStyle(Color.white.opacity(0.62))
+                                      .multilineTextAlignment(.center)
+                              }
+                              .frame(maxWidth: .infinity, maxHeight: .infinity)
+                              .padding(30)
+                          } else {
+                              ScrollView(showsIndicators: false) {
+                                  LazyVStack(spacing: 10) {
+                                      ForEach(items) { item in
+                                          textureRow(item, character: character)
+                                      }
+                                  }
+                                  .padding(.horizontal, 18)
+                                  .padding(.bottom, 18)
+                              }
+                          }
+
+                          actionFooter
                       }
                   }
-                  .background(darkMode ? Color.black : Color.white)
-                  .preferredColorScheme(darkMode ? .dark : .light)
-                   .task { await load() }
-                   .alert("Senha da textura", isPresented: Binding(get: { pendingPasswordItem != nil }, set: { visible in
-                       if !visible { clearPasswordPrompt() }
-                   })) {
-                       SecureField("Digite a senha", text: $texturePassword)
-                       Button("Cancelar", role: .cancel) { clearPasswordPrompt() }
-                       Button("Aplicar") {
-                           guard let item = pendingPasswordItem, let url = pendingPasswordURL else { return }
-                           let password = texturePassword
-                           clearPasswordPrompt()
-                           Task { await decodeAndApply(item: item, url: url, password: password) }
-                       }
-                   } message: {
-                       Text("Este pacote TEXTURA está protegido. A senha não é enviada para a API.")
-                   }
+                  .preferredColorScheme(.dark)
+                  .alert("Senha da textura", isPresented: Binding(get: { pendingPasswordItem != nil }, set: { visible in
+                      if !visible { clearPasswordPrompt() }
+                  })) {
+                      SecureField("Digite a senha", text: $texturePassword)
+                      Button("Cancelar", role: .cancel) { clearPasswordPrompt() }
+                      Button("Aplicar") {
+                          guard let item = pendingPasswordItem, let url = pendingPasswordURL else { return }
+                          let password = texturePassword
+                          clearPasswordPrompt()
+                          Task { await decodeAndApply(item: item, url: url, password: password) }
+                      }
+                  } message: {
+                      Text("Este pacote TEXTURA está protegido. A senha não é enviada para a API.")
+                  }
               }
+
+              private func textureRow(_ item: TextureCatalogItem, character: TextureCharacter) -> some View {
+                  let isSelected = selectedItemID == item.id
+                  let isActive = activeIDs.contains(item.id)
+                  return Button { selectedItemID = item.id } label: {
+                      HStack(spacing: 12) {
+                          if let raw = item.logoUrl, let url = URL(string: raw) {
+                              AsyncImage(url: url) { phase in
+                                  if let image = phase.image {
+                                      image.resizable().scaledToFill()
+                                  } else {
+                                      logoPlaceholder
+                                  }
+                              }
+                              .frame(width: 58, height: 58)
+                              .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                          } else {
+                              logoPlaceholder
+                                  .frame(width: 58, height: 58)
+                                  .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+                          }
+                          VStack(alignment: .leading, spacing: 5) {
+                              Text(item.title)
+                                  .font(.system(size: 15, weight: .bold, design: .rounded))
+                                  .foregroundStyle(.white)
+                                  .lineLimit(2)
+                                  .multilineTextAlignment(.leading)
+                              Text("\(character.title) • Free Fire")
+                                  .font(.system(size: 11, weight: .medium))
+                                  .foregroundStyle(Color.white.opacity(0.50))
+                          }
+                          Spacer(minLength: 4)
+                          Image(systemName: isSelected ? "checkmark.circle.fill" : (isActive ? "checkmark.seal.fill" : "circle"))
+                              .font(.system(size: 21, weight: .medium))
+                              .foregroundStyle(isSelected || isActive ? .white : Color.white.opacity(0.34))
+                      }
+                      .padding(11)
+                      .background(Color.white.opacity(isSelected ? 0.12 : 0.065), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                      .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(isSelected ? 0.42 : 0.09), lineWidth: 1))
+                  }
+                  .buttonStyle(.plain)
+              }
+
+              private var logoPlaceholder: some View {
+                  ZStack {
+                      Color.white.opacity(0.08)
+                      Image(systemName: "paintbrush.pointed.fill")
+                          .font(.system(size: 20, weight: .semibold))
+                          .foregroundStyle(Color.white.opacity(0.58))
+                  }
+              }
+
+              private var actionFooter: some View {
+                  VStack(spacing: 9) {
+                      if !message.isEmpty && !message.hasPrefix("Carregando") {
+                          Text(message)
+                              .font(.system(size: 12, weight: .medium))
+                              .foregroundStyle(Color.white.opacity(0.62))
+                              .lineLimit(2)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                      }
+                      Button {
+                          guard let item = selectedItem else { return }
+                          isWorking = true
+                          Task {
+                              await applyOrRestore(item)
+                              isWorking = false
+                          }
+                      } label: {
+                          HStack(spacing: 9) {
+                              if isWorking {
+                                  ProgressView().tint(Color.black)
+                                  Text("APLICANDO...")
+                              } else if let item = selectedItem, activeIDs.contains(item.id) {
+                                  Image(systemName: "arrow.uturn.backward")
+                                  Text("RESTAURAR")
+                              } else {
+                                  Image(systemName: "bolt.fill")
+                                  Text("INJECT")
+                              }
+                          }
+                          .font(.system(size: 15, weight: .black, design: .rounded))
+                          .tracking(0.6)
+                          .foregroundStyle(Color.black)
+                          .frame(maxWidth: .infinity)
+                          .frame(height: 54)
+                          .background(Color.white, in: Capsule())
+                      }
+                      .buttonStyle(.plain)
+                      .disabled(selectedItem == nil || isWorking)
+                      .opacity(selectedItem == nil ? 0.43 : 1)
+                  }
+                  .padding(.horizontal, 18)
+                  .padding(.top, 12)
+                  .padding(.bottom, 12)
+                  .background(Color(red: 0.018, green: 0.020, blue: 0.027))
+              }
+
               private func load() async {
                   guard let key = LicenseStore.storedKey else { message = "Faça login para carregar as texturas."; return }
                   do {
@@ -366,6 +619,7 @@ jobs:
                       let catalog = try JSONDecoder().decode(TextureCatalogResponse.self, from: data); textureBannerUrl = catalog.textureBannerUrl; items = catalog.patches ?? []; message = items.isEmpty ? "Nenhuma textura publicada ainda." : ""
                   } catch { message = "Não foi possível carregar o catálogo agora." }
               }
+
               private func applyOrRestore(_ item: TextureCatalogItem) async {
                   if activeIDs.contains(item.id) { await restore(item); return }
                   do {
@@ -394,6 +648,7 @@ jobs:
                       await decodeAndApply(item: item, url: localURL, password: nil)
                   } catch { await MainActor.run { message = "Não foi possível aplicar: \(error.localizedDescription)" } }
               }
+
               private func decodeAndApply(item: TextureCatalogItem, url: URL, password: String?) async {
                   do {
                       let packageData = try PatchProjectLibrary.readPackage(at: url)
@@ -402,11 +657,13 @@ jobs:
                       await MainActor.run { activeIDs.insert(item.id); message = "Aplicado: \(item.title)" }
                   } catch { await MainActor.run { message = "Não foi possível aplicar: \(error.localizedDescription)" } }
               }
+
               private func clearPasswordPrompt() {
                   pendingPasswordItem = nil
                   pendingPasswordURL = nil
                   texturePassword = ""
               }
+
               private func restore(_ item: TextureCatalogItem) async {
                   do {
                       let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
@@ -420,8 +677,7 @@ jobs:
               }
           }
           SWIFT
-
-          cat "$APP_DIR/views/TextureOnlineView.swift" >> "$APP_DIR/views/PatchProjectsView.swift"
+          cat >> "$APP_DIR/views/PatchProjectsView.swift" < "$APP_DIR/views/TextureOnlineView.swift"
       - name: Finalize TEXTURA navigation
         shell: bash
         run: |
@@ -509,7 +765,7 @@ jobs:
               private var features: [CompactFeature] {
                   let visiblePatches: [PreloadedPatch] = {
                       guard let remoteCatalog else { return selectedGame.patches }
-                      return remoteCatalog.filter { $0.game == selectedGameID }.map { item in
+                      return remoteCatalog.filter { $0.game == selectedGameID && $0.section == "patches" }.map { item in
                           PreloadedPatch(id: item.slug, title: item.title ?? item.fileName, fileName: item.fileName, replacementCount: 1)
                       }
                   }()
@@ -823,9 +1079,9 @@ jobs:
                       var request = URLRequest(url: catalogURL, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
                       request.httpMethod = "POST"
                       request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"])
+                      request.httpBody = try JSONSerialization.data(withJSONObject: ["key": key.trimmingCharacters(in: .whitespacesAndNewlines).uppercased(), "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device", "package": Bundle.main.bundleIdentifier ?? "unknown.bundle", "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0", "section": "patches"])
                       let (data, response) = try await URLSession.shared.data(for: request)
-                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
+                      guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid, let descriptor = catalog.patches?.first(where: { $0.section == "patches" && $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }
                       let (fileData, fileResponse) = try await URLSession.shared.data(from: url)
                       guard let fileHTTP = fileResponse as? HTTPURLResponse, (200..<300).contains(fileHTTP.statusCode), fileData.count == descriptor.sizeBytes else { return cachedFile(named: patch.fileName) }
                       let digest = SHA256.hash(data: fileData).map { String(format: "%02x", $0) }.joined()
@@ -1434,9 +1690,9 @@ jobs:
           import sys
           p = Path(sys.argv[1])
           text = p.read_text()
-          old = 'guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid, let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }'
+          old = 'guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid, let descriptor = catalog.patches?.first(where: { $0.section == "patches" && $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else { return cachedFile(named: patch.fileName) }'
           new = '''guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), let catalog = try? JSONDecoder().decode(RemotePatchCatalogResponse.self, from: data), catalog.valid else { return cachedFile(named: patch.fileName) }
-                      guard let descriptor = catalog.patches?.first(where: { $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else {
+                      guard let descriptor = catalog.patches?.first(where: { $0.section == "patches" && $0.fileName.precomposedStringWithCanonicalMapping == patch.fileName.precomposedStringWithCanonicalMapping }), let url = URL(string: descriptor.downloadUrl) else {
                           if let cached = cachedFile(named: patch.fileName) { try? FileManager.default.removeItem(at: cached) }
                           return nil
                       }'''
@@ -2032,6 +2288,20 @@ jobs:
           t, count = re.subn(r'\s*private var gameCards: some View \{.*?\s*private var featureList', '\n' + cards + '              private var featureList', t, count=1, flags=re.S)
           p.write_text(t)
           PY
+      - name: Match PROXY interface to TEXTURA
+        shell: bash
+        run: |
+          set -euo pipefail
+          PATCH_SWIFT=source/3105-1.1.1/ThreeOneOSFive/views/PatchProjectsView.swift
+          python3 .github/workflows/patch_proxy_to_texture_style.py "$PATCH_SWIFT"
+          python3 .github/workflows/patch_proxy_activation.py "$PATCH_SWIFT"
+          grep -q 'Text("INJECT")' "$PATCH_SWIFT"
+          grep -q 'Text("RESTAURAR")' "$PATCH_SWIFT"
+          grep -q 'DevicePatchService.restore(receipt: receipt)' "$PATCH_SWIFT"
+          grep -q 'PATCHES ONLINE' "$PATCH_SWIFT"
+          grep -q 'proxyCatalogScreen' "$PATCH_SWIFT"
+          grep -q 'RemotePatchAPI.resolve(patch: feature.patch)' "$PATCH_SWIFT"
+          grep -q 'DevicePatchService.restore(receipt: receipt)' "$PATCH_SWIFT"
       - name: Attach TEXTURA view after all Swift patches
         shell: bash
         run: |
@@ -2396,6 +2666,31 @@ jobs:
               exploit.write_text(source)
           PYFIX
 
+      - name: Add Config tab and global background preferences
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR=source/3105-1.1.1/ThreeOneOSFive
+          python3 .github/workflows/config_panel_patch.py "$APP_DIR"
+          python3 - <<'PYCONFIGCHECK'
+          from pathlib import Path
+          root = Path("source/3105-1.1.1/ThreeOneOSFive")
+          content = (root / "ContentView.swift").read_text()
+          nav = (root / "helpers/AppTabNavigationState.swift").read_text()
+          patch = (root / "views/PatchProjectsView.swift").read_text()
+          texture = (root / "views/TextureOnlineView.swift").read_text()
+          assert "ConfigPanelView()" in content and 'systemImage: "gearshape.fill"' in content
+          assert "case config" in nav and ".config].filter(isVisible)" in nav
+          assert "static var allCases: [Category] { [.functions, .esp, .tools] }" in patch
+          assert "Validade da key" in patch and "FPS" in patch and "Aparência" in patch
+          assert "configBackgroundColor(hex: globalAppBackgroundHex)" in texture
+          assert "await refreshProfile()" not in patch
+          assert patch.count("ConfigBackgroundChoice(title:") == 12
+          assert 'systemImage: "paintpalette.fill"' in content
+          assert "paintpalette.fill" in texture and "paintbrush.pointed.fill" in content
+          print("Config tab, 12 backgrounds, live profile data, and Texture paint icon are ready.")
+          PYCONFIGCHECK
+
       - name: Build original archive and IPA
         shell: bash
         run: |
@@ -2426,11 +2721,3 @@ jobs:
         with:
           name: nubank-preloaded-cards-home-patches
           path: dist/nubank-preloaded-cards.ipa
-      - name: Publish IPA fallback to GitHub Release
-        if: ${{ always() && hashFiles('dist/nubank-preloaded-cards.ipa') != '' }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          TAG="ipa-${GITHUB_RUN_ID}"
-          gh release create "$TAG" dist/nubank-preloaded-cards.ipa --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "IPA Melhorawifi ${GITHUB_RUN_NUMBER}" --notes "Build experimental com perfil Melhorawifi.bpf."
