@@ -2693,7 +2693,21 @@ jobs:
           assert "10 · imagem estática" in patch and "6 · vídeo em loop" in patch
           assert 'systemImage: "paintpalette.fill"' in content
           assert "paintpalette.fill" in texture and "paintbrush.pointed.fill" in content
-          print("Config tab, 12 backgrounds, live profile data, and Texture paint icon are ready.")
+          body_start = patch.index("var body: some View {")
+          body_end = patch.index("private var fg: Color", body_start)
+          proxy_body = patch[body_start:body_end]
+          banner_index = proxy_body.index("ProxyGIFBannerView()")
+          banner = proxy_body[banner_index:banner_index + 240]
+          assert ".frame(height: 260)" in banner and ".padding(.horizontal, -16)" in banner
+          assert proxy_body.index("header") < banner_index < proxy_body.index('sectionTitle("ESCOLHA O JOGO"') < proxy_body.index("gameCards")
+          header_start = patch.index("private var header: some View {")
+          header_end = patch.index("private func sectionTitle", header_start)
+          assert "ProxyGIFBannerView()" not in patch[header_start:header_end]
+          game_start = patch.index("private var gameCards: some View {", body_end)
+          game_end = patch.index("private var featureList: some View {", game_start)
+          assert "remoteLogo(" not in patch[game_start:game_end]
+          assert 'title: "FREE FIRE"' in patch and 'title: "FREE FIRE MAX"' in patch
+          print("Full-width Proxy GIF, text-only Free Fire cards, Config, and Texture icon are ready.")
           PYCONFIGCHECK
 
       - name: Build original archive and IPA

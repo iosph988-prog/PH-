@@ -299,7 +299,14 @@ private struct ProxyGIFMediaView: UIViewRepresentable {
         guard webView.accessibilityIdentifier != key else { return }
         webView.accessibilityIdentifier = key
         if url.isFileURL {
-            webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+            let directory = url.deletingLastPathComponent()
+            let previewURL = directory.appendingPathComponent("proxy-gif-preview.html")
+            do {
+                try Self.html(for: url, kind: kind).write(to: previewURL, atomically: true, encoding: .utf8)
+                webView.loadFileURL(previewURL, allowingReadAccessTo: directory)
+            } catch {
+                webView.loadFileURL(url, allowingReadAccessTo: directory)
+            }
         } else {
             webView.loadHTMLString(Self.html(for: url, kind: kind), baseURL: URL(string: "https://i.pinimg.com"))
         }
@@ -315,7 +322,7 @@ private struct ProxyGIFMediaView: UIViewRepresentable {
             ? "<video src=\"\(source)\" autoplay loop muted playsinline webkit-playsinline></video>"
             : "<img src=\"\(source)\" alt=\"GIF\" />"
         return """
-        <!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}img,video{display:block;width:100%;height:100%;object-fit:contain}</style></head><body>\(media)</body></html>
+        <!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}img,video{display:block;width:100%;height:100%;object-fit:cover}</style></head><body>\(media)</body></html>
         """
     }
 }

@@ -57,7 +57,8 @@ banner_match = re.search(r'(?m)^([ \t]*)header\s*$', body)
 assert banner_match, "PROXY header call not found in body"
 banner = '''ProxyGIFBannerView()
 .frame(maxWidth: .infinity)
-.frame(height: 220)
+.frame(height: 260)
+.padding(.horizontal, -16)
 .padding(.top, 12)
 .padding(.bottom, 12)'''
 body = body[:banner_match.end()] + "\n" + block(banner_match.group(1), banner) + body[banner_match.end():]
