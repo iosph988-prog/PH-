@@ -6,7 +6,7 @@ name: Build Theos 8Ball
       - '8Ball-2.zip'
       - '.github/workflows/theos-8ball-build.yml'
 jobs:
-  build:
+  build: 
     runs-on: macos-latest
     steps:
       - name: Checkout
