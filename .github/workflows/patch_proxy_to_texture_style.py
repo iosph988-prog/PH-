@@ -127,47 +127,76 @@ header_line = text.rfind("\n", 0, header_match.start()) + 1
 section_line = text.rfind("\n", 0, section_start) + 1
 text = text[:header_line] + block(header_indent, header) + "\n\n" + text[section_line:]
 
-cards = '''private var gameCards: some View {
+cards = r'''private var gameCards: some View {
     GeometryReader { proxy in
         let width = max(130, (proxy.size.width - 12) / 2)
         HStack(spacing: 12) {
             ForEach(preloadedGames) { game in
+                let isMax = game.id == "free-fire-max"
+                let isSelected = selectedGameID == game.id
+                let accent = isMax ? Color(red: 0.40, green: 0.78, blue: 1.0) : Color(red: 1.0, green: 0.48, blue: 0.18)
+                let topColor = isMax ? Color(red: 0.08, green: 0.16, blue: 0.29) : Color(red: 0.30, green: 0.12, blue: 0.07)
+                let bottomColor = isMax ? Color(red: 0.045, green: 0.075, blue: 0.15) : Color(red: 0.13, green: 0.055, blue: 0.045)
                 Button {
                     selectedGameID = game.id
                     showingProxyCatalog = true
                 } label: {
-                    VStack(alignment: .leading, spacing: 9) {
-                        HStack {
+                    ZStack(alignment: .bottomTrailing) {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(LinearGradient(colors: [topColor, bottomColor], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        Image(systemName: isMax ? "bolt.fill" : "flame.fill")
+                            .font(.system(size: 82, weight: .black))
+                            .foregroundStyle(accent.opacity(0.10))
+                            .rotationEffect(.degrees(isMax ? 12 : -10))
+                            .offset(x: 18, y: 22)
+                        VStack(alignment: .leading, spacing: 0) {
+                            HStack(spacing: 8) {
+                                Image(systemName: isMax ? "bolt.fill" : "flame.fill")
+                                    .font(.system(size: 18, weight: .black))
+                                    .foregroundStyle(accent)
+                                    .frame(width: 38, height: 38)
+                                    .background(accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(accent.opacity(0.30), lineWidth: 1))
+                                Spacer(minLength: 0)
+                                HStack(spacing: 4) {
+                                    Image(systemName: isSelected ? "checkmark.circle.fill" : "arrow.up.right")
+                                        .font(.system(size: 9, weight: .black))
+                                    Text(isSelected ? "SELECIONADO" : "ESCOLHER")
+                                        .font(.system(size: 7, weight: .black, design: .rounded))
+                                        .tracking(0.35)
+                                }
+                                .foregroundStyle(isSelected ? accent : Color.white.opacity(0.74))
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 6)
+                                .background(Color.black.opacity(0.20), in: Capsule())
+                            }
+                            Spacer(minLength: 12)
                             Text(game.title)
-                                .font(.system(size: 15, weight: .black, design: .rounded))
+                                .font(.system(size: 14, weight: .black, design: .rounded))
                                 .foregroundStyle(.white)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.72)
-                            Spacer(minLength: 4)
-                            if selectedGameID == game.id {
-                                Text("SELECIONADO")
-                                    .font(.system(size: 8, weight: .black, design: .rounded))
-                                    .tracking(0.4)
-                                    .foregroundStyle(Color.white.opacity(0.82))
-                            }
+                            Text(isSelected ? "TOQUE PARA ABRIR PATCHES" : "PATCHES ONLINE · TOQUE PARA ESCOLHER")
+                                .font(.system(size: 8, weight: .bold, design: .rounded))
+                                .tracking(0.35)
+                                .foregroundStyle(Color.white.opacity(0.65))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                                .padding(.top, 5)
                         }
-                        Text(selectedGameID == game.id ? "Toque para abrir os patches" : "Toque para selecionar")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(Color.white.opacity(0.62))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                        Spacer(minLength: 0)
+                        .padding(13)
                     }
-                    .frame(width: width - 26, height: 92, alignment: .leading)
-                    .padding(.horizontal, 13)
-                    .background(Color.white.opacity(selectedGameID == game.id ? 0.13 : 0.065), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.white.opacity(selectedGameID == game.id ? 0.42 : 0.12), lineWidth: selectedGameID == game.id ? 1.5 : 1))
+                    .frame(width: width, height: 132)
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(isSelected ? accent.opacity(0.90) : Color.white.opacity(0.15), lineWidth: isSelected ? 1.8 : 1))
+                    .shadow(color: accent.opacity(isSelected ? 0.18 : 0.07), radius: 10, y: 4)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("\(game.title). Toque para abrir os patches online.")
             }
         }
     }
-    .frame(height: 92)
+    .frame(height: 132)
     .fullScreenCover(isPresented: $showingProxyCatalog) {
         proxyCatalogScreen
     }
@@ -322,4 +351,6 @@ game_start = text.index("private var gameCards: some View {", final_body_end)
 feature_start = text.index("private var featureList: some View {", game_start)
 game_block = text[game_start:feature_start]
 assert "remoteLogo(" not in game_block, "Free Fire game cards must not render background images"
+assert 'Image(systemName: isMax ? "bolt.fill" : "flame.fill")' in game_block, "distinct Free Fire card icons missing"
+assert ".frame(height: 132)" in game_block, "refreshed game card height missing"
 path.write_text(text, encoding="utf-8")

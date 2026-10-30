@@ -35,6 +35,8 @@ def add_app_storage(source: str, struct_name: str) -> str:
 swift = patch_file.read_text()
 if "import WebKit" not in swift:
     swift = swift.replace("import SwiftUI", "import SwiftUI\nimport WebKit", 1)
+if "import PhotosUI" not in swift:
+    swift = swift.replace("import SwiftUI", "import SwiftUI\nimport PhotosUI", 1)
 # Add a persistent, shared color preference to each view that paints a page background.
 # The workflow also concatenates TextureOnlineView into PatchProjectsView.swift.
 for view_name in ("PatchProjectsView", "ExternalPanelView", "TextureOnlineView", "MiscToolsView"):
@@ -336,6 +338,8 @@ struct ConfigPanelView: View {
     @State private var licenseExpiresAt: Date?
     @State private var customGIFURLDraft = ""
     @State private var isImportingGIF = false
+    @State private var selectedGalleryGIF: PhotosPickerItem?
+    @State private var isLoadingGalleryGIF = false
     @State private var gifImportMessage = ""
 
     private let backgroundChoices = [
@@ -479,10 +483,27 @@ struct ConfigPanelView: View {
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Color.white.opacity(0.48))
                     .fixedSize(horizontal: false, vertical: true)
+                PhotosPicker(selection: $selectedGalleryGIF, matching: .images, photoLibrary: .shared()) {
+                    Label(isLoadingGalleryGIF ? "Carregando GIF..." : "Escolher GIF da Galeria", systemImage: "photo.on.rectangle.angled")
+                        .font(.system(size: 12, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color(red: 0.18, green: 0.40, blue: 0.68), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(isLoadingGalleryGIF)
+                .onChange(of: selectedGalleryGIF) { item in
+                    guard let item else { return }
+                    Task { await importGIFFromGallery(item) }
+                }
+                Text("Escolha um GIF animado salvo no Fotos. Imagens estáticas não são aceitas.")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.48))
+                    .fixedSize(horizontal: false, vertical: true)
                 Button {
                     isImportingGIF = true
                 } label: {
-                    Label("Escolher GIF no app Arquivos", systemImage: "folder.badge.plus")
+                    Label("Ou escolher pelo app Arquivos", systemImage: "folder.badge.plus")
                         .font(.system(size: 12, weight: .bold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -581,6 +602,53 @@ struct ConfigPanelView: View {
         gifImportMessage = "Link próprio aplicado na aba PROXY."
     }
 
+    @MainActor
+    private func importGIFFromGallery(_ item: PhotosPickerItem) async {
+        isLoadingGalleryGIF = true
+        defer {
+            isLoadingGalleryGIF = false
+            selectedGalleryGIF = nil
+        }
+        do {
+            guard let data = try await item.loadTransferable(type: Data.self) else {
+                gifImportMessage = "Não foi possível ler o GIF selecionado da galeria."
+                return
+            }
+            saveGIFData(data, successMessage: "GIF da galeria importado e aplicado na aba PROXY.")
+        } catch {
+            gifImportMessage = "Não foi possível ler o GIF da galeria: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
+    private func saveGIFData(_ data: Data, successMessage: String) {
+        guard data.count <= 25 * 1024 * 1024 else {
+            gifImportMessage = "O GIF selecionado excede o limite de 25 MB."
+            return
+        }
+        let signature = String(data: Data(data.prefix(6)), encoding: .ascii)
+        guard signature == "GIF87a" || signature == "GIF89a" else {
+            gifImportMessage = "O arquivo não contém um GIF animado válido."
+            return
+        }
+        do {
+            let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("ProxyGIF", isDirectory: true)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let destination = directory.appendingPathComponent("custom-\(UUID().uuidString).gif")
+            try data.write(to: destination, options: .atomic)
+            if let previous = ProxyGIFCatalog.localFileURL(named: proxyGIFCustomFileName), previous != destination {
+                try? FileManager.default.removeItem(at: previous)
+            }
+            proxyGIFCustomFileName = destination.lastPathComponent
+            proxyGIFSelection = "customFile"
+            gifImportMessage = successMessage
+        } catch {
+            gifImportMessage = "Não foi possível salvar o GIF: \(error.localizedDescription)"
+        }
+    }
+
+    @MainActor
     private func handleGIFImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
@@ -589,28 +657,9 @@ struct ConfigPanelView: View {
             defer { if accessed { sourceURL.stopAccessingSecurityScopedResource() } }
             do {
                 let data = try Data(contentsOf: sourceURL)
-                guard data.count <= 25 * 1024 * 1024 else {
-                    gifImportMessage = "O GIF selecionado excede o limite de 25 MB."
-                    return
-                }
-                let signature = String(data: Data(data.prefix(6)), encoding: .ascii)
-                guard signature == "GIF87a" || signature == "GIF89a" else {
-                    gifImportMessage = "O arquivo escolhido não é um GIF válido."
-                    return
-                }
-                let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-                    .appendingPathComponent("ProxyGIF", isDirectory: true)
-                try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-                let destination = directory.appendingPathComponent("custom-\(UUID().uuidString).gif")
-                try data.write(to: destination, options: .atomic)
-                if let previous = ProxyGIFCatalog.localFileURL(named: proxyGIFCustomFileName), previous != destination {
-                    try? FileManager.default.removeItem(at: previous)
-                }
-                proxyGIFCustomFileName = destination.lastPathComponent
-                proxyGIFSelection = "customFile"
-                gifImportMessage = "GIF importado e aplicado na aba PROXY."
+                saveGIFData(data, successMessage: "GIF importado e aplicado na aba PROXY.")
             } catch {
-                gifImportMessage = "Não foi possível importar o GIF: \(error.localizedDescription)"
+                gifImportMessage = "Não foi possível ler o GIF: \(error.localizedDescription)"
             }
         case .failure(let error):
             gifImportMessage = "Não foi possível abrir o arquivo: \(error.localizedDescription)"

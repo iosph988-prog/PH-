@@ -2688,7 +2688,9 @@ jobs:
           assert patch.count("ConfigBackgroundChoice(title:") == 12
           assert patch.count("ProxyGIFOption(id:") == 10
           assert "ProxyGIFBannerView()" in patch and "proxyGIFSection" in patch
-          assert "Escolher GIF no app Arquivos" in patch and "Usar link próprio" in patch
+          assert "PhotosPicker(selection:" in patch and "Escolher GIF da Galeria" in patch and "import PhotosUI" in patch
+          assert "loadTransferable(type: Data.self)" in patch and "Ou escolher pelo app Arquivos" in patch
+          assert "Usar link próprio" in patch
           assert "GIF87a" in patch and "GIF89a" in patch
           assert "10 · imagem estática" in patch and "6 · vídeo em loop" in patch
           assert 'systemImage: "paintpalette.fill"' in content
@@ -2705,9 +2707,12 @@ jobs:
           assert "ProxyGIFBannerView()" not in patch[header_start:header_end]
           game_start = patch.index("private var gameCards: some View {", body_end)
           game_end = patch.index("private var featureList: some View {", game_start)
-          assert "remoteLogo(" not in patch[game_start:game_end]
+          game_block = patch[game_start:game_end]
+          assert "remoteLogo(" not in game_block
+          assert 'Image(systemName: isMax ? "bolt.fill" : "flame.fill")' in game_block
+          assert '.frame(height: 132)' in game_block
           assert 'title: "FREE FIRE"' in patch and 'title: "FREE FIRE MAX"' in patch
-          print("Full-width Proxy GIF, text-only Free Fire cards, Config, and Texture icon are ready.")
+          print("Full-width Proxy GIF, Photos gallery selector, refreshed Free Fire cards, Config, and Texture icon are ready.")
           PYCONFIGCHECK
 
       - name: Build original archive and IPA
