@@ -101,6 +101,8 @@ async function startServer() {
     catch { return res.status(503).json({ announcement: "", url: null, freeFireLogoUrl: "", freeFireMaxLogoUrl: "" }); }
   });
 
+  app.get("/api/health", (_req, res) => res.status(200).json({ status: "ok" }));
+
   app.post("/api/license/validate", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion } = req.body ?? {};
     if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
@@ -173,10 +175,15 @@ async function startServer() {
 
   app.get("/api/patches/download", async (req, res) => {
     const token = typeof req.query.t === "string" ? req.query.t : "";
-    const url = await getAuthorizedPatchUrl(token);
-    if (!url) return res.status(403).json({ valid: false, code: "download_forbidden", message: "Download não autorizado" });
-    res.setHeader("Cache-Control", "private, max-age=300");
-    return res.redirect(307, url);
+    try {
+      const url = await getAuthorizedPatchUrl(token);
+      if (!url) return res.status(403).json({ valid: false, code: "download_forbidden", message: "Download não autorizado" });
+      res.setHeader("Cache-Control", "private, max-age=300");
+      return res.redirect(307, url);
+    } catch (error) {
+      console.error("[Patch API] Download failed", error);
+      return res.status(503).json({ valid: false, code: "service_unavailable", message: "Serviço temporariamente indisponível" });
+    }
   });
 
   // tRPC API

@@ -115,7 +115,36 @@ export async function listRemotePatches(section?: PatchSection, includeInactive 
   if (section === "external") filters.push(eq(remotePatches.section, "external"));
   else if (section) filters.push(eq(remotePatches.section, normalizeSection(section)));
   const rows = await db.select({ patch: remotePatches, version: remotePatchVersions }).from(remotePatches).innerJoin(remotePatchVersions, eq(remotePatchVersions.id, remotePatches.currentVersionId)).where(and(...filters)).orderBy(remotePatches.game, remotePatches.slug);
-  return Promise.all(rows.map(async ({ patch, version }) => ({ id: patch.id, slug: patch.slug, title: patch.title, game: patch.game, section: patch.section, interfaceTab: patch.interfaceTab, logoUrl: patch.logoStorageKey ? await storageGetSignedUrl(patch.logoStorageKey) : null, versionId: version.id, version: version.version, fileName: version.fileName, sha256: version.sha256, sizeBytes: version.sizeBytes, status: version.status, publishedAt: version.publishedAt })));
+  let logoWarningLogged = false;
+  return Promise.all(rows.map(async ({ patch, version }) => {
+    let logoUrl: string | null = null;
+    if (patch.logoStorageKey) {
+      try {
+        logoUrl = await storageGetSignedUrl(patch.logoStorageKey);
+      } catch {
+        if (!logoWarningLogged) {
+          console.warn("[Patch API] Logo signing unavailable; returning catalog metadata without logos");
+          logoWarningLogged = true;
+        }
+      }
+    }
+    return {
+      id: patch.id,
+      slug: patch.slug,
+      title: patch.title,
+      game: patch.game,
+      section: patch.section,
+      interfaceTab: patch.interfaceTab,
+      logoUrl,
+      versionId: version.id,
+      version: version.version,
+      fileName: version.fileName,
+      sha256: version.sha256,
+      sizeBytes: version.sizeBytes,
+      status: version.status,
+      publishedAt: version.publishedAt,
+    };
+  }));
 }
 
 export async function updateRemotePatch(input: { id: number; updatedBy: number; title?: string; game?: string; fileName?: string; data?: Buffer; interfaceTab?: string | null; logoData?: Buffer; logoContentType?: string }) {
