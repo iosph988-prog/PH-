@@ -160,7 +160,25 @@ if not (visual_root / "index.html").is_file():
     visual_html = index_path.read_text()
     visual_html = visual_html.replace("url('/assets/", "url('./assets/")
     visual_html = visual_html.replace('url("/assets/', 'url("./assets/')
-    bridge = """\nconst phNativeBase64 = bytes => {\n  const chunk = 0x8000; let binary = '';\n  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));\n  return btoa(binary);\n};\nconst phSendNativeTexture = (name, version, bytes) => {\n  try { window.webkit?.messageHandlers?.phvisualDownload?.postMessage({name, version, base64: phNativeBase64(bytes)}); } catch (error) { console.warn('PH native texture bridge failed', error); }\n};\n"""
+    bridge = """\nconst phNativeBase64 = bytes => {
+  const chunk = 0x8000; let binary = '';
+  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));
+  return btoa(binary);
+};
+const phSendNativeTexture = (name, version, bytes) => {
+  try {
+    const handler = window.webkit?.messageHandlers?.phvisualDownload;
+    if (!handler) return;
+    const id = 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    const chunkSize = 0x40000;
+    handler.postMessage({type:'begin', id, name, version, total: Math.ceil(bytes.length / chunkSize)});
+    for (let offset = 0, index = 0; offset < bytes.length; offset += chunkSize, index++) {
+      handler.postMessage({type:'chunk', id, index, base64: phNativeBase64(bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)))});
+    }
+    handler.postMessage({type:'end', id});
+  } catch (error) { console.warn('PH native texture bridge failed', error); }
+};
+"""
     visual_html = visual_html.replace("const saveFile=(bytes,name)=>{", bridge + "\n  const saveFile=(bytes,name)=>{", 1)
     export_anchor = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
     export_replacement = "const packaged=await packageOne(version,bytes);\n        phSendNativeTexture(packaged.name,version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
@@ -915,14 +933,34 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
 }
 
 private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
+    private struct PendingTransfer {
+        var name: String
+        var version: String
+        var total: Int
+        var chunks: [Int: String] = [:]
+    }
+    private var pending: [String: PendingTransfer] = [:]
+
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == "phvisualDownload",
-              let body = message.body as? [String: Any],
-              let name = body["name"] as? String,
-              let version = body["version"] as? String,
-              let encoded = body["base64"] as? String,
-              let bundleData = Data(base64Encoded: encoded),
+        guard message.name == "phvisualDownload", let body = message.body as? [String: Any],
+              let type = body["type"] as? String, let id = body["id"] as? String else { return }
+        if type == "begin", let name = body["name"] as? String, let version = body["version"] as? String,
+           let total = body["total"] as? Int {
+            pending[id] = PendingTransfer(name: name, version: version, total: total)
+            return
+        }
+        if type == "chunk", let index = body["index"] as? Int, let encoded = body["base64"] as? String,
+           var transfer = pending[id] {
+            transfer.chunks[index] = encoded
+            pending[id] = transfer
+            return
+        }
+        guard type == "end", let transfer = pending.removeValue(forKey: id),
+              transfer.chunks.count == transfer.total,
+              let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()),
               !bundleData.isEmpty else { return }
+        let name = transfer.name
+        let version = transfer.version
         do {
             let isMax = version.hasSuffix("-max")
             let isAndroid = version.hasPrefix("android-")
@@ -946,7 +984,9 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
             let safeName = name.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
             let outputURL = directory.appendingPathComponent(safeName + ".3105")
             try encodedPackage.data.write(to: outputURL, options: .atomic)
-            NotificationCenter.default.post(name: Notification.Name("phvisual.texture.created"), object: outputURL)
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("phvisual.texture.created"), object: outputURL)
+            }
         } catch {
             print("PH visual 3105 conversion failed: \(error)")
         }
