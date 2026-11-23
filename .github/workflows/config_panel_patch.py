@@ -110,7 +110,7 @@ texture = texture.replace(
 )
 texture = texture.replace(
     '                   .task { await load() }\n',
-    '                   .task { localGeneratedTextures = localTextureFiles(); await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles(); message = "MOD convertido para .3105 e enviado para TEXTURA." }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.failed"))) { note in message = "Falha ao converter MOD: \(note.object as? String ?? "erro desconhecido")" }\n',
+    '                   .task { localGeneratedTextures = localTextureFiles(); await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles(); message = "MOD convertido para .3105. Enviando para TEXTURA online..."; Task { await load() } }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.remoteUploaded"))) { _ in message = "MOD enviado para TEXTURA online."; Task { await load() } }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.failed"))) { note in message = "Falha no MOD: \(note.object as? String ?? "erro desconhecido")" }\n',
     1,
 )
 texture = texture.replace(
@@ -961,75 +961,64 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
 }
 
 private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
-    private struct PendingTransfer {
-        var version: String
-        var relativePath: String
-        var total: Int
-        var chunks: [Int: String] = [:]
-    }
+    private struct PendingTransfer { var version: String; var relativePath: String; var total: Int; var chunks: [Int: String] = [:] }
     private var pending: [String: PendingTransfer] = [:]
-
+    private func notify(_ name: String, _ object: Any? = nil) { DispatchQueue.main.async { NotificationCenter.default.post(name: Notification.Name(name), object: object) } }
+    private func uploadToTextureAPI(data: Data, fileName: String, bundleID: String) async throws {
+        guard let key = LicenseStore.storedKey, !key.isEmpty else { throw NSError(domain: "TextureUpload", code: 401, userInfo: [NSLocalizedDescriptionKey: "Faça login antes de criar o MOD."]) }
+        guard let endpoint = URL(string: "https://api-production-182c.up.railway.app/api/patches/texture/upload") else { throw URLError(.badURL) }
+        var request = URLRequest(url: endpoint); request.httpMethod = "POST"; request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        let body: [String: Any] = [
+            "key": key,
+            "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "texture-device",
+            "package": Bundle.main.bundleIdentifier ?? "com.apple.mobile.MobileHouseArrest",
+            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
+            "file_name": fileName,
+            "title": "PH XITER \(fileName)",
+            "game": bundleID.contains("freefiremax") ? "free-fire-max" : "free-fire",
+            "data_base64": data.base64EncodedString()
+        ]
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (responseData, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+            let serverMessage = (try? JSONSerialization.jsonObject(with: responseData) as? [String: Any])?["message"] as? String
+            throw NSError(domain: "TextureUpload", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: serverMessage ?? "A API recusou o upload do MOD."])
+        }
+        notify("phvisual.texture.remoteUploaded")
+    }
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == "phvisualDownload", let body = message.body as? [String: Any],
-              let type = body["type"] as? String else { return }
-        if type == "error", let text = body["message"] as? String {
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: Notification.Name("phvisual.texture.failed"), object: text)
-            }
-            return
+        guard message.name == "phvisualDownload", let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
+        if type == "error", let text = body["message"] as? String { notify("phvisual.texture.failed", text); return }
+        guard let id = body["id"] as? String else { notify("phvisual.texture.failed", "O visual não enviou o identificador da transferência."); return }
+        if type == "begin" {
+            guard let version = body["version"] as? String, let relativePath = body["relativePath"] as? String, let total = (body["total"] as? NSNumber)?.intValue, total > 0 else { notify("phvisual.texture.failed", "Transferência do AssetBundle inválida."); return }
+            pending[id] = PendingTransfer(version: version, relativePath: relativePath, total: total); return
         }
-        guard let id = body["id"] as? String else { return }
-        if type == "begin", let version = body["version"] as? String, let relativePath = body["relativePath"] as? String,
-           let total = body["total"] as? Int {
-            pending[id] = PendingTransfer(version: version, relativePath: relativePath, total: total)
-            return
+        if type == "chunk" {
+            guard let index = (body["index"] as? NSNumber)?.intValue, let encoded = body["base64"] as? String, var transfer = pending[id], index >= 0, index < transfer.total else { notify("phvisual.texture.failed", "Bloco inválido recebido do visual."); return }
+            transfer.chunks[index] = encoded; pending[id] = transfer; return
         }
-        if type == "chunk", let index = body["index"] as? Int, let encoded = body["base64"] as? String,
-           var transfer = pending[id] {
-            transfer.chunks[index] = encoded
-            pending[id] = transfer
-            return
-        }
-        guard type == "end", let transfer = pending.removeValue(forKey: id),
-              transfer.chunks.count == transfer.total,
-              let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()),
-              !bundleData.isEmpty else { return }
+        guard type == "end", let transfer = pending.removeValue(forKey: id) else { notify("phvisual.texture.failed", "Finalização da transferência inválida."); return }
+        guard transfer.chunks.count == transfer.total else { notify("phvisual.texture.failed", "A transferência do AssetBundle terminou incompleta."); return }
+        guard let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()), !bundleData.isEmpty else { notify("phvisual.texture.failed", "Não foi possível reconstruir o AssetBundle."); return }
         do {
-            let isMax = transfer.version.hasSuffix("-max")
-            let isAndroid = transfer.version.hasPrefix("android-")
-            let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
+            let isMax = transfer.version.hasSuffix("-max"); let isAndroid = transfer.version.hasPrefix("android-"); let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
             var relativePath = transfer.relativePath
-            if isAndroid, relativePath.hasPrefix(bundleID + "/") {
-                relativePath = String(relativePath.dropFirst(bundleID.count + 1))
-            }
+            if isAndroid, relativePath.hasPrefix(bundleID + "/") { relativePath = String(relativePath.dropFirst(bundleID.count + 1)) }
             guard relativePath.contains("optionalavatarres/gameassetbundles/") else { throw PatchPackageError.invalidProject }
             let bundleName = URL(fileURLWithPath: relativePath).lastPathComponent
-            let project = PatchProject(
-                name: "PH XITER \(bundleName)",
-                author: "PH XITER",
-                bundleIdentifiers: [bundleID],
-                rules: [PatchRule(
-                    bundleID: bundleID,
-                    relativePath: relativePath,
-                    replacementFilename: bundleName,
-                    replacementData: bundleData
-                )]
-            )
+            let project = PatchProject(name: "PH XITER \(bundleName)", author: "PH XITER", bundleIdentifiers: [bundleID], rules: [PatchRule(bundleID: bundleID, relativePath: relativePath, replacementFilename: bundleName, replacementData: bundleData)])
             let encodedPackage = try PatchPackageCodec.encodeLegacyV2(project: project, password: nil)
             let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
             let safeName = bundleName.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
             let outputURL = directory.appendingPathComponent(safeName + ".3105")
             try encodedPackage.data.write(to: outputURL, options: .atomic)
-            DispatchQueue.main.async {
-                NotificationCenter.default.post(name: Notification.Name("phvisual.texture.created"), object: outputURL)
-            }
-        } catch {
-            print("PH visual 3105 conversion failed: \(error)")
-        }
+            notify("phvisual.texture.created", outputURL)
+            Task { do { try await uploadToTextureAPI(data: encodedPackage.data, fileName: outputURL.lastPathComponent, bundleID: bundleID) } catch { notify("phvisual.texture.failed", "Arquivo salvo localmente, mas a API não recebeu: \(error.localizedDescription)") } }
+        } catch { notify("phvisual.texture.failed", error.localizedDescription); print("PH visual 3105 conversion failed: \(error)") }
     }
 }
-
 private struct VisualProjectWebView: UIViewRepresentable {
     func makeCoordinator() -> PHVisualDownloadHandler { PHVisualDownloadHandler() }
 

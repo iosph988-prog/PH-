@@ -10,7 +10,7 @@ import { createContext } from "./context";
 import { deleteExpiredLicenses, validateLicense } from "../licenses";
 import { findScheduledJob } from "../scheduled";
 import { sdk } from "./sdk";
-import { getAuthorizedPatchUrl, listRemotePatchesForLicense } from "../remotePatches";
+import { getAuthorizedPatchUrl, listRemotePatchesForLicense, publishRemotePatch, hash as hashPatch } from "../remotePatches";
 import { getAnnouncement } from "../announcements";
 import { getLicenseCreatorId } from "../licenses";
 import { serveStatic, setupVite } from "./vite";
@@ -138,6 +138,37 @@ async function startServer() {
     }
   });
 
+  app.post("/api/patches/texture/upload", async (req, res) => {
+    const { key, device_id: deviceId, package: packageName, app_version: appVersion, file_name: fileName, title, game, data_base64: dataBase64 } = req.body ?? {};
+    if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
+    if ([key, deviceId, packageName, appVersion, fileName, dataBase64].some(value => typeof value !== "string" || !value.trim())) {
+      return res.status(400).json({ valid: false, code: "invalid_request", message: "Campos obrigatórios: key, device_id, package, app_version, file_name e data_base64" });
+    }
+    if (!isAllowedClient(packageName, appVersion)) return res.status(403).json(unsupportedClient());
+    try {
+      const validation = await validateLicense({ key, deviceId, packageName, appVersion, ipAddress: req.ip });
+      if (!validation.valid) return res.status(403).json(validation);
+      const creatorId = await getLicenseCreatorId(key);
+      if (!creatorId) return res.status(403).json({ valid: false, code: "invalid_key", message: "Licença sem proprietário válido" });
+      const data = Buffer.from(dataBase64, "base64");
+      const safeTitle = typeof title === "string" && title.trim() ? title.trim().slice(0, 160) : `PH XITER ${fileName}`;
+      const safeGame = typeof game === "string" && game.trim() ? game.trim() : "free-fire";
+      const slug = `ph-visual-${hashPatch(data).slice(0, 24)}`;
+      const published = await publishRemotePatch({
+        createdBy: creatorId,
+        slug,
+        title: safeTitle,
+        game: safeGame,
+        section: "texture",
+        fileName: fileName.trim(),
+        data,
+      });
+      return res.status(200).json({ valid: true, uploaded: true, ...published });
+    } catch (error) {
+      console.error("[Texture Upload API] Failed", error);
+      return res.status(400).json({ valid: false, code: "upload_failed", message: error instanceof Error ? error.message : "Não foi possível publicar a textura" });
+    }
+  });
   app.post("/api/patches/catalog", async (req, res) => {
     const { key, device_id: deviceId, package: packageName, app_version: appVersion, section } = req.body ?? {};
     if (!hasValidIosToken(req)) return res.status(403).json({ valid: false, code: "invalid_client_token", message: "Cliente não autorizado" });
