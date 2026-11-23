@@ -83,6 +83,52 @@ patch_file.write_text(swift)
 
 texture = texture_file.read_text()
 texture = add_app_storage(texture, "TextureOnlineView")
+texture = texture.replace(
+    'struct TextureOnlineView: View {\n',
+    'struct TextureOnlineView: View {\n              @State private var localGeneratedTextures: [URL] = []\n',
+    1,
+)
+texture = texture.replace(
+    '                              Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))\n',
+    '''                              Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
+                              if !localGeneratedTextures.isEmpty {
+                                  Text("MODS CRIADOS NO VIZUAL").font(.headline).foregroundStyle(accentColor)
+                                  ForEach(localGeneratedTextures, id: \\.path) { url in
+                                      HStack(spacing: 10) {
+                                          Image(systemName: "doc.badge.gearshape").foregroundStyle(accentColor)
+                                          Text(url.lastPathComponent).font(.caption).lineLimit(2).foregroundStyle(accentColor)
+                                          Spacer()
+                                          Button("Aplicar") { Task { await applyLocalTexture(url) } }.buttonStyle(.borderedProminent).tint(accentColor)
+                                      }.padding(10).background(darkMode ? Color.white.opacity(0.07) : Color.black.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 12))
+                                  }
+                              }
+''',
+    1,
+)
+texture = texture.replace(
+    '                   .task { await load() }\n',
+    '                   .task { localGeneratedTextures = localTextureFiles(); await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles() }\n',
+    1,
+)
+texture = texture.replace(
+    '              private func load() async {\n',
+    '''              private func localTextureFiles() -> [URL] {
+                  let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
+                  return (try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles]))?.filter { $0.pathExtension.lowercased() == "3105" }.sorted { $0.lastPathComponent.localizedCaseInsensitiveCompare($1.lastPathComponent) == .orderedAscending } ?? []
+              }
+              private func applyLocalTexture(_ url: URL) async {
+                  do {
+                      let decoded = try PatchPackageCodec.decode(try Data(contentsOf: url), password: nil)
+                      _ = try DevicePatchService.apply(project: decoded.project)
+                      await MainActor.run { message = "Aplicado: \\(url.lastPathComponent)" }
+                  } catch {
+                      await MainActor.run { message = "Não foi possível aplicar: \\(error.localizedDescription)" }
+                  }
+              }
+              private func load() async {
+''',
+    1,
+)
 texture_bg = "Color(red: 0.018, green: 0.020, blue: 0.027)"
 if texture.count(texture_bg) < 2:
     raise SystemExit("TEXTURA background anchors not found")
@@ -91,7 +137,7 @@ texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image
 texture_file.write_text(texture)
 
 # Download the Portuguese PH XITER visual project and add it as a local folder resource.
-visual_root = app.parent / "VisualProject"
+visual_root = app / "VisualProject"
 if not (visual_root / "index.html").is_file():
     mediafire_page = "https://www.mediafire.com/file/pxee5hw5vjw7ir5/fantastic-integrity.zip/file"
     page_html = urllib.request.urlopen(mediafire_page, timeout=45).read().decode("utf-8", "replace")
@@ -110,7 +156,15 @@ if not (visual_root / "index.html").is_file():
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(archive.read(member))
     index_path = visual_root / "index.html"
-    index_path.write_text(index_path.read_text().replace("url('/assets/", "url('./assets/").replace('url("/assets/', 'url("./assets/'))
+    visual_html = index_path.read_text()
+    visual_html = visual_html.replace("url('/assets/", "url('./assets/")
+    visual_html = visual_html.replace('url("/assets/', 'url("./assets/')
+    bridge = """\nconst phNativeBase64 = bytes => {\n  const chunk = 0x8000; let binary = '';\n  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));\n  return btoa(binary);\n};\nconst phSendNativeTexture = (name, version, bytes) => {\n  try { window.webkit?.messageHandlers?.phvisualDownload?.postMessage({name, version, base64: phNativeBase64(bytes)}); } catch (error) { console.warn('PH native texture bridge failed', error); }\n};\n"""
+    visual_html = visual_html.replace("const saveFile=(bytes,name)=>{", bridge + "\n  const saveFile=(bytes,name)=>{", 1)
+    export_anchor = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
+    export_replacement = "const packaged=await packageOne(version,bytes);\n        phSendNativeTexture(packaged.name,version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
+    visual_html = visual_html.replace(export_anchor, export_replacement, 1)
+    index_path.write_text(visual_html)
 
 project_file = app.parent / "ThreeOneOSFive.xcodeproj/project.pbxproj"
 if not project_file.is_file():
@@ -123,7 +177,7 @@ if "path = VisualProject;" not in pbx:
     build_ref = f"\t\t{build_id} /* VisualProject */ = {{isa = PBXBuildFile; fileRef = {file_id} /* VisualProject */; }};\n"
     pbx = pbx.replace("/* End PBXFileReference section */", file_ref + "/* End PBXFileReference section */", 1)
     pbx = pbx.replace("/* End PBXBuildFile section */", build_ref + "/* End PBXBuildFile section */", 1)
-    root_match = re.search(r"mainGroup\s*=\s*([A-Za-z0-9_-]+)\s*;", pbx)
+    root_match = re.search(r"mainGroup = ([A-F0-9]{24})(?: /\* .*? \*/)?;", pbx)
     if not root_match:
         raise SystemExit("Xcode main group not found")
     root_id = root_match.group(1)
@@ -132,7 +186,7 @@ if "path = VisualProject;" not in pbx:
         raise SystemExit("Xcode root group children not found")
     insert_at = group_match.start(1) + len(group_match.group(1))
     pbx = pbx[:insert_at] + f"\n\t\t\t\t{file_id} /* VisualProject */," + pbx[insert_at:]
-    resources_match = re.search(r"(isa = PBXResourcesBuildPhase;.*?files = [(](.*?)[)])", pbx, re.S)
+    resources_match = re.search(r"(isa = PBXResourcesBuildPhase;.*?files = \((.*?)\n\t\t\);", pbx, re.S)
     if not resources_match:
         raise SystemExit("Xcode resources phase not found")
     resources_end = resources_match.start(2) + len(resources_match.group(2))
@@ -822,7 +876,8 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
             return
         }
         let relativePath = url.path.removingPercentEncoding ?? url.path
-        let fileURL = root.appendingPathComponent(relativePath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))).standardizedFileURL
+        let fileURL = root.appendingPathComponent(relativePath.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
+            .standardizedFileURL
         guard fileURL.path.hasPrefix(root.path + "/"), FileManager.default.fileExists(atPath: fileURL.path) else {
             urlSchemeTask.didFailWithError(NSError(domain: "VisualProject", code: 404))
             return
@@ -841,7 +896,12 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
             case "svg": mime = "image/svg+xml"
             default: mime = "application/octet-stream"
             }
-            let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": mime, "Content-Length": "\(data.count)"])!
+            let response = HTTPURLResponse(
+                url: url,
+                statusCode: 200,
+                httpVersion: "HTTP/1.1",
+                headerFields: ["Content-Type": mime, "Content-Length": "\(data.count)"]
+            )!
             urlSchemeTask.didReceive(response)
             urlSchemeTask.didReceive(data)
             urlSchemeTask.didFinish()
@@ -853,14 +913,60 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
 }
 
+private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        guard message.name == "phvisualDownload",
+              let body = message.body as? [String: Any],
+              let name = body["name"] as? String,
+              let version = body["version"] as? String,
+              let encoded = body["base64"] as? String,
+              let bundleData = Data(base64Encoded: encoded),
+              !bundleData.isEmpty else { return }
+        do {
+            let isMax = version.hasSuffix("-max")
+            let isAndroid = version.hasPrefix("android-")
+            let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
+            let platform = isAndroid ? "android" : "ios"
+            let relativePath: String
+            if isAndroid {
+                relativePath = "\(bundleID)/files/contentcache/Optional/\(platform)/optionalavatarres/gameassetbundles/\(name)"
+            } else {
+                relativePath = "Documents/contentcache/Optional/\(platform)/optionalavatarres/gameassetbundles/\(name)"
+            }
+            let project = PatchProject(
+                name: "PH XITER \(name)",
+                author: "PH XITER",
+                bundleIdentifiers: [bundleID],
+                rules: [PatchRule(bundleID: bundleID, relativePath: relativePath, replacementFilename: name, replacementData: bundleData)]
+            )
+            let encodedPackage = try PatchPackageCodec.encodeLegacyV2(project: project, password: nil)
+            let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let safeName = name.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
+            let outputURL = directory.appendingPathComponent(safeName + ".3105")
+            try encodedPackage.data.write(to: outputURL, options: .atomic)
+            NotificationCenter.default.post(name: Notification.Name("phvisual.texture.created"), object: outputURL)
+        } catch {
+            print("PH visual 3105 conversion failed: \(error)")
+        }
+    }
+}
+
 private struct VisualProjectWebView: UIViewRepresentable {
+    func makeCoordinator() -> PHVisualDownloadHandler { PHVisualDownloadHandler() }
+
     func makeUIView(context: Context) -> WKWebView {
         let directRoot = Bundle.main.bundleURL.appendingPathComponent("VisualProject", isDirectory: true)
-        let projectRoot = FileManager.default.fileExists(atPath: directRoot.path) ? directRoot : Bundle.main.url(forResource: "VisualProject", withExtension: nil)
+        let projectRoot = FileManager.default.fileExists(atPath: directRoot.path)
+            ? directRoot
+            : Bundle.main.url(forResource: "VisualProject", withExtension: nil)
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.websiteDataStore = .default()
-        if let projectRoot { configuration.setURLSchemeHandler(VisualProjectSchemeHandler(root: projectRoot), forURLScheme: "phvisual") }
+        configuration.userContentController.add(context.coordinator, name: "phvisualDownload")
+        if let projectRoot {
+            configuration.setURLSchemeHandler(VisualProjectSchemeHandler(root: projectRoot), forURLScheme: "phvisual")
+        }
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.isOpaque = false
         webView.backgroundColor = .clear
@@ -869,10 +975,13 @@ private struct VisualProjectWebView: UIViewRepresentable {
         webView.allowsBackForwardNavigationGestures = true
         if let projectRoot {
             let index = projectRoot.appendingPathComponent("index.html")
-            if FileManager.default.fileExists(atPath: index.path) { webView.load(URLRequest(url: URL(string: "phvisual://localhost/index.html")!)) }
+            if FileManager.default.fileExists(atPath: index.path) {
+                webView.load(URLRequest(url: URL(string: "phvisual://localhost/index.html")!))
+            }
         }
         return webView
     }
+
     func updateUIView(_ webView: WKWebView, context: Context) {}
 }
 
@@ -887,4 +996,3 @@ struct VisualPanelView: View {
 if "struct VisualPanelView: View" not in patch_file.read_text():
     with patch_file.open("a") as handle:
         handle.write(visual_swift)
-
