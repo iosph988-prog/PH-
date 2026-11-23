@@ -99,6 +99,9 @@ texture = texture.replace(
                                           Text(url.lastPathComponent).font(.caption).lineLimit(2).foregroundStyle(accentColor)
                                           Spacer()
                                           Button("Aplicar") { Task { await applyLocalTexture(url) } }.buttonStyle(.borderedProminent).tint(accentColor)
+                                          if hasLocalReceipt(for: url) {
+                                              Button("Restaurar") { Task { await restoreLocalTexture(url) } }.buttonStyle(.bordered).tint(.orange)
+                                          }
                                       }.padding(10).background(darkMode ? Color.white.opacity(0.07) : Color.black.opacity(0.06)).clipShape(RoundedRectangle(cornerRadius: 12))
                                   }
                               }
@@ -116,13 +119,30 @@ texture = texture.replace(
                   let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
                   return (try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey], options: [.skipsHiddenFiles]))?.filter { $0.pathExtension.lowercased() == "3105" }.sorted { $0.lastPathComponent.localizedCaseInsensitiveCompare($1.lastPathComponent) == .orderedAscending } ?? []
               }
+              private func receiptKey(for url: URL) -> String { "ph.texture.receipt." + url.lastPathComponent }
+              private func hasLocalReceipt(for url: URL) -> Bool {
+                  guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value) else { return false }
+                  return PatchProjectLibrary.latestReceipt(projectID: projectID) != nil
+              }
               private func applyLocalTexture(_ url: URL) async {
                   do {
                       let decoded = try PatchPackageCodec.decode(try Data(contentsOf: url), password: nil)
-                      _ = try DevicePatchService.apply(project: decoded.project)
-                      await MainActor.run { message = "Aplicado: \\(url.lastPathComponent)" }
+                      let receipt = try DevicePatchService.apply(project: decoded.project)
+                      UserDefaults.standard.set(receipt.projectID.uuidString, forKey: receiptKey(for: url))
+                      await MainActor.run { message = "Aplicado: \\(url.lastPathComponent); backup criado para restauração." }
                   } catch {
                       await MainActor.run { message = "Não foi possível aplicar: \\(error.localizedDescription)" }
+                  }
+              }
+              private func restoreLocalTexture(_ url: URL) async {
+                  do {
+                      let value = UserDefaults.standard.string(forKey: receiptKey(for: url))
+                      guard let value, let projectID = UUID(uuidString: value), let receipt = PatchProjectLibrary.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
+                      try DevicePatchService.restore(receipt: receipt, allowChangedTargets: true)
+                      UserDefaults.standard.removeObject(forKey: receiptKey(for: url))
+                      await MainActor.run { message = "Restaurado: \\(url.lastPathComponent)" }
+                  } catch {
+                      await MainActor.run { message = "Não foi possível restaurar: \\(error.localizedDescription)" }
                   }
               }
               private func load() async {
@@ -957,31 +977,58 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
         }
         guard type == "end", let transfer = pending.removeValue(forKey: id),
               transfer.chunks.count == transfer.total,
-              let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()),
-              !bundleData.isEmpty else { return }
-        let name = transfer.name
-        let version = transfer.version
+              let zipData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()),
+              !zipData.isEmpty else { return }
         do {
-            let isMax = version.hasSuffix("-max")
-            let isAndroid = version.hasPrefix("android-")
+            let isMax = transfer.version.hasSuffix("-max")
+            let isAndroid = transfer.version.hasPrefix("android-")
             let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
-            let platform = isAndroid ? "android" : "ios"
-            let relativePath: String
-            if isAndroid {
-                relativePath = "\(bundleID)/files/contentcache/Optional/\(platform)/optionalavatarres/gameassetbundles/\(name)"
-            } else {
-                relativePath = "Documents/contentcache/Optional/\(platform)/optionalavatarres/gameassetbundles/\(name)"
+            let extractionRoot = FileManager.default.temporaryDirectory.appendingPathComponent("PHVisualZIP", isDirectory: true)
+            try FileManager.default.createDirectory(at: extractionRoot, withIntermediateDirectories: true)
+            let archiveURL = extractionRoot.appendingPathComponent("\(id).zip")
+            try zipData.write(to: archiveURL, options: .atomic)
+            let extracted = try ZIPArchiveExtractor.extract(archiveURL: archiveURL, into: extractionRoot)
+            defer {
+                try? FileManager.default.removeItem(at: archiveURL)
+                try? FileManager.default.removeItem(at: extracted.destinationURL)
             }
+            guard let enumerator = FileManager.default.enumerator(
+                at: extracted.destinationURL,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            ) else { throw PatchPackageError.invalidProject }
+            var rules: [PatchRule] = []
+            while let item = enumerator.nextObject() as? URL {
+                let values = try item.resourceValues(forKeys: [.isRegularFileKey])
+                guard values.isRegularFile == true else { continue }
+                let fullPath = item.path
+                let rootPrefix = extracted.destinationURL.path.hasSuffix("/") ? extracted.destinationURL.path : extracted.destinationURL.path + "/"
+                var relativePath = String(fullPath.dropFirst(rootPrefix.count))
+                if isAndroid, relativePath.hasPrefix(bundleID + "/") {
+                    relativePath = String(relativePath.dropFirst(bundleID.count + 1))
+                }
+                guard !relativePath.isEmpty,
+                      relativePath.contains("optionalavatarres/gameassetbundles/") else { continue }
+                let replacementData = try Data(contentsOf: item, options: .mappedIfSafe)
+                rules.append(PatchRule(
+                    bundleID: bundleID,
+                    relativePath: relativePath,
+                    replacementFilename: item.lastPathComponent,
+                    replacementData: replacementData
+                ))
+            }
+            guard !rules.isEmpty else { throw PatchPackageError.invalidProject }
             let project = PatchProject(
-                name: "PH XITER \(name)",
+                name: "PH XITER \(rules.map(\.replacementFilename).joined(separator: ", "))",
                 author: "PH XITER",
                 bundleIdentifiers: [bundleID],
-                rules: [PatchRule(bundleID: bundleID, relativePath: relativePath, replacementFilename: name, replacementData: bundleData)]
+                rules: rules
             )
             let encodedPackage = try PatchPackageCodec.encodeLegacyV2(project: project, password: nil)
             let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            let safeName = name.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
+            let outputName = rules.count == 1 ? rules[0].replacementFilename : "PH-XITER-\(transfer.name.replacingOccurrences(of: ".zip", with: ""))"
+            let safeName = outputName.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
             let outputURL = directory.appendingPathComponent(safeName + ".3105")
             try encodedPackage.data.write(to: outputURL, options: .atomic)
             DispatchQueue.main.async {
