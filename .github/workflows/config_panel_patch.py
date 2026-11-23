@@ -177,7 +177,7 @@ if "path = VisualProject;" not in pbx:
     build_ref = f"\t\t{build_id} /* VisualProject */ = {{isa = PBXBuildFile; fileRef = {file_id} /* VisualProject */; }};\n"
     pbx = pbx.replace("/* End PBXFileReference section */", file_ref + "/* End PBXFileReference section */", 1)
     pbx = pbx.replace("/* End PBXBuildFile section */", build_ref + "/* End PBXBuildFile section */", 1)
-    root_match = re.search(r"mainGroup = ([A-F0-9]{24})(?: /\* .*? \*/)?;", pbx)
+    root_match = re.search(r"mainGroup\s*=\s*([A-Za-z0-9_-]+)(?: /\* .*? \*/)?;", pbx)
     if not root_match:
         raise SystemExit("Xcode main group not found")
     root_id = root_match.group(1)
