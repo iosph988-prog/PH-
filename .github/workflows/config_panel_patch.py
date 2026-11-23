@@ -1,4 +1,4 @@
-fg#!/usr/bin/env python3
+#!/usr/bin/env python3
 """Add a Config tab, move live profile metrics there, and share a background palette across tabs."""
 from pathlib import Path
 import re
