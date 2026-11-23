@@ -190,13 +190,23 @@ const phSendNativeTexture = (name, version, bytes) => {
     const handler = window.webkit?.messageHandlers?.phvisualDownload;
     if (!handler) return;
     const source = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-    const entries = fflate.unzipSync(source);
-    const rawPath = Object.keys(entries).find(path => (path.includes('Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/') || path.includes('/ios/optionalavatarres/gameassetbundles/')) && !path.endsWith('/'));
-    if (!rawPath) throw new Error('AssetBundle iOS não encontrado no ZIP exportado.');
-    const iosMarker = 'Documents/contentcache/Optional/ios/';
-    const markerIndex = rawPath.indexOf(iosMarker);
-    const relativePath = markerIndex >= 0 ? rawPath.slice(markerIndex) : 'Documents/contentcache/Optional/' + rawPath.slice(rawPath.indexOf('ios/'));
-    const payload = entries[rawPath];
+    const looksLikeZip = source.length >= 4 && source[0] === 0x50 && source[1] === 0x4b;
+    let payload;
+    let relativePath;
+    if (looksLikeZip) {
+      const entries = fflate.unzipSync(source);
+      const rawPath = Object.keys(entries).find(path => (path.includes('Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/') || path.includes('/ios/optionalavatarres/gameassetbundles/')) && !path.endsWith('/'));
+      if (!rawPath) throw new Error('O ZIP não contém um AssetBundle iOS.');
+      const iosMarker = 'Documents/contentcache/Optional/ios/';
+      const markerIndex = rawPath.indexOf(iosMarker);
+      relativePath = markerIndex >= 0 ? rawPath.slice(markerIndex) : 'Documents/contentcache/Optional/' + rawPath.slice(rawPath.indexOf('ios/'));
+      payload = entries[rawPath];
+    } else {
+      const bundleName = String(name || 'optionalab_avatar').split('/').pop().replace(/\.(zip|3105)$/i, '') || 'optionalab_avatar';
+      relativePath = 'Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/' + bundleName;
+      payload = source;
+    }
+    if (!payload || !payload.length) throw new Error('Arquivo bruto do Criar MOD vazio.');
     const id = 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     const chunkSize = 0x8000;
     const iosVersion = String(version).toLowerCase().includes('max') ? 'ios-max' : 'ios';
