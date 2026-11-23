@@ -132,7 +132,7 @@ if "path = VisualProject;" not in pbx:
         raise SystemExit("Xcode root group children not found")
     insert_at = group_match.start(1) + len(group_match.group(1))
     pbx = pbx[:insert_at] + f"\n\t\t\t\t{file_id} /* VisualProject */," + pbx[insert_at:]
-    resources_match = re.search(r"(isa = PBXResourcesBuildPhase;.*?files = \((.*?)\n\t\t\);", pbx, re.S)
+    resources_match = re.search(r"(isa = PBXResourcesBuildPhase;.*?files = [(](.*?)[)])", pbx, re.S)
     if not resources_match:
         raise SystemExit("Xcode resources phase not found")
     resources_end = resources_match.start(2) + len(resources_match.group(2))
