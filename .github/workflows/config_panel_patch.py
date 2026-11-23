@@ -223,7 +223,7 @@ const phSendNativeTexture = (name, version, bytes) => {
 """
     visual_html = visual_html.replace("const saveFile=(bytes,name)=>{", bridge + "\n  const saveFile=(bytes,name)=>{", 1)
     export_anchor = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
-    export_replacement = "const packaged=await packageOne(version,bytes);\n        phSendNativeTexture(packaged.name,version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
+    export_replacement = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);\n        setTimeout(() => phSendNativeTexture(packaged.name,version,bytes), 0);"
     visual_html = visual_html.replace(export_anchor, export_replacement, 1)
     index_path.write_text(visual_html)
 
