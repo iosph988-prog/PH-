@@ -110,7 +110,7 @@ texture = texture.replace(
 )
 texture = texture.replace(
     '                   .task { await load() }\n',
-    '                   .task { localGeneratedTextures = localTextureFiles(); await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles(); message = "MOD convertido para .3105. Enviando para TEXTURA online..."; Task { await load() } }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.remoteUploaded"))) { _ in message = "MOD enviado para TEXTURA online."; Task { await load() } }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.failed"))) { note in message = "Falha no MOD: \(note.object as? String ?? "erro desconhecido")" }\n',
+    '                   .task { localGeneratedTextures = localTextureFiles(); message = UserDefaults.standard.string(forKey: "ph.texture.lastStatus") ?? message; await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles(); message = "MOD convertido para .3105. Enviando para TEXTURA online..."; Task { await load() } }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.remoteUploaded"))) { _ in message = "MOD enviado para TEXTURA online."; Task { await load() } }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.failed"))) { note in message = "Falha no MOD: \(note.object as? String ?? "erro desconhecido")" }\n',
     1,
 )
 texture = texture.replace(
@@ -195,7 +195,7 @@ const phSendNativeTexture = (name, version, bytes) => {
     if (!relativePath) throw new Error('AssetBundle não encontrado no ZIP exportado.');
     const payload = entries[relativePath];
     const id = 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-    const chunkSize = 0x40000;
+    const chunkSize = 0x8000
     handler.postMessage({type:'begin', id, version, relativePath, total: Math.ceil(payload.length / chunkSize)});
     for (let offset = 0, index = 0; offset < payload.length; offset += chunkSize, index++) {
       handler.postMessage({type:'chunk', id, index, base64: phNativeBase64(payload.subarray(offset, Math.min(offset + chunkSize, payload.length)))});
@@ -963,7 +963,11 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
 private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
     private struct PendingTransfer { var version: String; var relativePath: String; var total: Int; var chunks: [Int: String] = [:] }
     private var pending: [String: PendingTransfer] = [:]
-    private func notify(_ name: String, _ object: Any? = nil) { DispatchQueue.main.async { NotificationCenter.default.post(name: Notification.Name(name), object: object) } }
+    private func notify(_ name: String, _ object: Any? = nil) {
+        let status = object.map { String(describing: $0) } ?? (name == "phvisual.texture.remoteUploaded" ? "MOD enviado para TEXTURA online." : "")
+        if !status.isEmpty { UserDefaults.standard.set(status, forKey: "ph.texture.lastStatus") }
+        DispatchQueue.main.async { NotificationCenter.default.post(name: Notification.Name(name), object: object) }
+    }
     private func uploadToTextureAPI(data: Data, fileName: String, bundleID: String) async throws {
         guard let key = LicenseStore.storedKey, !key.isEmpty else { throw NSError(domain: "TextureUpload", code: 401, userInfo: [NSLocalizedDescriptionKey: "Faça login antes de criar o MOD."]) }
         guard let endpoint = URL(string: "https://api-production-182c.up.railway.app/api/patches/texture/upload") else { throw URLError(.badURL) }
