@@ -86,19 +86,21 @@ texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackg
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
 
-# Add AppSection.config and expose it in the generated ContentView navigation.
+# Add AppSection.visual/config and expose them in the generated ContentView navigation.
 nav = nav_file.read_text()
+if "    case misc\n" not in nav:
+    raise SystemExit("MISC enum case not found")
 if "    case config\n" not in nav:
-    if "    case misc\n" not in nav:
-        raise SystemExit("MISC enum case not found")
     nav = nav.replace("    case misc\n", "    case misc\n    case config\n", 1)
+if "    case visual\n" not in nav:
+    nav = nav.replace("    case config\n", "    case visual\n    case config\n", 1)
 nav = nav.replace(
+    "[.patches, .external, .texture, .misc].filter(isVisible)",
     "[.patches, .external, .texture, .visual, .misc, .config].filter(isVisible)",
-    "[.patches, .external, .texture, .misc, .config].filter(isVisible)",
 )
 nav = nav.replace(
-    "case .home, .files, .patches, .external, .texture, .visual, .misc:",
-    "case .home, .files, .patches, .external, .texture, .misc, .config:",
+    "case .home, .files, .patches, .external, .texture, .misc:",
+    "case .home, .files, .patches, .external, .texture, .visual, .misc, .config:",
 )
 nav_file.write_text(nav)
 
@@ -118,16 +120,16 @@ if "case .config:\n            ConfigPanelView()" not in content:
     )
     content = content[:match.start()] + replacement + content[match.end():]
 content = content.replace(
+    "[.patches, .external, .texture, .misc].filter(isVisible)",
     "[.patches, .external, .texture, .visual, .misc, .config].filter(isVisible)",
-    "[.patches, .external, .texture, .misc, .config].filter(isVisible)",
 )
 content = content.replace(
+    "[AppSection.patches, .external, .texture, .misc]",
     "[AppSection.patches, .external, .texture, .visual, .misc, .config]",
-    "[AppSection.patches, .external, .texture, .misc, .config]",
 )
 content = content.replace(
+    "ForEach([AppSection.patches, .external, .texture, .misc])",
     "ForEach([AppSection.patches, .external, .texture, .visual, .misc, .config])",
-    "ForEach([AppSection.patches, .external, .texture, .misc, .config])",
 )
 # Insert VIZUAL immediately after TEXTURA.
 if 'sectionContent(.visual)' not in content:
@@ -151,6 +153,10 @@ if 'case .config: return "Config"' not in content:
     content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .config: return "Config"', 1)
 if 'case .config: return "gearshape.fill"' not in content:
     content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .config: return "gearshape.fill"', 1)
+if 'case .visual: return "VIZUAL"' not in content:
+    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .visual: return "VIZUAL"', 1)
+if 'case .visual: return "tshirt.fill"' not in content:
+    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .visual: return "tshirt.fill"', 1)
 content = content.replace('title: language.text(section.titleKey)', 'title: section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey))')
 content = content.replace('Label(language.text(section.titleKey), systemImage: section.systemImage)', 'Label(section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey)), systemImage: section.systemImage)')
 content = content.replace(
@@ -710,13 +716,6 @@ struct ConfigPanelView: View {
         }
     }
 }
-'''
-if "struct ConfigPanelView: View" not in patch_file.read_text():
-    with patch_file.open("a") as handle:
-        handle.write(config_swift)
-
-print("Config patch applied")
-print("views:", patch_file, texture_file, content_file, nav_file)
 
 
 struct VisualPanelView: View {
@@ -747,3 +746,10 @@ struct VisualPanelView: View {
         }
     }
 }
+'''
+if "struct ConfigPanelView: View" not in patch_file.read_text():
+    with patch_file.open("a") as handle:
+        handle.write(config_swift)
+
+print("Config patch applied")
+print("views:", patch_file, texture_file, content_file, nav_file)
