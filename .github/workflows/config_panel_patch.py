@@ -3,6 +3,10 @@
 from pathlib import Path
 import re
 import sys
+import io
+import urllib.request
+import zipfile
+import uuid
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: config_panel_patch.py <ThreeOneOSFive source directory>")
@@ -85,6 +89,55 @@ if texture.count(texture_bg) < 2:
 texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackgroundHex)")
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
+
+# Download the Portuguese PH XITER visual project and add it as a local folder resource.
+visual_root = app / "VisualProject"
+if not (visual_root / "index.html").is_file():
+    mediafire_page = "https://www.mediafire.com/file/pxee5hw5vjw7ir5/fantastic-integrity.zip/file"
+    page_html = urllib.request.urlopen(mediafire_page, timeout=45).read().decode("utf-8", "replace")
+    download_match = re.search(r"https://download[^\"']+\.zip", page_html)
+    if not download_match:
+        raise SystemExit("Portuguese visual project download URL not found")
+    project_zip = urllib.request.urlopen(download_match.group(0), timeout=180).read()
+    visual_root.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(io.BytesIO(project_zip)) as archive:
+        prefix = "ph-xiter-vip-railway-main/public/"
+        for member in archive.infolist():
+            if not member.filename.startswith(prefix) or member.filename.endswith("/"):
+                continue
+            relative = Path(member.filename[len(prefix):])
+            target = visual_root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(archive.read(member))
+    index_path = visual_root / "index.html"
+    index_path.write_text(index_path.read_text().replace("url('/assets/", "url('./assets/").replace('url("/assets/', 'url("./assets/'))
+
+project_file = app.parent / "ThreeOneOSFive.xcodeproj/project.pbxproj"
+if not project_file.is_file():
+    raise SystemExit(f"Xcode project file missing: {project_file}")
+pbx = project_file.read_text()
+if "path = VisualProject;" not in pbx:
+    file_id = uuid.uuid4().hex[:24].upper()
+    build_id = uuid.uuid4().hex[:24].upper()
+    file_ref = f"\t\t{file_id} /* VisualProject */ = {{isa = PBXFileReference; lastKnownFileType = folder; path = VisualProject; sourceTree = \"<group>\"; }};\n"
+    build_ref = f"\t\t{build_id} /* VisualProject */ = {{isa = PBXBuildFile; fileRef = {file_id} /* VisualProject */; }};\n"
+    pbx = pbx.replace("/* End PBXFileReference section */", file_ref + "/* End PBXFileReference section */", 1)
+    pbx = pbx.replace("/* End PBXBuildFile section */", build_ref + "/* End PBXBuildFile section */", 1)
+    root_match = re.search(r"mainGroup = ([A-F0-9]{24}) /\* .*? \*/;", pbx)
+    if not root_match:
+        raise SystemExit("Xcode main group not found")
+    root_id = root_match.group(1)
+    group_match = re.search(rf"{root_id} /\*.*?\*/ = \{{.*?children = \((.*?)\n\t\t\);", pbx, re.S)
+    if not group_match:
+        raise SystemExit("Xcode root group children not found")
+    insert_at = group_match.start(1) + len(group_match.group(1))
+    pbx = pbx[:insert_at] + f"\n\t\t\t\t{file_id} /* VisualProject */," + pbx[insert_at:]
+    resources_match = re.search(r"(isa = PBXResourcesBuildPhase;.*?files = \((.*?)\n\t\t\);", pbx, re.S)
+    if not resources_match:
+        raise SystemExit("Xcode resources phase not found")
+    resources_end = resources_match.start(2) + len(resources_match.group(2))
+    pbx = pbx[:resources_end] + f"\n\t\t\t\t{build_id} /* VisualProject */," + pbx[resources_end:]
+    project_file.write_text(pbx)
 
 # Add AppSection.config and expose it in the generated ContentView navigation.
 nav = nav_file.read_text()
@@ -746,11 +799,17 @@ if "import WebKit" not in patch_file.read_text():
         current = "import WebKit\n" + current
     patch_file.write_text(current)
 
+if "import WebKit" not in patch_file.read_text():
+    current = patch_file.read_text()
+    if "import SwiftUI" in current:
+        current = current.replace("import SwiftUI", "import SwiftUI\nimport WebKit", 1)
+    else:
+        current = "import WebKit\n" + current
+    patch_file.write_text(current)
+
 visual_swift = r"""
 
 private struct VisualProjectWebView: UIViewRepresentable {
-    let url: URL
-
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
@@ -761,22 +820,19 @@ private struct VisualProjectWebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = true
-        webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 30))
+        if let projectRoot = Bundle.main.url(forResource: "VisualProject", withExtension: nil) {
+            let index = projectRoot.appendingPathComponent("index.html")
+            webView.loadFileURL(index, allowingReadAccessTo: projectRoot)
+        }
         return webView
     }
 
-    func updateUIView(_ webView: WKWebView, context: Context) {
-        if webView.url == nil {
-            webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 30))
-        }
-    }
+    func updateUIView(_ webView: WKWebView, context: Context) {}
 }
 
 struct VisualPanelView: View {
-    private let projectURL = URL(string: "https://mods.cheatiosvip.net/")!
-
     var body: some View {
-        VisualProjectWebView(url: projectURL)
+        VisualProjectWebView()
             .ignoresSafeArea(edges: [.top, .bottom])
             .background(Color.black)
     }
