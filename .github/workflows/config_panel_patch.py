@@ -86,11 +86,11 @@ texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackg
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
 
-# Add AppSection.visual/config and expose them in the generated ContentView navigation.
+# Add AppSection.config and expose it in the generated ContentView navigation.
 nav = nav_file.read_text()
-if "    case misc\n" not in nav:
-    raise SystemExit("MISC enum case not found")
 if "    case config\n" not in nav:
+    if "    case misc\n" not in nav:
+        raise SystemExit("MISC enum case not found")
     nav = nav.replace("    case misc\n", "    case misc\n    case config\n", 1)
 if "    case visual\n" not in nav:
     nav = nav.replace("    case config\n", "    case visual\n    case config\n", 1)
@@ -141,22 +141,37 @@ if 'sectionContent(.visual)' not in content:
     match = tab_pattern.search(content)
     if not match:
         raise SystemExit("TEXTURA compact tab anchor not found")
-    new_tab = (
-        match.group(0)
+    new_tab = (match.group(0)
         + "\n" + match.group("i1") + "sectionContent(.visual)"
         + "\n" + match.group("i2") + '.tabItem { CompactTabLabel(title: "VIZUAL", systemImage: "tshirt.fill") }'
-        + "\n" + match.group("i3") + ".tag(AppSection.visual.rawValue)"
+        + "\n" + match.group("i3") + ".tag(AppSection.visual.rawValue)")
+    content = content[:match.start()] + new_tab + content[match.end():]
+# Insert the fifth compact tab after MISC.
+if 'sectionContent(.config)' not in content:
+    tab_pattern = re.compile(
+        r'(?m)^(?P<i1>[ \t]*)sectionContent\(\.misc\)\n'
+        r'(?P<i2>[ \t]*)\.tabItem \{ CompactTabLabel\(title: "MISC", systemImage: "eye\.fill"\) \}\n'
+        r'(?P<i3>[ \t]*)\.tag\(AppSection\.misc\.rawValue\)'
+    )
+    match = tab_pattern.search(content)
+    if not match:
+        raise SystemExit("MISC compact tab anchor not found")
+    new_tab = (
+        match.group(0)
+        + "\n" + match.group("i1") + "sectionContent(.config)"
+        + "\n" + match.group("i2") + '.tabItem { CompactTabLabel(title: "Config", systemImage: "gearshape.fill") }'
+        + "\n" + match.group("i3") + ".tag(AppSection.config.rawValue)"
     )
     content = content[:match.start()] + new_tab + content[match.end():]
 # Keep the regular-size navigation labels exhaustive and readable.
-if 'case .config: return "Config"' not in content:
-    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .config: return "Config"', 1)
-if 'case .config: return "gearshape.fill"' not in content:
-    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .config: return "gearshape.fill"', 1)
 if 'case .visual: return "VIZUAL"' not in content:
     content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .visual: return "VIZUAL"', 1)
 if 'case .visual: return "tshirt.fill"' not in content:
     content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .visual: return "tshirt.fill"', 1)
+if 'case .config: return "Config"' not in content:
+    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .config: return "Config"', 1)
+if 'case .config: return "gearshape.fill"' not in content:
+    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .config: return "gearshape.fill"', 1)
 content = content.replace('title: language.text(section.titleKey)', 'title: section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey))')
 content = content.replace('Label(language.text(section.titleKey), systemImage: section.systemImage)', 'Label(section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey)), systemImage: section.systemImage)')
 content = content.replace(
@@ -716,36 +731,6 @@ struct ConfigPanelView: View {
         }
     }
 }
-
-
-struct VisualPanelView: View {
-    @AppStorage("globalAppBackgroundHex") private var globalAppBackgroundHex = "05070A"
-    var body: some View {
-        ZStack {
-            configBackgroundColor(hex: globalAppBackgroundHex).ignoresSafeArea()
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 18) {
-                    Image(systemName: "tshirt.fill")
-                        .font(.system(size: 52, weight: .bold))
-                        .foregroundStyle(.pink)
-                    Text("VIZUAL")
-                        .font(.system(size: 27, weight: .black, design: .rounded))
-                        .foregroundStyle(.pink)
-                    Text("Área visual")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(.white)
-                    Text("Os conteúdos visuais ficarão disponíveis nesta aba.")
-                        .multilineTextAlignment(.center)
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .padding(.horizontal, 28)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.top, 90)
-            }
-        }
-    }
-}
 '''
 if "struct ConfigPanelView: View" not in patch_file.read_text():
     with patch_file.open("a") as handle:
@@ -753,3 +738,36 @@ if "struct ConfigPanelView: View" not in patch_file.read_text():
 
 print("Config patch applied")
 print("views:", patch_file, texture_file, content_file, nav_file)
+visual_swift = r"""
+
+struct VisualPanelView: View {
+    @AppStorage("globalAppBackgroundHex") private var globalAppBackgroundHex = "05070A"
+    var body: some View {
+        ZStack {
+            configBackgroundColor(hex: globalAppBackgroundHex).ignoresSafeArea()
+            VStack(spacing: 18) {
+                Image(systemName: "tshirt.fill")
+                    .font(.system(size: 52, weight: .bold))
+                    .foregroundStyle(.pink)
+                Text("VIZUAL")
+                    .font(.system(size: 27, weight: .black, design: .rounded))
+                    .foregroundStyle(.pink)
+                Text("Área visual")
+                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                Text("Os conteúdos visuais ficarão disponíveis nesta aba.")
+                    .multilineTextAlignment(.center)
+                    .font(.system(size: 14, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.72))
+                    .padding(.horizontal, 28)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 90)
+        }
+    }
+}
+"""
+if "struct VisualPanelView: View" not in patch_file.read_text():
+    with patch_file.open("a") as handle:
+        handle.write(visual_swift)
+
