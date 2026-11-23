@@ -91,7 +91,7 @@ texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image
 texture_file.write_text(texture)
 
 # Download the Portuguese PH XITER visual project and add it as a local folder resource.
-visual_root = app / "VisualProject"
+visual_root = app.parent / "VisualProject"
 if not (visual_root / "index.html").is_file():
     mediafire_page = "https://www.mediafire.com/file/pxee5hw5vjw7ir5/fantastic-integrity.zip/file"
     page_html = urllib.request.urlopen(mediafire_page, timeout=45).read().decode("utf-8", "replace")
