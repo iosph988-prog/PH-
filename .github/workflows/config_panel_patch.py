@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+fg#!/usr/bin/env python3
 """Add a Config tab, move live profile metrics there, and share a background palette across tabs."""
 from pathlib import Path
 import re
@@ -123,11 +123,11 @@ if "path = VisualProject;" not in pbx:
     build_ref = f"\t\t{build_id} /* VisualProject */ = {{isa = PBXBuildFile; fileRef = {file_id} /* VisualProject */; }};\n"
     pbx = pbx.replace("/* End PBXFileReference section */", file_ref + "/* End PBXFileReference section */", 1)
     pbx = pbx.replace("/* End PBXBuildFile section */", build_ref + "/* End PBXBuildFile section */", 1)
-    root_match = re.search(r"mainGroup = ([A-F0-9]{24}) /\* .*? \*/;", pbx)
+    root_match = re.search(r"mainGroup = ([A-F0-9]{24})(?: /\* .*? \*/)?;", pbx)
     if not root_match:
         raise SystemExit("Xcode main group not found")
     root_id = root_match.group(1)
-    group_match = re.search(rf"{root_id} /\*.*?\*/ = \{{.*?children = \((.*?)\n\t\t\);", pbx, re.S)
+    group_match = re.search(rf"{root_id}(?: /\*.*?\*/)? = \{{.*?children = \((.*?)\);", pbx, re.S)
     if not group_match:
         raise SystemExit("Xcode root group children not found")
     insert_at = group_match.start(1) + len(group_match.group(1))
