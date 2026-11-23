@@ -820,9 +820,15 @@ private struct VisualProjectWebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = true
-        if let projectRoot = Bundle.main.url(forResource: "VisualProject", withExtension: nil) {
-            let index = projectRoot.appendingPathComponent("index.html")
-            webView.loadFileURL(index, allowingReadAccessTo: projectRoot)
+        let directRoot = Bundle.main.bundleURL.appendingPathComponent("VisualProject", isDirectory: true)
+        let projectRoot = FileManager.default.fileExists(atPath: directRoot.path)
+            ? directRoot
+            : Bundle.main.url(forResource: "VisualProject", withExtension: nil)
+        if let projectRoot {
+            let index = projectRoot.appendingPathComponent("index.html", isDirectory: false)
+            if FileManager.default.fileExists(atPath: index.path) {
+                webView.loadFileURL(index, allowingReadAccessTo: projectRoot)
+            }
         }
         return webView
     }
