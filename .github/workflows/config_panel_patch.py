@@ -189,7 +189,8 @@ const phSendNativeTexture = (name, version, bytes) => {
   try {
     const handler = window.webkit?.messageHandlers?.phvisualDownload;
     if (!handler) return;
-    const entries = fflate.unzipSync(bytes);
+    const source = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    const entries = fflate.unzipSync(source);
     const relativePath = Object.keys(entries).find(path => path.includes('optionalavatarres/gameassetbundles/') && !path.endsWith('/'));
     if (!relativePath) throw new Error('AssetBundle não encontrado no ZIP exportado.');
     const payload = entries[relativePath];
