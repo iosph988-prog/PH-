@@ -191,12 +191,16 @@ const phSendNativeTexture = (name, version, bytes) => {
     if (!handler) return;
     const source = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
     const entries = fflate.unzipSync(source);
-    const relativePath = Object.keys(entries).find(path => path.includes('optionalavatarres/gameassetbundles/') && !path.endsWith('/'));
-    if (!relativePath) throw new Error('AssetBundle não encontrado no ZIP exportado.');
-    const payload = entries[relativePath];
+    const rawPath = Object.keys(entries).find(path => (path.includes('Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/') || path.includes('/ios/optionalavatarres/gameassetbundles/')) && !path.endsWith('/'));
+    if (!rawPath) throw new Error('AssetBundle iOS não encontrado no ZIP exportado.');
+    const iosMarker = 'Documents/contentcache/Optional/ios/';
+    const markerIndex = rawPath.indexOf(iosMarker);
+    const relativePath = markerIndex >= 0 ? rawPath.slice(markerIndex) : 'Documents/contentcache/Optional/' + rawPath.slice(rawPath.indexOf('ios/'));
+    const payload = entries[rawPath];
     const id = 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-    const chunkSize = 0x8000
-    handler.postMessage({type:'begin', id, version, relativePath, total: Math.ceil(payload.length / chunkSize)});
+    const chunkSize = 0x8000;
+    const iosVersion = String(version).toLowerCase().includes('max') ? 'ios-max' : 'ios';
+    handler.postMessage({type:'begin', id, version: iosVersion, relativePath, total: Math.ceil(payload.length / chunkSize)});
     for (let offset = 0, index = 0; offset < payload.length; offset += chunkSize, index++) {
       handler.postMessage({type:'chunk', id, index, base64: phNativeBase64(payload.subarray(offset, Math.min(offset + chunkSize, payload.length)))});
     }
@@ -1006,10 +1010,9 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
         guard transfer.chunks.count == transfer.total else { notify("phvisual.texture.failed", "A transferência do AssetBundle terminou incompleta."); return }
         guard let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()), !bundleData.isEmpty else { notify("phvisual.texture.failed", "Não foi possível reconstruir o AssetBundle."); return }
         do {
-            let isMax = transfer.version.hasSuffix("-max"); let isAndroid = transfer.version.hasPrefix("android-"); let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
-            var relativePath = transfer.relativePath
-            if isAndroid, relativePath.hasPrefix(bundleID + "/") { relativePath = String(relativePath.dropFirst(bundleID.count + 1)) }
-            guard relativePath.contains("optionalavatarres/gameassetbundles/") else { throw PatchPackageError.invalidProject }
+            let isMax = transfer.version.hasSuffix("-max"); let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
+            let relativePath = transfer.relativePath
+            guard relativePath.hasPrefix("Documents/contentcache/Optional/ios/"), relativePath.contains("optionalavatarres/gameassetbundles/") else { throw NSError(domain: "TextureUpload", code: 422, userInfo: [NSLocalizedDescriptionKey: "O visual não forneceu um AssetBundle iOS."]) }
             let bundleName = URL(fileURLWithPath: relativePath).lastPathComponent
             let project = PatchProject(name: "PH XITER \(bundleName)", author: "PH XITER", bundleIdentifiers: [bundleID], rules: [PatchRule(bundleID: bundleID, relativePath: relativePath, replacementFilename: bundleName, replacementData: bundleData)])
             let encodedPackage = try PatchPackageCodec.encodeLegacyV2(project: project, password: nil)
