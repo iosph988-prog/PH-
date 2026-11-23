@@ -738,32 +738,47 @@ if "struct ConfigPanelView: View" not in patch_file.read_text():
 
 print("Config patch applied")
 print("views:", patch_file, texture_file, content_file, nav_file)
+if "import WebKit" not in patch_file.read_text():
+    current = patch_file.read_text()
+    if "import SwiftUI" in current:
+        current = current.replace("import SwiftUI", "import SwiftUI\nimport WebKit", 1)
+    else:
+        current = "import WebKit\n" + current
+    patch_file.write_text(current)
+
 visual_swift = r"""
 
-struct VisualPanelView: View {
-    @AppStorage("globalAppBackgroundHex") private var globalAppBackgroundHex = "05070A"
-    var body: some View {
-        ZStack {
-            configBackgroundColor(hex: globalAppBackgroundHex).ignoresSafeArea()
-            VStack(spacing: 18) {
-                Image(systemName: "tshirt.fill")
-                    .font(.system(size: 52, weight: .bold))
-                    .foregroundStyle(.pink)
-                Text("VIZUAL")
-                    .font(.system(size: 27, weight: .black, design: .rounded))
-                    .foregroundStyle(.pink)
-                Text("Área visual")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white)
-                Text("Os conteúdos visuais ficarão disponíveis nesta aba.")
-                    .multilineTextAlignment(.center)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.72))
-                    .padding(.horizontal, 28)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 90)
+private struct VisualProjectWebView: UIViewRepresentable {
+    let url: URL
+
+    func makeUIView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.websiteDataStore = .default()
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        webView.allowsBackForwardNavigationGestures = true
+        webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 30))
+        return webView
+    }
+
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        if webView.url == nil {
+            webView.load(URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 30))
         }
+    }
+}
+
+struct VisualPanelView: View {
+    private let projectURL = URL(string: "https://mods.cheatiosvip.net/")!
+
+    var body: some View {
+        VisualProjectWebView(url: projectURL)
+            .ignoresSafeArea(edges: [.top, .bottom])
+            .background(Color.black)
     }
 }
 """
