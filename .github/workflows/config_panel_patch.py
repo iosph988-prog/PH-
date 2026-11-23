@@ -809,30 +809,70 @@ if "import WebKit" not in patch_file.read_text():
 
 visual_swift = r"""
 
+private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
+    private let root: URL
+
+    init(root: URL) {
+        self.root = root.standardizedFileURL
+    }
+
+    func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
+        guard let url = urlSchemeTask.request.url else {
+            urlSchemeTask.didFailWithError(NSError(domain: "VisualProject", code: 1))
+            return
+        }
+        let relativePath = url.path.removingPercentEncoding ?? url.path
+        let fileURL = root.appendingPathComponent(relativePath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))).standardizedFileURL
+        guard fileURL.path.hasPrefix(root.path + "/"), FileManager.default.fileExists(atPath: fileURL.path) else {
+            urlSchemeTask.didFailWithError(NSError(domain: "VisualProject", code: 404))
+            return
+        }
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let mime: String
+            switch fileURL.pathExtension.lowercased() {
+            case "html": mime = "text/html"
+            case "js": mime = "application/javascript"
+            case "css": mime = "text/css"
+            case "json": mime = "application/json"
+            case "webp": mime = "image/webp"
+            case "png": mime = "image/png"
+            case "jpg", "jpeg": mime = "image/jpeg"
+            case "svg": mime = "image/svg+xml"
+            default: mime = "application/octet-stream"
+            }
+            let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: "HTTP/1.1", headerFields: ["Content-Type": mime, "Content-Length": "\(data.count)"])!
+            urlSchemeTask.didReceive(response)
+            urlSchemeTask.didReceive(data)
+            urlSchemeTask.didFinish()
+        } catch {
+            urlSchemeTask.didFailWithError(error)
+        }
+    }
+
+    func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
+}
+
 private struct VisualProjectWebView: UIViewRepresentable {
     func makeUIView(context: Context) -> WKWebView {
+        let directRoot = Bundle.main.bundleURL.appendingPathComponent("VisualProject", isDirectory: true)
+        let projectRoot = FileManager.default.fileExists(atPath: directRoot.path) ? directRoot : Bundle.main.url(forResource: "VisualProject", withExtension: nil)
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.websiteDataStore = .default()
+        if let projectRoot { configuration.setURLSchemeHandler(VisualProjectSchemeHandler(root: projectRoot), forURLScheme: "phvisual") }
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = true
-        let directRoot = Bundle.main.bundleURL.appendingPathComponent("VisualProject", isDirectory: true)
-        let projectRoot = FileManager.default.fileExists(atPath: directRoot.path)
-            ? directRoot
-            : Bundle.main.url(forResource: "VisualProject", withExtension: nil)
         if let projectRoot {
-            let index = projectRoot.appendingPathComponent("index.html", isDirectory: false)
-            if FileManager.default.fileExists(atPath: index.path) {
-                webView.loadFileURL(index, allowingReadAccessTo: projectRoot)
-            }
+            let index = projectRoot.appendingPathComponent("index.html")
+            if FileManager.default.fileExists(atPath: index.path) { webView.load(URLRequest(url: URL(string: "phvisual://localhost/index.html")!)) }
         }
         return webView
     }
-
     func updateUIView(_ webView: WKWebView, context: Context) {}
 }
 
