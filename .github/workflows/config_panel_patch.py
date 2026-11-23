@@ -86,19 +86,21 @@ texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackg
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
 
-# Add AppSection.config and expose it in the generated ContentView navigation.
+# Add AppSection.visual/config and expose them in the generated ContentView navigation.
 nav = nav_file.read_text()
+if "    case misc\n" not in nav:
+    raise SystemExit("MISC enum case not found")
 if "    case config\n" not in nav:
-    if "    case misc\n" not in nav:
-        raise SystemExit("MISC enum case not found")
     nav = nav.replace("    case misc\n", "    case misc\n    case config\n", 1)
+if "    case visual\n" not in nav:
+    nav = nav.replace("    case config\n", "    case visual\n    case config\n", 1)
 nav = nav.replace(
     "[.patches, .external, .texture, .misc].filter(isVisible)",
-    "[.patches, .external, .texture, .misc, .config].filter(isVisible)",
+    "[.patches, .external, .texture, .visual, .misc, .config].filter(isVisible)",
 )
 nav = nav.replace(
     "case .home, .files, .patches, .external, .texture, .misc:",
-    "case .home, .files, .patches, .external, .texture, .misc, .config:",
+    "case .home, .files, .patches, .external, .texture, .visual, .misc, .config:",
 )
 nav_file.write_text(nav)
 
@@ -113,36 +115,37 @@ if "case .config:\n            ConfigPanelView()" not in content:
     child_indent = match.group("child") or match.group("case") + "    "
     replacement = (
         match.group("case") + "case .misc:\n" + child_indent + "MiscToolsView()\n"
+        + match.group("case") + "case .visual:\n" + child_indent + "VisualPanelView()\n"
         + match.group("case") + "case .config:\n" + child_indent + "ConfigPanelView()"
     )
     content = content[:match.start()] + replacement + content[match.end():]
 content = content.replace(
     "[.patches, .external, .texture, .misc].filter(isVisible)",
-    "[.patches, .external, .texture, .misc, .config].filter(isVisible)",
+    "[.patches, .external, .texture, .visual, .misc, .config].filter(isVisible)",
 )
 content = content.replace(
     "[AppSection.patches, .external, .texture, .misc]",
-    "[AppSection.patches, .external, .texture, .misc, .config]",
+    "[AppSection.patches, .external, .texture, .visual, .misc, .config]",
 )
 content = content.replace(
     "ForEach([AppSection.patches, .external, .texture, .misc])",
-    "ForEach([AppSection.patches, .external, .texture, .misc, .config])",
+    "ForEach([AppSection.patches, .external, .texture, .visual, .misc, .config])",
 )
-# Insert the fifth compact tab after MISC.
-if 'sectionContent(.config)' not in content:
+# Insert VIZUAL immediately after TEXTURA.
+if 'sectionContent(.visual)' not in content:
     tab_pattern = re.compile(
-        r'(?m)^(?P<i1>[ \t]*)sectionContent\(\.misc\)\n'
-        r'(?P<i2>[ \t]*)\.tabItem \{ CompactTabLabel\(title: "MISC", systemImage: "eye\.fill"\) \}\n'
-        r'(?P<i3>[ \t]*)\.tag\(AppSection\.misc\.rawValue\)'
+        r'(?m)^(?P<i1>[ \t]*)sectionContent\(\.texture\)\n'
+        r'(?P<i2>[ \t]*)\.tabItem \{ CompactTabLabel\(title: "TEXTURA", systemImage: "(?:paintbrush|paintpalette)\.fill"\) \}\n'
+        r'(?P<i3>[ \t]*)\.tag\(AppSection\.texture\.rawValue\)'
     )
     match = tab_pattern.search(content)
     if not match:
-        raise SystemExit("MISC compact tab anchor not found")
+        raise SystemExit("TEXTURA compact tab anchor not found")
     new_tab = (
         match.group(0)
-        + "\n" + match.group("i1") + "sectionContent(.config)"
-        + "\n" + match.group("i2") + '.tabItem { CompactTabLabel(title: "Config", systemImage: "gearshape.fill") }'
-        + "\n" + match.group("i3") + ".tag(AppSection.config.rawValue)"
+        + "\n" + match.group("i1") + "sectionContent(.visual)"
+        + "\n" + match.group("i2") + '.tabItem { CompactTabLabel(title: "VIZUAL", systemImage: "tshirt.fill") }'
+        + "\n" + match.group("i3") + ".tag(AppSection.visual.rawValue)"
     )
     content = content[:match.start()] + new_tab + content[match.end():]
 # Keep the regular-size navigation labels exhaustive and readable.
@@ -150,8 +153,12 @@ if 'case .config: return "Config"' not in content:
     content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .config: return "Config"', 1)
 if 'case .config: return "gearshape.fill"' not in content:
     content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .config: return "gearshape.fill"', 1)
-content = content.replace('title: language.text(section.titleKey)', 'title: section == .config ? "Config" : language.text(section.titleKey)')
-content = content.replace('Label(language.text(section.titleKey), systemImage: section.systemImage)', 'Label(section == .config ? "Config" : language.text(section.titleKey), systemImage: section.systemImage)')
+if 'case .visual: return "VIZUAL"' not in content:
+    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .visual: return "VIZUAL"', 1)
+if 'case .visual: return "tshirt.fill"' not in content:
+    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .visual: return "tshirt.fill"', 1)
+content = content.replace('title: language.text(section.titleKey)', 'title: section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey))')
+content = content.replace('Label(language.text(section.titleKey), systemImage: section.systemImage)', 'Label(section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey)), systemImage: section.systemImage)')
 content = content.replace(
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill")',
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintpalette.fill")',
@@ -159,7 +166,9 @@ content = content.replace(
 content = content.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintpalette.fill"', 1)
 old_tab_icon = 'Image(systemName: systemImage)'
 new_tab_icon = '''Group {
-                if title == "TEXTURA" {
+                if title == "VIZUAL" {
+                    Image(systemName: "tshirt.fill")
+                } else if title == "TEXTURA" {
                     ZStack(alignment: .bottomTrailing) {
                         Image(systemName: "paintpalette.fill")
                         Image(systemName: "paintbrush.pointed.fill")
@@ -704,6 +713,36 @@ struct ConfigPanelView: View {
             }
         } catch {
             // Keep the last locally cached expiry if the API is temporarily unavailable.
+        }
+    }
+}
+
+
+struct VisualPanelView: View {
+    @AppStorage("globalAppBackgroundHex") private var globalAppBackgroundHex = "05070A"
+    var body: some View {
+        ZStack {
+            configBackgroundColor(hex: globalAppBackgroundHex).ignoresSafeArea()
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 18) {
+                    Image(systemName: "tshirt.fill")
+                        .font(.system(size: 52, weight: .bold))
+                        .foregroundStyle(.pink)
+                    Text("VIZUAL")
+                        .font(.system(size: 27, weight: .black, design: .rounded))
+                        .foregroundStyle(.pink)
+                    Text("Área visual")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                    Text("Os conteúdos visuais ficarão disponíveis nesta aba.")
+                        .multilineTextAlignment(.center)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(.white.opacity(0.72))
+                        .padding(.horizontal, 28)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 90)
+            }
         }
     }
 }
