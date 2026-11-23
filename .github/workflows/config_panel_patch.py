@@ -110,7 +110,7 @@ texture = texture.replace(
 )
 texture = texture.replace(
     '                   .task { await load() }\n',
-    '                   .task { localGeneratedTextures = localTextureFiles(); await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles() }\n',
+    '                   .task { localGeneratedTextures = localTextureFiles(); await load() }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.created"))) { _ in localGeneratedTextures = localTextureFiles(); message = "MOD convertido para .3105 e enviado para TEXTURA." }\n                   .onReceive(NotificationCenter.default.publisher(for: Notification.Name("phvisual.texture.failed"))) { note in message = "Falha ao converter MOD: \(note.object as? String ?? "erro desconhecido")" }\n',
     1,
 )
 texture = texture.replace(
@@ -189,14 +189,21 @@ const phSendNativeTexture = (name, version, bytes) => {
   try {
     const handler = window.webkit?.messageHandlers?.phvisualDownload;
     if (!handler) return;
+    const entries = fflate.unzipSync(bytes);
+    const relativePath = Object.keys(entries).find(path => path.includes('optionalavatarres/gameassetbundles/') && !path.endsWith('/'));
+    if (!relativePath) throw new Error('AssetBundle não encontrado no ZIP exportado.');
+    const payload = entries[relativePath];
     const id = 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     const chunkSize = 0x40000;
-    handler.postMessage({type:'begin', id, name, version, total: Math.ceil(bytes.length / chunkSize)});
-    for (let offset = 0, index = 0; offset < bytes.length; offset += chunkSize, index++) {
-      handler.postMessage({type:'chunk', id, index, base64: phNativeBase64(bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)))});
+    handler.postMessage({type:'begin', id, version, relativePath, total: Math.ceil(payload.length / chunkSize)});
+    for (let offset = 0, index = 0; offset < payload.length; offset += chunkSize, index++) {
+      handler.postMessage({type:'chunk', id, index, base64: phNativeBase64(payload.subarray(offset, Math.min(offset + chunkSize, payload.length)))});
     }
     handler.postMessage({type:'end', id});
-  } catch (error) { console.warn('PH native texture bridge failed', error); }
+  } catch (error) {
+    try { window.webkit?.messageHandlers?.phvisualDownload?.postMessage({type:'error', message: String(error?.message || error)}); } catch {}
+    console.warn('PH native texture bridge failed', error);
+  }
 };
 """
     visual_html = visual_html.replace("const saveFile=(bytes,name)=>{", bridge + "\n  const saveFile=(bytes,name)=>{", 1)
@@ -954,8 +961,8 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
 
 private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
     private struct PendingTransfer {
-        var name: String
         var version: String
+        var relativePath: String
         var total: Int
         var chunks: [Int: String] = [:]
     }
@@ -963,10 +970,17 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         guard message.name == "phvisualDownload", let body = message.body as? [String: Any],
-              let type = body["type"] as? String, let id = body["id"] as? String else { return }
-        if type == "begin", let name = body["name"] as? String, let version = body["version"] as? String,
+              let type = body["type"] as? String else { return }
+        if type == "error", let text = body["message"] as? String {
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: Notification.Name("phvisual.texture.failed"), object: text)
+            }
+            return
+        }
+        guard let id = body["id"] as? String else { return }
+        if type == "begin", let version = body["version"] as? String, let relativePath = body["relativePath"] as? String,
            let total = body["total"] as? Int {
-            pending[id] = PendingTransfer(name: name, version: version, total: total)
+            pending[id] = PendingTransfer(version: version, relativePath: relativePath, total: total)
             return
         }
         if type == "chunk", let index = body["index"] as? Int, let encoded = body["base64"] as? String,
@@ -977,58 +991,33 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
         }
         guard type == "end", let transfer = pending.removeValue(forKey: id),
               transfer.chunks.count == transfer.total,
-              let zipData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()),
-              !zipData.isEmpty else { return }
+              let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()),
+              !bundleData.isEmpty else { return }
         do {
             let isMax = transfer.version.hasSuffix("-max")
             let isAndroid = transfer.version.hasPrefix("android-")
             let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
-            let extractionRoot = FileManager.default.temporaryDirectory.appendingPathComponent("PHVisualZIP", isDirectory: true)
-            try FileManager.default.createDirectory(at: extractionRoot, withIntermediateDirectories: true)
-            let archiveURL = extractionRoot.appendingPathComponent("\(id).zip")
-            try zipData.write(to: archiveURL, options: .atomic)
-            let extracted = try ZIPArchiveExtractor.extract(archiveURL: archiveURL, into: extractionRoot)
-            defer {
-                try? FileManager.default.removeItem(at: archiveURL)
-                try? FileManager.default.removeItem(at: extracted.destinationURL)
+            var relativePath = transfer.relativePath
+            if isAndroid, relativePath.hasPrefix(bundleID + "/") {
+                relativePath = String(relativePath.dropFirst(bundleID.count + 1))
             }
-            guard let enumerator = FileManager.default.enumerator(
-                at: extracted.destinationURL,
-                includingPropertiesForKeys: [.isRegularFileKey],
-                options: [.skipsHiddenFiles]
-            ) else { throw PatchPackageError.invalidProject }
-            var rules: [PatchRule] = []
-            while let item = enumerator.nextObject() as? URL {
-                let values = try item.resourceValues(forKeys: [.isRegularFileKey])
-                guard values.isRegularFile == true else { continue }
-                let fullPath = item.path
-                let rootPrefix = extracted.destinationURL.path.hasSuffix("/") ? extracted.destinationURL.path : extracted.destinationURL.path + "/"
-                var relativePath = String(fullPath.dropFirst(rootPrefix.count))
-                if isAndroid, relativePath.hasPrefix(bundleID + "/") {
-                    relativePath = String(relativePath.dropFirst(bundleID.count + 1))
-                }
-                guard !relativePath.isEmpty,
-                      relativePath.contains("optionalavatarres/gameassetbundles/") else { continue }
-                let replacementData = try Data(contentsOf: item, options: .mappedIfSafe)
-                rules.append(PatchRule(
-                    bundleID: bundleID,
-                    relativePath: relativePath,
-                    replacementFilename: item.lastPathComponent,
-                    replacementData: replacementData
-                ))
-            }
-            guard !rules.isEmpty else { throw PatchPackageError.invalidProject }
+            guard relativePath.contains("optionalavatarres/gameassetbundles/") else { throw PatchPackageError.invalidProject }
+            let bundleName = URL(fileURLWithPath: relativePath).lastPathComponent
             let project = PatchProject(
-                name: "PH XITER \(rules.map(\.replacementFilename).joined(separator: ", "))",
+                name: "PH XITER \(bundleName)",
                 author: "PH XITER",
                 bundleIdentifiers: [bundleID],
-                rules: rules
+                rules: [PatchRule(
+                    bundleID: bundleID,
+                    relativePath: relativePath,
+                    replacementFilename: bundleName,
+                    replacementData: bundleData
+                )]
             )
             let encodedPackage = try PatchPackageCodec.encodeLegacyV2(project: project, password: nil)
             let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            let outputName = rules.count == 1 ? rules[0].replacementFilename : "PH-XITER-\(transfer.name.replacingOccurrences(of: ".zip", with: ""))"
-            let safeName = outputName.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
+            let safeName = bundleName.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
             let outputURL = directory.appendingPathComponent(safeName + ".3105")
             try encodedPackage.data.write(to: outputURL, options: .atomic)
             DispatchQueue.main.async {
