@@ -180,7 +180,11 @@ if not (visual_root / "index.html").is_file():
     visual_html = index_path.read_text()
     visual_html = visual_html.replace("url('/assets/", "url('./assets/")
     visual_html = visual_html.replace('url("/assets/', 'url("./assets/')
-    bridge = """\nconst phNativeBase64 = bytes => {
+    bridge = """\n// Compatibilidade com o visual integrado: o projeto original referencia
+// estas funções, mas não as define dentro do pacote local.
+window.fishCheckExport = window.fishCheckExport || (async () => null);
+window.fishChargeExport = window.fishChargeExport || (async () => {});
+const phNativeBase64 = bytes => {
   const chunk = 0x8000; let binary = '';
   for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));
   return btoa(binary);
@@ -225,6 +229,17 @@ const phSendNativeTexture = (name, version, bytes) => {
     export_anchor = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
     export_replacement = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);\n        setTimeout(() => phSendNativeTexture(packaged.name,version,bytes), 0);"
     visual_html = visual_html.replace(export_anchor, export_replacement, 1)
+    # The real button handler lives in wardrobe-app*.js and uses the
+    # synchronous package API. Send the raw bytes only after its browser
+    # download has been started; patching the secondary runtime alone has no
+    # effect on the visible Criar MOD button.
+    active_anchor = "setTimeout(()=>URL.revokeObjectURL(url),60000);"
+    active_replacement = "setTimeout(()=>URL.revokeObjectURL(url),60000);\n      setTimeout(() => phSendNativeTexture(packaged.name,version,bytes), 0);"
+    visual_js = next(visual_root.glob("wardrobe-app*.js"), None)
+    if visual_js:
+        active_js = visual_js.read_text()
+        active_js = active_js.replace(active_anchor, active_replacement, 1)
+        visual_js.write_text(active_js)
     index_path.write_text(visual_html)
 
 project_file = app.parent / "ThreeOneOSFive.xcodeproj/project.pbxproj"
