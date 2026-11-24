@@ -122,7 +122,7 @@ texture = texture.replace(
               private func receiptKey(for url: URL) -> String { "ph.texture.receipt." + url.lastPathComponent }
               private func hasLocalReceipt(for url: URL) -> Bool {
                   guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value) else { return false }
-                  return PatchProjectLibrary.latestReceipt(projectID: projectID) != nil
+                  return DevicePatchService.latestReceipt(projectID: projectID) != nil
               }
               private func applyLocalTexture(_ url: URL) async {
                   do {
@@ -137,7 +137,7 @@ texture = texture.replace(
               private func restoreLocalTexture(_ url: URL) async {
                   do {
                       let value = UserDefaults.standard.string(forKey: receiptKey(for: url))
-                      guard let value, let projectID = UUID(uuidString: value), let receipt = PatchProjectLibrary.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
+                      guard let value, let projectID = UUID(uuidString: value), let receipt = DevicePatchService.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
                       try DevicePatchService.restore(receipt: receipt, allowChangedTargets: true)
                       UserDefaults.standard.removeObject(forKey: receiptKey(for: url))
                       await MainActor.run { message = "Restaurado: \\(url.lastPathComponent)" }
@@ -1018,7 +1018,7 @@ struct VisualPanelView: View {
     private func receiptKey(for url: URL) -> String { "ph.visual.receipt." + url.lastPathComponent }
     private func hasReceipt(for url: URL) -> Bool {
         guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value) else { return false }
-        return PatchProjectLibrary.latestReceipt(projectID: projectID) != nil
+        return DevicePatchService.latestReceipt(projectID: projectID) != nil
     }
     private func applyTexture(_ url: URL) {
         Task {
@@ -1035,7 +1035,7 @@ struct VisualPanelView: View {
     private func restoreTexture(_ url: URL) {
         Task {
             do {
-                guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value), let receipt = PatchProjectLibrary.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
+                guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value), let receipt = DevicePatchService.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
                 try DevicePatchService.restore(receipt: receipt, allowChangedTargets: true)
                 UserDefaults.standard.removeObject(forKey: receiptKey(for: url))
                 await MainActor.run { textureMessage = "Restaurado: \(url.lastPathComponent)" }
