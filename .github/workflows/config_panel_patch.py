@@ -986,7 +986,7 @@ struct VisualPanelView: View {
     @State private var textureMessage = ""
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottom) {
             VisualProjectWebView { url in
                 if !generatedTextures.contains(url) { generatedTextures.insert(url, at: 0) }
                 textureMessage = "`.3105` criado: \(url.lastPathComponent)"
@@ -1009,6 +1009,9 @@ struct VisualPanelView: View {
                 }
                 .padding(12)
                 .background(Color.black.opacity(0.92))
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+                .padding(.horizontal, 10)
+                .padding(.bottom, 84)
             }
         }
         .ignoresSafeArea(edges: [.top, .bottom])
