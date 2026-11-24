@@ -1033,7 +1033,14 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
         }
         guard type == "end", let transfer = pending.removeValue(forKey: id) else { notify("phvisual.texture.failed", "Finalização da transferência inválida."); return }
         guard transfer.chunks.count == transfer.total else { notify("phvisual.texture.failed", "A transferência do AssetBundle terminou incompleta."); return }
-        guard let bundleData = Data(base64Encoded: (0..<transfer.total).compactMap { transfer.chunks[$0] }.joined()), !bundleData.isEmpty else { notify("phvisual.texture.failed", "Não foi possível reconstruir o AssetBundle."); return }
+        var bundleData = Data()
+        for index in 0..<transfer.total {
+            guard let encoded = transfer.chunks[index], let chunkData = Data(base64Encoded: encoded) else {
+                notify("phvisual.texture.failed", "Não foi possível decodificar o bloco \(index + 1) do AssetBundle."); return
+            }
+            bundleData.append(chunkData)
+        }
+        guard !bundleData.isEmpty else { notify("phvisual.texture.failed", "Não foi possível reconstruir o AssetBundle."); return }
         do {
             let isMax = transfer.version.hasSuffix("-max"); let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
             let relativePath = transfer.relativePath
