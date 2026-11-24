@@ -1255,6 +1255,7 @@ const phPrepareVisualDownload = (name, version, bytes) => {
 };
 window.phPrepareVisualDownload = phPrepareVisualDownload;
 const phSendNativeTexture = (name, version, bytes) => {
+  let sent = false;
   try {
     const handler = window.webkit?.messageHandlers?.phvisualDownload;
     if (!handler) throw new Error('O app não registrou o canal nativo do VIZUAL.');
@@ -1279,9 +1280,12 @@ const phSendNativeTexture = (name, version, bytes) => {
     handler.postMessage({type:'begin', id, version:iosVersion, relativePath, total:Math.ceil(payload.length / chunkSize)});
     for (let offset=0,index=0; offset<payload.length; offset+=chunkSize,index++) handler.postMessage({type:'chunk',id,index,base64:phNativeBase64(payload.subarray(offset,Math.min(offset+chunkSize,payload.length)))})
     handler.postMessage({type:'end',id});
+    sent = true;
+    return true;
   } catch (error) {
     try { window.webkit?.messageHandlers?.phvisualDownload?.postMessage({type:'error',message:String(error?.message||error)}); } catch {}
     console.warn('PH native texture bridge failed', error);
+    return sent;
   }
 };
 window.phSendNativeTexture = phSendNativeTexture;

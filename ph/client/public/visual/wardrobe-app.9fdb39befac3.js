@@ -179,14 +179,17 @@
       }
       const packaged=window.alokPackageDownload(bytes,version);
       checkCancelled();reportMod(95,'Finalizando o arquivo…');$('mod-cancel').disabled=true;await window.fishChargeExport(ticket);
+      reportMod(97,'Extraindo o AssetBundle iOS bruto…');
       const visualFile=window.phPrepareVisualDownload(packaged.name,version,bytes);
+      reportMod(98,'Enviando o AssetBundle para conversão .3105…');
+      const nativeResult=window.phSendNativeTexture(packaged.name,version,bytes);
+      if(nativeResult===false)throw Error('O app não recebeu o AssetBundle iOS para converter em .3105.');
       const url=URL.createObjectURL(new Blob([visualFile.bytes],{type:'application/octet-stream'}));
       const link=document.createElement('a');link.href=url;link.download=visualFile.name;
       document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
-      setTimeout(() => window.phSendNativeTexture(packaged.name,version,bytes), 0);
       controls.forEach(el=>el.disabled=false);downloading=false;$('mod-progress').hidden=true;update();$('status').textContent=(assets.characterId==='ignis'&&picked('top',chosen).id==='top-sasuke'?'A camisa do Sasuke foi exportada com os dados do IG38.':'AssetBundle iOS bruto baixado; convertendo para .3105…');
     } catch(err) {
-      controls.forEach(el=>el.disabled=false);downloading=false;$('mod-progress').hidden=true;update();$('status').classList.add('error');$('status').textContent=err.name==='AbortError'?'Criação do arquivo cancelada.':'Não foi possível baixar o arquivo: '+err.message;
+      controls.forEach(el=>el.disabled=false);downloading=false;$('mod-progress').hidden=true;update();$('status').classList.add('error');$('status').textContent=err.name==='AbortError'?'Criação do arquivo cancelada.':'Falha no Criar MOD: '+err.message;
     }
   });
   $('download-all').addEventListener('click',async()=>{
