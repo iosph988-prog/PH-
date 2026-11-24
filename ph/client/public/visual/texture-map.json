@@ -1,0 +1,3220 @@
+{
+  "manifest_image_entries": [
+    {
+      "logical_name": "assets/textures/bottom-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/59213ae186b008521004.webp",
+      "file": "assets/runtime/59213ae186b008521004.webp",
+      "status": 200,
+      "bytes": 120134
+    },
+    {
+      "logical_name": "assets/textures/bottom-1.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e6738cfd8ec70f41dd2d.webp",
+      "file": "assets/runtime/e6738cfd8ec70f41dd2d.webp",
+      "status": 200,
+      "bytes": 160622
+    },
+    {
+      "logical_name": "assets/textures/hair.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d31822368d8168758e73.webp",
+      "file": "assets/runtime/d31822368d8168758e73.webp",
+      "status": 200,
+      "bytes": 21456
+    },
+    {
+      "logical_name": "assets/textures/head.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3fce23229794e293cb53.webp",
+      "file": "assets/runtime/3fce23229794e293cb53.webp",
+      "status": 200,
+      "bytes": 188350
+    },
+    {
+      "logical_name": "assets/textures/mask.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8ed5bd39b9e0c91d7142.webp",
+      "file": "assets/runtime/8ed5bd39b9e0c91d7142.webp",
+      "status": 200,
+      "bytes": 45944
+    },
+    {
+      "logical_name": "assets/textures/shoes.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/93c5f69c895469bb5df6.webp",
+      "file": "assets/runtime/93c5f69c895469bb5df6.webp",
+      "status": 200,
+      "bytes": 34732
+    },
+    {
+      "logical_name": "assets/textures/skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/dce99f99bf23431d3edd.webp",
+      "file": "assets/runtime/dce99f99bf23431d3edd.webp",
+      "status": 200,
+      "bytes": 135450
+    },
+    {
+      "logical_name": "assets/textures/top-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/828bb34c68193421bbb4.webp",
+      "file": "assets/runtime/828bb34c68193421bbb4.webp",
+      "status": 200,
+      "bytes": 219132
+    },
+    {
+      "logical_name": "assets/textures/top-1.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c961653c00f58a47e9d1.webp",
+      "file": "assets/runtime/c961653c00f58a47e9d1.webp",
+      "status": 200,
+      "bytes": 202160
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-hair.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/41c5d581e14cb8e8ebf4.webp",
+      "file": "assets/runtime/41c5d581e14cb8e8ebf4.webp",
+      "status": 200,
+      "bytes": 40816
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-top.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/736321ec93302c13b742.webp",
+      "file": "assets/runtime/736321ec93302c13b742.webp",
+      "status": 200,
+      "bytes": 199924
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-bottom.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1fedad85d4f6e7fe2d0f.webp",
+      "file": "assets/runtime/1fedad85d4f6e7fe2d0f.webp",
+      "status": 200,
+      "bytes": 131154
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-shoes.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9be42cf519fab28ffc46.webp",
+      "file": "assets/runtime/9be42cf519fab28ffc46.webp",
+      "status": 200,
+      "bytes": 41744
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-mask.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/618beac4da3296f60840.webp",
+      "file": "assets/runtime/618beac4da3296f60840.webp",
+      "status": 200,
+      "bytes": 49688
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-face.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/bd13befe3636c79b0888.webp",
+      "file": "assets/runtime/bd13befe3636c79b0888.webp",
+      "status": 200,
+      "bytes": 182102
+    },
+    {
+      "logical_name": "assets/textures/default-android-normal-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4b6deac1ea76e9844583.webp",
+      "file": "assets/runtime/4b6deac1ea76e9844583.webp",
+      "status": 200,
+      "bytes": 124248
+    },
+    {
+      "logical_name": "assets/previews/default-android-normal.webp",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5021119f516923be666b.webp",
+      "file": "assets/runtime/5021119f516923be666b.webp",
+      "status": 200,
+      "bytes": 106114
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-hair.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/41c5d581e14cb8e8ebf4.webp",
+      "file": "assets/runtime/41c5d581e14cb8e8ebf4.webp",
+      "status": 200,
+      "bytes": 40816
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-top.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/736321ec93302c13b742.webp",
+      "file": "assets/runtime/736321ec93302c13b742.webp",
+      "status": 200,
+      "bytes": 199924
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-bottom.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1fedad85d4f6e7fe2d0f.webp",
+      "file": "assets/runtime/1fedad85d4f6e7fe2d0f.webp",
+      "status": 200,
+      "bytes": 131154
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-shoes.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9be42cf519fab28ffc46.webp",
+      "file": "assets/runtime/9be42cf519fab28ffc46.webp",
+      "status": 200,
+      "bytes": 41744
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-mask.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/618beac4da3296f60840.webp",
+      "file": "assets/runtime/618beac4da3296f60840.webp",
+      "status": 200,
+      "bytes": 49688
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-face.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/bd13befe3636c79b0888.webp",
+      "file": "assets/runtime/bd13befe3636c79b0888.webp",
+      "status": 200,
+      "bytes": 182102
+    },
+    {
+      "logical_name": "assets/textures/default-android-max-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4b6deac1ea76e9844583.webp",
+      "file": "assets/runtime/4b6deac1ea76e9844583.webp",
+      "status": 200,
+      "bytes": 124248
+    },
+    {
+      "logical_name": "assets/previews/default-android-max.webp",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5021119f516923be666b.webp",
+      "file": "assets/runtime/5021119f516923be666b.webp",
+      "status": 200,
+      "bytes": 106114
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-hair.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6320c16ca2e4a6d8284e.webp",
+      "file": "assets/runtime/6320c16ca2e4a6d8284e.webp",
+      "status": 200,
+      "bytes": 62292
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-top.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/43a76bb7af745299218c.webp",
+      "file": "assets/runtime/43a76bb7af745299218c.webp",
+      "status": 200,
+      "bytes": 302350
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-bottom.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f35079af140a44d47bfb.webp",
+      "file": "assets/runtime/f35079af140a44d47bfb.webp",
+      "status": 200,
+      "bytes": 228632
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-shoes.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/da5010b79de685888e6c.webp",
+      "file": "assets/runtime/da5010b79de685888e6c.webp",
+      "status": 200,
+      "bytes": 67818
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-mask.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ff4484d5ea793b8ea299.webp",
+      "file": "assets/runtime/ff4484d5ea793b8ea299.webp",
+      "status": 200,
+      "bytes": 78488
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-face.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/733a873115bfaebbf9ea.webp",
+      "file": "assets/runtime/733a873115bfaebbf9ea.webp",
+      "status": 200,
+      "bytes": 266636
+    },
+    {
+      "logical_name": "assets/textures/default-ios-normal-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9410989a134a413dcb75.webp",
+      "file": "assets/runtime/9410989a134a413dcb75.webp",
+      "status": 200,
+      "bytes": 199294
+    },
+    {
+      "logical_name": "assets/previews/default-ios-normal.webp",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4cee044750cafa104936.webp",
+      "file": "assets/runtime/4cee044750cafa104936.webp",
+      "status": 200,
+      "bytes": 134154
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-hair.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/41c5d581e14cb8e8ebf4.webp",
+      "file": "assets/runtime/41c5d581e14cb8e8ebf4.webp",
+      "status": 200,
+      "bytes": 40816
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-top.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ab693c3bfdcf4c96a37f.webp",
+      "file": "assets/runtime/ab693c3bfdcf4c96a37f.webp",
+      "status": 200,
+      "bytes": 199908
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-bottom.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6263a466122b4938a6ef.webp",
+      "file": "assets/runtime/6263a466122b4938a6ef.webp",
+      "status": 200,
+      "bytes": 131040
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-shoes.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/415a9e7d2e02a859f493.webp",
+      "file": "assets/runtime/415a9e7d2e02a859f493.webp",
+      "status": 200,
+      "bytes": 41736
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-mask.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/11d1e30377ce4bd3e092.webp",
+      "file": "assets/runtime/11d1e30377ce4bd3e092.webp",
+      "status": 200,
+      "bytes": 49638
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-face.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e530b86095a34eaeca1b.webp",
+      "file": "assets/runtime/e530b86095a34eaeca1b.webp",
+      "status": 200,
+      "bytes": 182236
+    },
+    {
+      "logical_name": "assets/textures/default-ios-max-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4b6deac1ea76e9844583.webp",
+      "file": "assets/runtime/4b6deac1ea76e9844583.webp",
+      "status": 200,
+      "bytes": 124248
+    },
+    {
+      "logical_name": "assets/previews/default-ios-max.webp",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/17c574bc52d44f68b468.webp",
+      "file": "assets/runtime/17c574bc52d44f68b468.webp",
+      "status": 200,
+      "bytes": 106086
+    },
+    {
+      "logical_name": "assets/textures/hair-soi-cong-nghe.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7278b347b1238bdfc5ba.webp",
+      "file": "assets/runtime/7278b347b1238bdfc5ba.webp",
+      "status": 200,
+      "bytes": 42336
+    },
+    {
+      "logical_name": "assets/textures/new-items-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/dce99f99bf23431d3edd.webp",
+      "file": "assets/runtime/dce99f99bf23431d3edd.webp",
+      "status": 200,
+      "bytes": 135450
+    },
+    {
+      "logical_name": "assets/textures/top-qua-den.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e021420995aed0f575d4.webp",
+      "file": "assets/runtime/e021420995aed0f575d4.webp",
+      "status": 200,
+      "bytes": 93624
+    },
+    {
+      "logical_name": "assets/textures/bottom-sooc-den.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7705d3c1091e094f7a92.webp",
+      "file": "assets/runtime/7705d3c1091e094f7a92.webp",
+      "status": 200,
+      "bytes": 20014
+    },
+    {
+      "logical_name": "assets/textures/bottom-ve-binh-tinh-tu.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/81fe98c6301013408928.webp",
+      "file": "assets/runtime/81fe98c6301013408928.webp",
+      "status": 200,
+      "bytes": 157126
+    },
+    {
+      "logical_name": "assets/textures/top-cuop-bien-nam.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/766c2bf0e291c68948db.webp",
+      "file": "assets/runtime/766c2bf0e291c68948db.webp",
+      "status": 200,
+      "bytes": 120078
+    },
+    {
+      "logical_name": "assets/textures/mask-ma-bup-be-nham-thach.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/fa0e5ef62562da550dc6.webp",
+      "file": "assets/runtime/fa0e5ef62562da550dc6.webp",
+      "status": 200,
+      "bytes": 60532
+    },
+    {
+      "logical_name": "assets/textures/face-tiec-cuong-loan.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5596d46a902071ff57c8.webp",
+      "file": "assets/runtime/5596d46a902071ff57c8.webp",
+      "status": 200,
+      "bytes": 146758
+    },
+    {
+      "logical_name": "assets/textures/top-dau-si-huyen-thoai.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7e7d072b85cff2386a82.webp",
+      "file": "assets/runtime/7e7d072b85cff2386a82.webp",
+      "status": 200,
+      "bytes": 187884
+    },
+    {
+      "logical_name": "assets/textures/hair-hac-tinh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/bee2c7ed7f4d26f0e59b.webp",
+      "file": "assets/runtime/bee2c7ed7f4d26f0e59b.webp",
+      "status": 200,
+      "bytes": 24700
+    },
+    {
+      "logical_name": "assets/textures/top-nguoi-choi-squid.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/540f31b2b6f9a13d5d99.webp",
+      "file": "assets/runtime/540f31b2b6f9a13d5d99.webp",
+      "status": 200,
+      "bytes": 141924
+    },
+    {
+      "logical_name": "assets/textures/top-thu-linh-binh-doan.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/18f54f13618dda57db86.webp",
+      "file": "assets/runtime/18f54f13618dda57db86.webp",
+      "status": 200,
+      "bytes": 211380
+    },
+    {
+      "logical_name": "assets/textures/bottom-phong-cach-street.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e44322f86d60dbaead23.webp",
+      "file": "assets/runtime/e44322f86d60dbaead23.webp",
+      "status": 200,
+      "bytes": 91004
+    },
+    {
+      "logical_name": "assets/textures/top-thiet-quyen.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/caddcbf33c584317e5d0.webp",
+      "file": "assets/runtime/caddcbf33c584317e5d0.webp",
+      "status": 200,
+      "bytes": 155346
+    },
+    {
+      "logical_name": "assets/textures/top-da-bong-anh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8e98bf9c7be5de0d2f98.webp",
+      "file": "assets/runtime/8e98bf9c7be5de0d2f98.webp",
+      "status": 200,
+      "bytes": 153486
+    },
+    {
+      "logical_name": "assets/textures/bottom-bong-chay.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b0e33cd343719c22d778.webp",
+      "file": "assets/runtime/b0e33cd343719c22d778.webp",
+      "status": 200,
+      "bytes": 34124
+    },
+    {
+      "logical_name": "assets/textures/top-lv-up.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ff3d07e6c425cbae3050.webp",
+      "file": "assets/runtime/ff3d07e6c425cbae3050.webp",
+      "status": 200,
+      "bytes": 170450
+    },
+    {
+      "logical_name": "assets/textures/bottom-thien-than-hoang-kim.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9a4cea766d73c03e61f6.webp",
+      "file": "assets/runtime/9a4cea766d73c03e61f6.webp",
+      "status": 200,
+      "bytes": 179106
+    },
+    {
+      "logical_name": "assets/textures/bottom-tham-hiem-hong-thien.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6a714461658977da5fcc.webp",
+      "file": "assets/runtime/6a714461658977da5fcc.webp",
+      "status": 200,
+      "bytes": 42598
+    },
+    {
+      "logical_name": "assets/textures/shoes-hacker.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b2a4cd1ed99c89abfca2.webp",
+      "file": "assets/runtime/b2a4cd1ed99c89abfca2.webp",
+      "status": 200,
+      "bytes": 40390
+    },
+    {
+      "logical_name": "assets/textures/top-da-bong-den.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3995468db1855329cbd0.webp",
+      "file": "assets/runtime/3995468db1855329cbd0.webp",
+      "status": 200,
+      "bytes": 117044
+    },
+    {
+      "logical_name": "assets/textures/bottom-tre-trau.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8c9b8f31f7b40fb67654.webp",
+      "file": "assets/runtime/8c9b8f31f7b40fb67654.webp",
+      "status": 200,
+      "bytes": 46308
+    },
+    {
+      "logical_name": "assets/textures/hair-tieu-tien.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a338586679dee4817083.webp",
+      "file": "assets/runtime/a338586679dee4817083.webp",
+      "status": 200,
+      "bytes": 104404
+    },
+    {
+      "logical_name": "assets/textures/top-tho-quay.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/53e97a3eb29b55b208c5.webp",
+      "file": "assets/runtime/53e97a3eb29b55b208c5.webp",
+      "status": 200,
+      "bytes": 245754
+    },
+    {
+      "logical_name": "assets/textures/bottom-tham-hiem-loi-lac.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e8249d072a3a33164912.webp",
+      "file": "assets/runtime/e8249d072a3a33164912.webp",
+      "status": 200,
+      "bytes": 42074
+    },
+    {
+      "logical_name": "assets/textures/mask-noel.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6e1d6e7ae0a06013e8d3.webp",
+      "file": "assets/runtime/6e1d6e7ae0a06013e8d3.webp",
+      "status": 200,
+      "bytes": 53544
+    },
+    {
+      "logical_name": "assets/textures/top-peru.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8935933e93f0cad2fce3.webp",
+      "file": "assets/runtime/8935933e93f0cad2fce3.webp",
+      "status": 200,
+      "bytes": 179906
+    },
+    {
+      "logical_name": "assets/textures/top-ao-bong-bi.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/09d24e9a0ad908773482.webp",
+      "file": "assets/runtime/09d24e9a0ad908773482.webp",
+      "status": 200,
+      "bytes": 147156
+    },
+    {
+      "logical_name": "assets/textures/top-da-bong-argentina.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f5eecefb5f71aba264d6.webp",
+      "file": "assets/runtime/f5eecefb5f71aba264d6.webp",
+      "status": 200,
+      "bytes": 182212
+    },
+    {
+      "logical_name": "assets/textures/top-da-bong-duc.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/aed5d52d98403e835841.webp",
+      "file": "assets/runtime/aed5d52d98403e835841.webp",
+      "status": 200,
+      "bytes": 160914
+    },
+    {
+      "logical_name": "assets/textures/bottom-pyjama-gau-truc.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ddc867c2dd65c884cd6d.webp",
+      "file": "assets/runtime/ddc867c2dd65c884cd6d.webp",
+      "status": 200,
+      "bytes": 138590
+    },
+    {
+      "logical_name": "assets/textures/hair-duong-pho-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/77a3ebc9864005f05486.webp",
+      "file": "assets/runtime/77a3ebc9864005f05486.webp",
+      "status": 200,
+      "bytes": 39858
+    },
+    {
+      "logical_name": "assets/textures/top-co-rua-trang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/736c71d62fe5827b8d5d.webp",
+      "file": "assets/runtime/736c71d62fe5827b8d5d.webp",
+      "status": 200,
+      "bytes": 152350
+    },
+    {
+      "logical_name": "assets/textures/bottom-angelic-neon.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/afdd47ad696df7d8f78f.webp",
+      "file": "assets/runtime/afdd47ad696df7d8f78f.webp",
+      "status": 200,
+      "bytes": 149196
+    },
+    {
+      "logical_name": "assets/textures/shoes-dep-heo-u.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e4d6cc0ac9165b9e22ef.webp",
+      "file": "assets/runtime/e4d6cc0ac9165b9e22ef.webp",
+      "status": 200,
+      "bytes": 43548
+    },
+    {
+      "logical_name": "assets/textures/mask-chien-than-dung-nham.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6b5eaca871f0ebace881.webp",
+      "file": "assets/runtime/6b5eaca871f0ebace881.webp",
+      "status": 200,
+      "bytes": 5922
+    },
+    {
+      "logical_name": "assets/textures/hair-trai-ngo-ngao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f04e75c0f06a380fcc4c.webp",
+      "file": "assets/runtime/f04e75c0f06a380fcc4c.webp",
+      "status": 200,
+      "bytes": 116616
+    },
+    {
+      "logical_name": "assets/textures/top-bong-ma-phia-tay.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e044089effcc5b693e4a.webp",
+      "file": "assets/runtime/e044089effcc5b693e4a.webp",
+      "status": 200,
+      "bytes": 245952
+    },
+    {
+      "logical_name": "assets/textures/bottom-bang-cuop-dem.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/13203e0b651c3cdf9f63.webp",
+      "file": "assets/runtime/13203e0b651c3cdf9f63.webp",
+      "status": 200,
+      "bytes": 182656
+    },
+    {
+      "logical_name": "assets/textures/shoes-bong-ro.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/0c3a54c7ce8a7ab2ab51.webp",
+      "file": "assets/runtime/0c3a54c7ce8a7ab2ab51.webp",
+      "status": 200,
+      "bytes": 45652
+    },
+    {
+      "logical_name": "assets/textures/mask-chien-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/2544c68ff85c91791f7e.webp",
+      "file": "assets/runtime/2544c68ff85c91791f7e.webp",
+      "status": 200,
+      "bytes": 12492
+    },
+    {
+      "logical_name": "assets/textures/hair-duong-pho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/be220fb79e1bb9248c16.webp",
+      "file": "assets/runtime/be220fb79e1bb9248c16.webp",
+      "status": 200,
+      "bytes": 36408
+    },
+    {
+      "logical_name": "assets/textures/top-duong-pho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e8d38669a3d76babe932.webp",
+      "file": "assets/runtime/e8d38669a3d76babe932.webp",
+      "status": 200,
+      "bytes": 244674
+    },
+    {
+      "logical_name": "assets/textures/bottom-duong-pho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/75864fa906a5a6eb5957.webp",
+      "file": "assets/runtime/75864fa906a5a6eb5957.webp",
+      "status": 200,
+      "bytes": 57514
+    },
+    {
+      "logical_name": "assets/textures/shoes-thanh-phong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c9fcf713322d2653834a.webp",
+      "file": "assets/runtime/c9fcf713322d2653834a.webp",
+      "status": 200,
+      "bytes": 164228
+    },
+    {
+      "logical_name": "assets/textures/mask-ma-bup-be.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/0ce1008121b183c5cbcd.webp",
+      "file": "assets/runtime/0ce1008121b183c5cbcd.webp",
+      "status": 200,
+      "bytes": 53686
+    },
+    {
+      "logical_name": "assets/textures/hair-bich-vang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/41886978572321192886.webp",
+      "file": "assets/runtime/41886978572321192886.webp",
+      "status": 200,
+      "bytes": 94190
+    },
+    {
+      "logical_name": "assets/textures/top-cau-thu-tay-dai.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/04bf12812c62cbdde09a.webp",
+      "file": "assets/runtime/04bf12812c62cbdde09a.webp",
+      "status": 200,
+      "bytes": 142564
+    },
+    {
+      "logical_name": "assets/textures/bottom-chien-binh-tho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/af434eeb35270021c58c.webp",
+      "file": "assets/runtime/af434eeb35270021c58c.webp",
+      "status": 200,
+      "bytes": 140660
+    },
+    {
+      "logical_name": "assets/textures/shoes-ca-sau.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ab5e7d66b7e0aa4e1754.webp",
+      "file": "assets/runtime/ab5e7d66b7e0aa4e1754.webp",
+      "status": 200,
+      "bytes": 41884
+    },
+    {
+      "logical_name": "assets/textures/mask-hac-anh-tinh-ha.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6a9c3870ec224d7410f5.webp",
+      "file": "assets/runtime/6a9c3870ec224d7410f5.webp",
+      "status": 200,
+      "bytes": 42346
+    },
+    {
+      "logical_name": "assets/textures/hair-hac-anh-tinh-ha.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/323c38d5f32f38ae213e.webp",
+      "file": "assets/runtime/323c38d5f32f38ae213e.webp",
+      "status": 200,
+      "bytes": 39998
+    },
+    {
+      "logical_name": "assets/textures/top-duong-pho-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6bf7f05f21a7d8b5de3a.webp",
+      "file": "assets/runtime/6bf7f05f21a7d8b5de3a.webp",
+      "status": 200,
+      "bytes": 177624
+    },
+    {
+      "logical_name": "assets/textures/bottom-duong-pho-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/96d494c691be65310351.webp",
+      "file": "assets/runtime/96d494c691be65310351.webp",
+      "status": 200,
+      "bytes": 183540
+    },
+    {
+      "logical_name": "assets/textures/shoes-ca-map.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/37007a8690df2021490c.webp",
+      "file": "assets/runtime/37007a8690df2021490c.webp",
+      "status": 200,
+      "bytes": 35256
+    },
+    {
+      "logical_name": "assets/textures/mask-hac-tinh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/83a5d00c9fedb0f37622.webp",
+      "file": "assets/runtime/83a5d00c9fedb0f37622.webp",
+      "status": 200,
+      "bytes": 25356
+    },
+    {
+      "logical_name": "assets/textures/hair-dao-si-do.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7ebffdc9b8e16109ecc9.webp",
+      "file": "assets/runtime/7ebffdc9b8e16109ecc9.webp",
+      "status": 200,
+      "bytes": 62030
+    },
+    {
+      "logical_name": "assets/textures/top-co-rua-den.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c141551f3fba90349a2b.webp",
+      "file": "assets/runtime/c141551f3fba90349a2b.webp",
+      "status": 200,
+      "bytes": 162436
+    },
+    {
+      "logical_name": "assets/textures/bottom-dong-phuc-anh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ca48e209fee1df010dc5.webp",
+      "file": "assets/runtime/ca48e209fee1df010dc5.webp",
+      "status": 200,
+      "bytes": 43698
+    },
+    {
+      "logical_name": "assets/textures/top-gojo.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d3ca188a33bda8dbe708.webp",
+      "file": "assets/runtime/d3ca188a33bda8dbe708.webp",
+      "status": 200,
+      "bytes": 71468
+    },
+    {
+      "logical_name": "assets/textures/bottom-gojo.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3d44703cca041c515479.webp",
+      "file": "assets/runtime/3d44703cca041c515479.webp",
+      "status": 200,
+      "bytes": 64970
+    },
+    {
+      "logical_name": "assets/textures/hair-lan-song-nang-dong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ebb5d6ce3db4d0dd8544.webp",
+      "file": "assets/runtime/ebb5d6ce3db4d0dd8544.webp",
+      "status": 200,
+      "bytes": 34578
+    },
+    {
+      "logical_name": "assets/textures/top-hello-kitty.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/21c5864a563d79d4e802.webp",
+      "file": "assets/runtime/21c5864a563d79d4e802.webp",
+      "status": 200,
+      "bytes": 175144
+    },
+    {
+      "logical_name": "assets/textures/bottom-hello-kitty.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4baee0cc975b1dcc7301.webp",
+      "file": "assets/runtime/4baee0cc975b1dcc7301.webp",
+      "status": 200,
+      "bytes": 149148
+    },
+    {
+      "logical_name": "assets/textures/shoes-hello-kitty.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/371c1b82b18dbeaf83c2.webp",
+      "file": "assets/runtime/371c1b82b18dbeaf83c2.webp",
+      "status": 200,
+      "bytes": 219384
+    },
+    {
+      "logical_name": "assets/textures/mask-hello-kitty.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a2ac36761efc562004a2.webp",
+      "file": "assets/runtime/a2ac36761efc562004a2.webp",
+      "status": 200,
+      "bytes": 191714
+    },
+    {
+      "logical_name": "assets/textures/hair-ghet-su-gia-doi.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/93f1b4b251dea4e68c23.webp",
+      "file": "assets/runtime/93f1b4b251dea4e68c23.webp",
+      "status": 200,
+      "bytes": 43428
+    },
+    {
+      "logical_name": "assets/textures/top-hello-kitty-xanh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9852efa3931225974009.webp",
+      "file": "assets/runtime/9852efa3931225974009.webp",
+      "status": 200,
+      "bytes": 178394
+    },
+    {
+      "logical_name": "assets/textures/bottom-hello-kitty-xanh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9fd2092f5e8bbbd5aa2d.webp",
+      "file": "assets/runtime/9fd2092f5e8bbbd5aa2d.webp",
+      "status": 200,
+      "bytes": 154226
+    },
+    {
+      "logical_name": "assets/textures/mask-tien-si-con-trung.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/92f8121d835a4e19e6f9.webp",
+      "file": "assets/runtime/92f8121d835a4e19e6f9.webp",
+      "status": 200,
+      "bytes": 25740
+    },
+    {
+      "logical_name": "assets/textures/hair-phu-thuy.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9d11923f321c7acf25df.webp",
+      "file": "assets/runtime/9d11923f321c7acf25df.webp",
+      "status": 200,
+      "bytes": 56352
+    },
+    {
+      "logical_name": "assets/textures/bottom-vo-dien-loi-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7a14aecaccdada48bc4a.webp",
+      "file": "assets/runtime/7a14aecaccdada48bc4a.webp",
+      "status": 200,
+      "bytes": 130146
+    },
+    {
+      "logical_name": "assets/textures/shoes-vo-dien-loi-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/2e44cc772fb59a43f555.webp",
+      "file": "assets/runtime/2e44cc772fb59a43f555.webp",
+      "status": 200,
+      "bytes": 42648
+    },
+    {
+      "logical_name": "assets/textures/mask-vo-dien-loi-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3a02625bda6dfb05ccdf.webp",
+      "file": "assets/runtime/3a02625bda6dfb05ccdf.webp",
+      "status": 200,
+      "bytes": 42000
+    },
+    {
+      "logical_name": "assets/textures/top-vo-dien-loi-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c4a4e1bb06df1a165091.webp",
+      "file": "assets/runtime/c4a4e1bb06df1a165091.webp",
+      "status": 200,
+      "bytes": 148872
+    },
+    {
+      "logical_name": "assets/textures/hair-bushido.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/efc2f90ec31606f4df4d.webp",
+      "file": "assets/runtime/efc2f90ec31606f4df4d.webp",
+      "status": 200,
+      "bytes": 31766
+    },
+    {
+      "logical_name": "assets/textures/top-bushido.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/adcfea584474a8ca2bae.webp",
+      "file": "assets/runtime/adcfea584474a8ca2bae.webp",
+      "status": 200,
+      "bytes": 242522
+    },
+    {
+      "logical_name": "assets/textures/bottom-bushido.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/742d76dbc139fb497460.webp",
+      "file": "assets/runtime/742d76dbc139fb497460.webp",
+      "status": 200,
+      "bytes": 50258
+    },
+    {
+      "logical_name": "assets/textures/mask-bushido.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8c5a66cb7ddcabe025f7.webp",
+      "file": "assets/runtime/8c5a66cb7ddcabe025f7.webp",
+      "status": 200,
+      "bytes": 60016
+    },
+    {
+      "logical_name": "assets/textures/hair-bushido-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f4ed60d2824e828601f5.webp",
+      "file": "assets/runtime/f4ed60d2824e828601f5.webp",
+      "status": 200,
+      "bytes": 30772
+    },
+    {
+      "logical_name": "assets/textures/top-bushido-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/76c76c069e9ca697aa70.webp",
+      "file": "assets/runtime/76c76c069e9ca697aa70.webp",
+      "status": 200,
+      "bytes": 203916
+    },
+    {
+      "logical_name": "assets/textures/bottom-bushido-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/118e719c3058a06bae64.webp",
+      "file": "assets/runtime/118e719c3058a06bae64.webp",
+      "status": 200,
+      "bytes": 196064
+    },
+    {
+      "logical_name": "assets/textures/shoes-bushido-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/457066b3783ee9b28348.webp",
+      "file": "assets/runtime/457066b3783ee9b28348.webp",
+      "status": 200,
+      "bytes": 36062
+    },
+    {
+      "logical_name": "assets/textures/mask-bushido-cao-cap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5a4dc1b05374e1e56538.webp",
+      "file": "assets/runtime/5a4dc1b05374e1e56538.webp",
+      "status": 200,
+      "bytes": 51912
+    },
+    {
+      "logical_name": "assets/textures/hair-su-gia-ac-ma.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b02f45d95df085a06f50.webp",
+      "file": "assets/runtime/b02f45d95df085a06f50.webp",
+      "status": 200,
+      "bytes": 85708
+    },
+    {
+      "logical_name": "assets/textures/top-da-biker.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/56044f83f57c974d08ee.webp",
+      "file": "assets/runtime/56044f83f57c974d08ee.webp",
+      "status": 200,
+      "bytes": 166660
+    },
+    {
+      "logical_name": "assets/textures/bottom-ky-hoi.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4ecf3e897533b68c06f2.webp",
+      "file": "assets/runtime/4ecf3e897533b68c06f2.webp",
+      "status": 200,
+      "bytes": 61634
+    },
+    {
+      "logical_name": "assets/textures/shoes-bong-gau-do.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/26b76f1071d31070d0b3.webp",
+      "file": "assets/runtime/26b76f1071d31070d0b3.webp",
+      "status": 200,
+      "bytes": 31580
+    },
+    {
+      "logical_name": "assets/textures/hair-xoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/2aca190edeacd69a14d8.webp",
+      "file": "assets/runtime/2aca190edeacd69a14d8.webp",
+      "status": 200,
+      "bytes": 21426
+    },
+    {
+      "logical_name": "assets/textures/top-xoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/468cd50e763d2f7a7908.webp",
+      "file": "assets/runtime/468cd50e763d2f7a7908.webp",
+      "status": 200,
+      "bytes": 155460
+    },
+    {
+      "logical_name": "assets/textures/bottom-xoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/cb4117904e17a65fe28d.webp",
+      "file": "assets/runtime/cb4117904e17a65fe28d.webp",
+      "status": 200,
+      "bytes": 44376
+    },
+    {
+      "logical_name": "assets/textures/shoes-xoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3d9f4ca0cd940184b81f.webp",
+      "file": "assets/runtime/3d9f4ca0cd940184b81f.webp",
+      "status": 200,
+      "bytes": 34652
+    },
+    {
+      "logical_name": "assets/textures/mask-xoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/22b2cc5578e8eded8d71.webp",
+      "file": "assets/runtime/22b2cc5578e8eded8d71.webp",
+      "status": 200,
+      "bytes": 45564
+    },
+    {
+      "logical_name": "assets/textures/face-xoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/29ffcfb5a39623463f59.webp",
+      "file": "assets/runtime/29ffcfb5a39623463f59.webp",
+      "status": 200,
+      "bytes": 190004
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-binh-tho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/637db846b007934cf2a2.webp",
+      "file": "assets/runtime/637db846b007934cf2a2.webp",
+      "status": 200,
+      "bytes": 42490
+    },
+    {
+      "logical_name": "assets/textures/top-chien-binh-tho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a10d5d5195f7b7b0c3ab.webp",
+      "file": "assets/runtime/a10d5d5195f7b7b0c3ab.webp",
+      "status": 200,
+      "bytes": 165560
+    },
+    {
+      "logical_name": "assets/textures/shoes-chien-binh-tho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/99c5705d137d61f9b7d8.webp",
+      "file": "assets/runtime/99c5705d137d61f9b7d8.webp",
+      "status": 200,
+      "bytes": 34868
+    },
+    {
+      "logical_name": "assets/textures/hair-soai-ca-cuong-thi.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6a678c080cd6f40b420c.webp",
+      "file": "assets/runtime/6a678c080cd6f40b420c.webp",
+      "status": 200,
+      "bytes": 36414
+    },
+    {
+      "logical_name": "assets/textures/top-trai-ngo-ngao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5729aa306a4282887577.webp",
+      "file": "assets/runtime/5729aa306a4282887577.webp",
+      "status": 200,
+      "bytes": 126240
+    },
+    {
+      "logical_name": "assets/textures/bottom-dau.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e178c9a646dd9125b1f4.webp",
+      "file": "assets/runtime/e178c9a646dd9125b1f4.webp",
+      "status": 200,
+      "bytes": 15800
+    },
+    {
+      "logical_name": "assets/textures/shoes-bushido.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/fda8efa3472ecfd3f4f5.webp",
+      "file": "assets/runtime/fda8efa3472ecfd3f4f5.webp",
+      "status": 200,
+      "bytes": 42720
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-black.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/97e3f077b387caad5970.webp",
+      "file": "assets/runtime/97e3f077b387caad5970.webp",
+      "status": 200,
+      "bytes": 9164
+    },
+    {
+      "logical_name": "assets/textures/top-quai-nhan-hu-khong-black.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ad307e8b7d512ad948f0.webp",
+      "file": "assets/runtime/ad307e8b7d512ad948f0.webp",
+      "status": 200,
+      "bytes": 223502
+    },
+    {
+      "logical_name": "assets/textures/bottom-quai-nhan-hu-khong-black.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/04138c0ef4608a4c909f.webp",
+      "file": "assets/runtime/04138c0ef4608a4c909f.webp",
+      "status": 200,
+      "bytes": 203784
+    },
+    {
+      "logical_name": "assets/textures/hair-quai-nhan-hu-khong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5515cdaedd4befa7330c.webp",
+      "file": "assets/runtime/5515cdaedd4befa7330c.webp",
+      "status": 200,
+      "bytes": 17082
+    },
+    {
+      "logical_name": "assets/textures/top-quai-nhan-hu-khong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/edab7387ffed8bf2a4cb.webp",
+      "file": "assets/runtime/edab7387ffed8bf2a4cb.webp",
+      "status": 200,
+      "bytes": 103436
+    },
+    {
+      "logical_name": "assets/textures/bottom-quai-nhan-hu-khong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d5b9ecc05b2451756293.webp",
+      "file": "assets/runtime/d5b9ecc05b2451756293.webp",
+      "status": 200,
+      "bytes": 74650
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-white.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9131b3e7a12e03b36e3d.webp",
+      "file": "assets/runtime/9131b3e7a12e03b36e3d.webp",
+      "status": 200,
+      "bytes": 69020
+    },
+    {
+      "logical_name": "assets/textures/top-quai-nhan-hu-khong-white.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/332270456ef2b6aeaeb1.webp",
+      "file": "assets/runtime/332270456ef2b6aeaeb1.webp",
+      "status": 200,
+      "bytes": 88328
+    },
+    {
+      "logical_name": "assets/textures/bottom-quai-nhan-hu-khong-white.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/06234b77f04e516d44e7.webp",
+      "file": "assets/runtime/06234b77f04e516d44e7.webp",
+      "status": 200,
+      "bytes": 83734
+    },
+    {
+      "logical_name": "assets/textures/top-quai-nhan-hu-khong-blue.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/380bc81f225f5de1f275.webp",
+      "file": "assets/runtime/380bc81f225f5de1f275.webp",
+      "status": 200,
+      "bytes": 143290
+    },
+    {
+      "logical_name": "assets/textures/bottom-quai-nhan-hu-khong-blue.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/859668920e056e8e5ff9.webp",
+      "file": "assets/runtime/859668920e056e8e5ff9.webp",
+      "status": 200,
+      "bytes": 128650
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-quay.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/20995cb66a38f52928f4.webp",
+      "file": "assets/runtime/20995cb66a38f52928f4.webp",
+      "status": 200,
+      "bytes": 56512
+    },
+    {
+      "logical_name": "assets/textures/top-tho-neon.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/37cd5c1030ff60db3f2b.webp",
+      "file": "assets/runtime/37cd5c1030ff60db3f2b.webp",
+      "status": 200,
+      "bytes": 190540
+    },
+    {
+      "logical_name": "assets/textures/bottom-dau-si-tho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c9efdf0dbac21c23f82c.webp",
+      "file": "assets/runtime/c9efdf0dbac21c23f82c.webp",
+      "status": 200,
+      "bytes": 201596
+    },
+    {
+      "logical_name": "assets/textures/shoes-dau-si-tho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5503207daeaffcd48b7f.webp",
+      "file": "assets/runtime/5503207daeaffcd48b7f.webp",
+      "status": 200,
+      "bytes": 41278
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-red.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ee909d8ec307884739a1.webp",
+      "file": "assets/runtime/ee909d8ec307884739a1.webp",
+      "status": 200,
+      "bytes": 191260
+    },
+    {
+      "logical_name": "assets/textures/top-tho-red.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6da0856071be5ab83f31.webp",
+      "file": "assets/runtime/6da0856071be5ab83f31.webp",
+      "status": 200,
+      "bytes": 265472
+    },
+    {
+      "logical_name": "assets/textures/bottom-tho-red.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/97204723bad4103da80b.webp",
+      "file": "assets/runtime/97204723bad4103da80b.webp",
+      "status": 200,
+      "bytes": 129180
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-thien-ha.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c137deb4660d760672a1.webp",
+      "file": "assets/runtime/c137deb4660d760672a1.webp",
+      "status": 200,
+      "bytes": 34388
+    },
+    {
+      "logical_name": "assets/textures/top-tho-black.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a10d5d5195f7b7b0c3ab.webp",
+      "file": "assets/runtime/a10d5d5195f7b7b0c3ab.webp",
+      "status": 200,
+      "bytes": 165560
+    },
+    {
+      "logical_name": "assets/textures/bottom-tho-thien-ha.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e0e1d325e543d4dc35dd.webp",
+      "file": "assets/runtime/e0e1d325e543d4dc35dd.webp",
+      "status": 200,
+      "bytes": 137692
+    },
+    {
+      "logical_name": "assets/textures/shoes-tho-black.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/99c5705d137d61f9b7d8.webp",
+      "file": "assets/runtime/99c5705d137d61f9b7d8.webp",
+      "status": 200,
+      "bytes": 34868
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-pink.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6ac39a346e4975b2c6c3.webp",
+      "file": "assets/runtime/6ac39a346e4975b2c6c3.webp",
+      "status": 200,
+      "bytes": 173554
+    },
+    {
+      "logical_name": "assets/textures/top-tho-pink.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/98d33ba6d561127f6b8d.webp",
+      "file": "assets/runtime/98d33ba6d561127f6b8d.webp",
+      "status": 200,
+      "bytes": 271542
+    },
+    {
+      "logical_name": "assets/textures/bottom-tho-pink.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c9e016abb825fb8e9d9e.webp",
+      "file": "assets/runtime/c9e016abb825fb8e9d9e.webp",
+      "status": 200,
+      "bytes": 213196
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-purple.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f01341b9d04b3b043525.webp",
+      "file": "assets/runtime/f01341b9d04b3b043525.webp",
+      "status": 200,
+      "bytes": 37258
+    },
+    {
+      "logical_name": "assets/textures/top-tho-purple.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f5d3592dd5a754d86b87.webp",
+      "file": "assets/runtime/f5d3592dd5a754d86b87.webp",
+      "status": 200,
+      "bytes": 184812
+    },
+    {
+      "logical_name": "assets/textures/bottom-tho-purple.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/60a179f3981fb246d607.webp",
+      "file": "assets/runtime/60a179f3981fb246d607.webp",
+      "status": 200,
+      "bytes": 138930
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-yellow.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3722b2e5c4f1ec0be07f.webp",
+      "file": "assets/runtime/3722b2e5c4f1ec0be07f.webp",
+      "status": 200,
+      "bytes": 35740
+    },
+    {
+      "logical_name": "assets/textures/top-tho-yellow.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8f51aa8e577adc9ef602.webp",
+      "file": "assets/runtime/8f51aa8e577adc9ef602.webp",
+      "status": 200,
+      "bytes": 182510
+    },
+    {
+      "logical_name": "assets/textures/bottom-tho-yellow.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/eaa6bcc46790297fec87.webp",
+      "file": "assets/runtime/eaa6bcc46790297fec87.webp",
+      "status": 200,
+      "bytes": 89796
+    },
+    {
+      "logical_name": "assets/textures/hair-alien-x.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1c3a674903e552f6d674.webp",
+      "file": "assets/runtime/1c3a674903e552f6d674.webp",
+      "status": 200,
+      "bytes": 38748
+    },
+    {
+      "logical_name": "assets/textures/top-thich-khach-kim-long.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f6697fd2636dba9acda6.webp",
+      "file": "assets/runtime/f6697fd2636dba9acda6.webp",
+      "status": 200,
+      "bytes": 45666
+    },
+    {
+      "logical_name": "assets/textures/bottom-hac-tinh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7bd41f00bc9276a8ccf4.webp",
+      "file": "assets/runtime/7bd41f00bc9276a8ccf4.webp",
+      "status": 200,
+      "bytes": 72492
+    },
+    {
+      "logical_name": "assets/textures/mask-trai-ngo-ngao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/56c386c28a28b99b3782.webp",
+      "file": "assets/runtime/56c386c28a28b99b3782.webp",
+      "status": 200,
+      "bytes": 25526
+    },
+    {
+      "logical_name": "assets/textures/top-ngu-thanh-phong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d3ffa657470333b4666f.webp",
+      "file": "assets/runtime/d3ffa657470333b4666f.webp",
+      "status": 200,
+      "bytes": 170184
+    },
+    {
+      "logical_name": "assets/textures/top-thich-khach-kim-long-dragon-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f3e1cd4ef905ce8ee135.webp",
+      "file": "assets/runtime/f3e1cd4ef905ce8ee135.webp",
+      "status": 200,
+      "bytes": 156682
+    },
+    {
+      "logical_name": "assets/textures/hair-caption-american.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/750c5b278674eb81e340.webp",
+      "file": "assets/runtime/750c5b278674eb81e340.webp",
+      "status": 200,
+      "bytes": 176966
+    },
+    {
+      "logical_name": "assets/textures/top-thich-khach-bong-dem.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/701b5e56838f7ae0f49a.webp",
+      "file": "assets/runtime/701b5e56838f7ae0f49a.webp",
+      "status": 200,
+      "bytes": 125016
+    },
+    {
+      "logical_name": "assets/textures/bottom-hoa-quyen-su.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/51761ed425c20a446fb0.webp",
+      "file": "assets/runtime/51761ed425c20a446fb0.webp",
+      "status": 200,
+      "bytes": 189276
+    },
+    {
+      "logical_name": "assets/textures/hair-titan-tien-cong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5ea25bb81c16c3d0ff18.webp",
+      "file": "assets/runtime/5ea25bb81c16c3d0ff18.webp",
+      "status": 200,
+      "bytes": 33108
+    },
+    {
+      "logical_name": "assets/textures/top-titan-tien-cong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/605188af54e0b2c73858.webp",
+      "file": "assets/runtime/605188af54e0b2c73858.webp",
+      "status": 200,
+      "bytes": 183230
+    },
+    {
+      "logical_name": "assets/textures/mask-titan-tien-cong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c3510fc71727de90f41c.webp",
+      "file": "assets/runtime/c3510fc71727de90f41c.webp",
+      "status": 200,
+      "bytes": 163382
+    },
+    {
+      "logical_name": "assets/textures/hair-titan-thiet-giap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/c88e9770bc1d2c76be28.webp",
+      "file": "assets/runtime/c88e9770bc1d2c76be28.webp",
+      "status": 200,
+      "bytes": 29354
+    },
+    {
+      "logical_name": "assets/textures/top-titan-thiet-giap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4bdfe639a7447a6a1dbc.webp",
+      "file": "assets/runtime/4bdfe639a7447a6a1dbc.webp",
+      "status": 200,
+      "bytes": 262574
+    },
+    {
+      "logical_name": "assets/textures/mask-titan-thiet-giap.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9676d3c3122a5d806983.webp",
+      "file": "assets/runtime/9676d3c3122a5d806983.webp",
+      "status": 200,
+      "bytes": 230392
+    },
+    {
+      "logical_name": "assets/textures/hair-tho-san-huyet-quy.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9fadb78fd0f38d7bad6f.webp",
+      "file": "assets/runtime/9fadb78fd0f38d7bad6f.webp",
+      "status": 200,
+      "bytes": 23198
+    },
+    {
+      "logical_name": "assets/textures/top-hac-ginh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8e0ae93b9ceeb160a6e8.webp",
+      "file": "assets/runtime/8e0ae93b9ceeb160a6e8.webp",
+      "status": 200,
+      "bytes": 88328
+    },
+    {
+      "logical_name": "assets/textures/bottom-nguoi-choi-squid-game.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e2919c0778db25100527.webp",
+      "file": "assets/runtime/e2919c0778db25100527.webp",
+      "status": 200,
+      "bytes": 139344
+    },
+    {
+      "logical_name": "assets/textures/shoes-hac-tinh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e3d2f08ca2da271d355e.webp",
+      "file": "assets/runtime/e3d2f08ca2da271d355e.webp",
+      "status": 200,
+      "bytes": 27834
+    },
+    {
+      "logical_name": "assets/textures/mask-anbu.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8d08a2e13fafa046c4cc.webp",
+      "file": "assets/runtime/8d08a2e13fafa046c4cc.webp",
+      "status": 200,
+      "bytes": 33712
+    },
+    {
+      "logical_name": "assets/textures/hair-nguoi-nhen.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f6e0afaef6921c8e93d8.webp",
+      "file": "assets/runtime/f6e0afaef6921c8e93d8.webp",
+      "status": 200,
+      "bytes": 39692
+    },
+    {
+      "logical_name": "assets/textures/top-nguoi-nhen.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/289e44a4b9ab74645848.webp",
+      "file": "assets/runtime/289e44a4b9ab74645848.webp",
+      "status": 200,
+      "bytes": 191824
+    },
+    {
+      "logical_name": "assets/textures/bottom-nguoi-nhen.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e339b452eaffe861e0e8.webp",
+      "file": "assets/runtime/e339b452eaffe861e0e8.webp",
+      "status": 200,
+      "bytes": 148186
+    },
+    {
+      "logical_name": "assets/textures/shoes-nguoi-nhen.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7b82d7cf114ca0f3e9d1.webp",
+      "file": "assets/runtime/7b82d7cf114ca0f3e9d1.webp",
+      "status": 200,
+      "bytes": 46040
+    },
+    {
+      "logical_name": "assets/textures/mask-hung-than-pha-mong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1fe2362f94a88f13f8d4.webp",
+      "file": "assets/runtime/1fe2362f94a88f13f8d4.webp",
+      "status": 200,
+      "bytes": 25110
+    },
+    {
+      "logical_name": "assets/textures/hair-mordecai.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/62c95cbfa0f200ff018f.webp",
+      "file": "assets/runtime/62c95cbfa0f200ff018f.webp",
+      "status": 200,
+      "bytes": 28570
+    },
+    {
+      "logical_name": "assets/textures/top-thich-khach-hac-long.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a2361727ac62d2242113.webp",
+      "file": "assets/runtime/a2361727ac62d2242113.webp",
+      "status": 200,
+      "bytes": 46484
+    },
+    {
+      "logical_name": "assets/textures/bottom-dau-sy-huyen-thoai.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ddb014321a32105df236.webp",
+      "file": "assets/runtime/ddb014321a32105df236.webp",
+      "status": 200,
+      "bytes": 194814
+    },
+    {
+      "logical_name": "assets/textures/shoes-hoang-de-hai-huoc.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/98a3d397db9d9d0b61cd.webp",
+      "file": "assets/runtime/98a3d397db9d9d0b61cd.webp",
+      "status": 200,
+      "bytes": 46450
+    },
+    {
+      "logical_name": "assets/textures/mask-mordecai.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/51ec1bb53aebe772e374.webp",
+      "file": "assets/runtime/51ec1bb53aebe772e374.webp",
+      "status": 200,
+      "bytes": 21852
+    },
+    {
+      "logical_name": "assets/textures/hair-nguoi-nhen-full-set.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1afec1bddc042d1094e7.webp",
+      "file": "assets/runtime/1afec1bddc042d1094e7.webp",
+      "status": 200,
+      "bytes": 197090
+    },
+    {
+      "logical_name": "assets/textures/top-da-bong-brazill.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b21d56049ffeaa8755da.webp",
+      "file": "assets/runtime/b21d56049ffeaa8755da.webp",
+      "status": 200,
+      "bytes": 164868
+    },
+    {
+      "logical_name": "assets/textures/bottom-ac-quy.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/55d0b2d8af8611c56187.webp",
+      "file": "assets/runtime/55d0b2d8af8611c56187.webp",
+      "status": 200,
+      "bytes": 173204
+    },
+    {
+      "logical_name": "assets/textures/shoes-he-vui-ve.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/109aae0131f10bc0881b.webp",
+      "file": "assets/runtime/109aae0131f10bc0881b.webp",
+      "status": 200,
+      "bytes": 44160
+    },
+    {
+      "logical_name": "assets/textures/mask-tu-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1f23093d55e566563b61.webp",
+      "file": "assets/runtime/1f23093d55e566563b61.webp",
+      "status": 200,
+      "bytes": 47402
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-bulldog.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f81094977a55a5043598.webp",
+      "file": "assets/runtime/f81094977a55a5043598.webp",
+      "status": 200,
+      "bytes": 34784
+    },
+    {
+      "logical_name": "assets/textures/bottom-anh-chang-keo-ngot.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6dd6ad4d8a7759e10631.webp",
+      "file": "assets/runtime/6dd6ad4d8a7759e10631.webp",
+      "status": 200,
+      "bytes": 202324
+    },
+    {
+      "logical_name": "assets/textures/shoes-hoi-tho-mua-he.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ae7d300eba40ac080393.webp",
+      "file": "assets/runtime/ae7d300eba40ac080393.webp",
+      "status": 200,
+      "bytes": 41332
+    },
+    {
+      "logical_name": "assets/textures/mask-bang-che-mat-quan-lot.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7a1008ebf6f37742b051.webp",
+      "file": "assets/runtime/7a1008ebf6f37742b051.webp",
+      "status": 200,
+      "bytes": 24234
+    },
+    {
+      "logical_name": "assets/textures/hair-ky-hoa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/603056da6bcdd80faaaa.webp",
+      "file": "assets/runtime/603056da6bcdd80faaaa.webp",
+      "status": 200,
+      "bytes": 35600
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-ban-tot-nhat-cua-con-nguoi.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e6eadbce729a4a4b4985.webp",
+      "file": "assets/runtime/e6eadbce729a4a4b4985.webp",
+      "status": 200,
+      "bytes": 23684
+    },
+    {
+      "logical_name": "assets/textures/bottom-anh-chang-dang-yeu.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/486fbfdb0db7627af5b6.webp",
+      "file": "assets/runtime/486fbfdb0db7627af5b6.webp",
+      "status": 200,
+      "bytes": 62934
+    },
+    {
+      "logical_name": "assets/textures/shoes-hoa-quyen-su.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/31fe7f77b4749c5def51.webp",
+      "file": "assets/runtime/31fe7f77b4749c5def51.webp",
+      "status": 200,
+      "bytes": 33722
+    },
+    {
+      "logical_name": "assets/textures/mask-bang-che-mat-ao-lot.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a943c5d6be2a551ba18d.webp",
+      "file": "assets/runtime/a943c5d6be2a551ba18d.webp",
+      "status": 200,
+      "bytes": 59096
+    },
+    {
+      "logical_name": "assets/textures/face-bi-ngo-duong-pho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7e6c74a1c33f65cc0357.webp",
+      "file": "assets/runtime/7e6c74a1c33f65cc0357.webp",
+      "status": 200,
+      "bytes": 198788
+    },
+    {
+      "logical_name": "assets/textures/hair-phac-thao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b823ff05f320200e8f93.webp",
+      "file": "assets/runtime/b823ff05f320200e8f93.webp",
+      "status": 200,
+      "bytes": 17858
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-chien-thang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d7bbeef9ea821f0decbc.webp",
+      "file": "assets/runtime/d7bbeef9ea821f0decbc.webp",
+      "status": 200,
+      "bytes": 25328
+    },
+    {
+      "logical_name": "assets/textures/bottom-anh-gau-bu.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b0dab9b5b9cc4c2a6af7.webp",
+      "file": "assets/runtime/b0dab9b5b9cc4c2a6af7.webp",
+      "status": 200,
+      "bytes": 157696
+    },
+    {
+      "logical_name": "assets/textures/shoes-nha-con-trung-hoc.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e273b090297cf8e245b7.webp",
+      "file": "assets/runtime/e273b090297cf8e245b7.webp",
+      "status": 200,
+      "bytes": 36562
+    },
+    {
+      "logical_name": "assets/textures/mask-bo-xuong-di-dong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3b3181c2af99a5e6c471.webp",
+      "file": "assets/runtime/3b3181c2af99a5e6c471.webp",
+      "status": 200,
+      "bytes": 57012
+    },
+    {
+      "logical_name": "assets/textures/face-bich-vuong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/65b109176852214b69d8.webp",
+      "file": "assets/runtime/65b109176852214b69d8.webp",
+      "status": 200,
+      "bytes": 93710
+    },
+    {
+      "logical_name": "assets/textures/hair-sat-thu-sa-mac.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/2c32b0e6efc82b569626.webp",
+      "file": "assets/runtime/2c32b0e6efc82b569626.webp",
+      "status": 200,
+      "bytes": 22572
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-co-don.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/27729268405bda354b03.webp",
+      "file": "assets/runtime/27729268405bda354b03.webp",
+      "status": 200,
+      "bytes": 19368
+    },
+    {
+      "logical_name": "assets/textures/bottom-anh-trai-say-trang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/95fe8de8bb9b9d7ef28c.webp",
+      "file": "assets/runtime/95fe8de8bb9b9d7ef28c.webp",
+      "status": 200,
+      "bytes": 310116
+    },
+    {
+      "logical_name": "assets/textures/shoes-phi-cong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e75cfaabb0c1bcbfd1e2.webp",
+      "file": "assets/runtime/e75cfaabb0c1bcbfd1e2.webp",
+      "status": 200,
+      "bytes": 29588
+    },
+    {
+      "logical_name": "assets/textures/mask-cuong-long-bao-kich.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9ebec6b74c583786321e.webp",
+      "file": "assets/runtime/9ebec6b74c583786321e.webp",
+      "status": 200,
+      "bytes": 43596
+    },
+    {
+      "logical_name": "assets/textures/face-ca-si-thay-ma.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/105018ccdc1db060fa02.webp",
+      "file": "assets/runtime/105018ccdc1db060fa02.webp",
+      "status": 200,
+      "bytes": 68248
+    },
+    {
+      "logical_name": "assets/textures/hair-chieu-mua.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/00b899dda8dafa228d55.webp",
+      "file": "assets/runtime/00b899dda8dafa228d55.webp",
+      "status": 200,
+      "bytes": 35408
+    },
+    {
+      "logical_name": "assets/textures/mask-cun-con-ngo-ngao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8abad18f7565468144a3.webp",
+      "file": "assets/runtime/8abad18f7565468144a3.webp",
+      "status": 200,
+      "bytes": 52390
+    },
+    {
+      "logical_name": "assets/textures/face-chieu-linh-bong-toi.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/47502b0b240c3f6972ba.webp",
+      "file": "assets/runtime/47502b0b240c3f6972ba.webp",
+      "status": 200,
+      "bytes": 22432
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-help.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/14020c8bdb6441174533.webp",
+      "file": "assets/runtime/14020c8bdb6441174533.webp",
+      "status": 200,
+      "bytes": 20546
+    },
+    {
+      "logical_name": "assets/textures/bottom-assasin-sat-thu-anh-sang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a0141938ba615ae67787.webp",
+      "file": "assets/runtime/a0141938ba615ae67787.webp",
+      "status": 200,
+      "bytes": 207702
+    },
+    {
+      "logical_name": "assets/textures/shoes-quai-thu-do.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ee1a7e631e3ee0b67e99.webp",
+      "file": "assets/runtime/ee1a7e631e3ee0b67e99.webp",
+      "status": 200,
+      "bytes": 35698
+    },
+    {
+      "logical_name": "assets/textures/hair-bao-to-cuc-tim.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/00b899dda8dafa228d55.webp",
+      "file": "assets/runtime/00b899dda8dafa228d55.webp",
+      "status": 200,
+      "bytes": 35408
+    },
+    {
+      "logical_name": "assets/textures/mask-ffwc-2025.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8abad18f7565468144a3.webp",
+      "file": "assets/runtime/8abad18f7565468144a3.webp",
+      "status": 200,
+      "bytes": 52390
+    },
+    {
+      "logical_name": "assets/textures/face-chieu-linh-bach-kim.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/47502b0b240c3f6972ba.webp",
+      "file": "assets/runtime/47502b0b240c3f6972ba.webp",
+      "status": 200,
+      "bytes": 22432
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-ham-doa.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/14020c8bdb6441174533.webp",
+      "file": "assets/runtime/14020c8bdb6441174533.webp",
+      "status": 200,
+      "bytes": 20546
+    },
+    {
+      "logical_name": "assets/textures/bottom-bang-chu-phi-dao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a0141938ba615ae67787.webp",
+      "file": "assets/runtime/a0141938ba615ae67787.webp",
+      "status": 200,
+      "bytes": 207702
+    },
+    {
+      "logical_name": "assets/textures/shoes-thien-than.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ee1a7e631e3ee0b67e99.webp",
+      "file": "assets/runtime/ee1a7e631e3ee0b67e99.webp",
+      "status": 200,
+      "bytes": 35698
+    },
+    {
+      "logical_name": "assets/textures/hair-bao-to-sam-set.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/95db877e4adcd8a86df6.webp",
+      "file": "assets/runtime/95db877e4adcd8a86df6.webp",
+      "status": 200,
+      "bytes": 34620
+    },
+    {
+      "logical_name": "assets/textures/mask-cau-hinh-dep-trai.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/22b2cc5578e8eded8d71.webp",
+      "file": "assets/runtime/22b2cc5578e8eded8d71.webp",
+      "status": 200,
+      "bytes": 45564
+    },
+    {
+      "logical_name": "assets/textures/face-chieu-linh-hoang-kim.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/44c5e8da9818764e0712.webp",
+      "file": "assets/runtime/44c5e8da9818764e0712.webp",
+      "status": 200,
+      "bytes": 25882
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-lam.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b4f51539f9b2cf7c58d2.webp",
+      "file": "assets/runtime/b4f51539f9b2cf7c58d2.webp",
+      "status": 200,
+      "bytes": 36402
+    },
+    {
+      "logical_name": "assets/textures/bottom-blue-lock.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/cd3136be1931e0127b68.webp",
+      "file": "assets/runtime/cd3136be1931e0127b68.webp",
+      "status": 200,
+      "bytes": 66262
+    },
+    {
+      "logical_name": "assets/textures/shoes-to-ong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5c885968d3fba6299702.webp",
+      "file": "assets/runtime/5c885968d3fba6299702.webp",
+      "status": 200,
+      "bytes": 42636
+    },
+    {
+      "logical_name": "assets/textures/hair-bach-tuoc-ca.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/899e9d5c5086db0bbcbd.webp",
+      "file": "assets/runtime/899e9d5c5086db0bbcbd.webp",
+      "status": 200,
+      "bytes": 78574
+    },
+    {
+      "logical_name": "assets/textures/mask-dan-choi-noi-loan.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b4d8c505bdd7d71794c0.webp",
+      "file": "assets/runtime/b4d8c505bdd7d71794c0.webp",
+      "status": 200,
+      "bytes": 44422
+    },
+    {
+      "logical_name": "assets/textures/face-chieu-linh-hac-am.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/96f35f4e9122a37cc101.webp",
+      "file": "assets/runtime/96f35f4e9122a37cc101.webp",
+      "status": 200,
+      "bytes": 21882
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-luc.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4e5448f0d16041d68a40.webp",
+      "file": "assets/runtime/4e5448f0d16041d68a40.webp",
+      "status": 200,
+      "bytes": 31358
+    },
+    {
+      "logical_name": "assets/textures/bottom-bom-thu-don-sac.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/1325fb63d10d5c3e24b3.webp",
+      "file": "assets/runtime/1325fb63d10d5c3e24b3.webp",
+      "status": 200,
+      "bytes": 87072
+    },
+    {
+      "logical_name": "assets/textures/shoes-dau-rang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/fce41ee299e37695436b.webp",
+      "file": "assets/runtime/fce41ee299e37695436b.webp",
+      "status": 200,
+      "bytes": 46218
+    },
+    {
+      "logical_name": "assets/textures/hair-bom.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/62552da3416c34aa49fc.webp",
+      "file": "assets/runtime/62552da3416c34aa49fc.webp",
+      "status": 200,
+      "bytes": 37334
+    },
+    {
+      "logical_name": "assets/textures/mask-ffws-2025.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8abad18f7565468144a3.webp",
+      "file": "assets/runtime/8abad18f7565468144a3.webp",
+      "status": 200,
+      "bytes": 52390
+    },
+    {
+      "logical_name": "assets/textures/face-cong-tuoc-hac-am.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e8b642603953c86c82ba.webp",
+      "file": "assets/runtime/e8b642603953c86c82ba.webp",
+      "status": 200,
+      "bytes": 51506
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-meo-de-thuong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a3a41c42c02cbc32db16.webp",
+      "file": "assets/runtime/a3a41c42c02cbc32db16.webp",
+      "status": 200,
+      "bytes": 21486
+    },
+    {
+      "logical_name": "assets/textures/bottom-boy-bac-beo.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/514503437957cb02ca31.webp",
+      "file": "assets/runtime/514503437957cb02ca31.webp",
+      "status": 200,
+      "bytes": 102640
+    },
+    {
+      "logical_name": "assets/textures/shoes-di-bien-vang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5bac1303d31b62da7965.webp",
+      "file": "assets/runtime/5bac1303d31b62da7965.webp",
+      "status": 200,
+      "bytes": 190014
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-binh-tuyet-bang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/18c4a72e49195bc68583.webp",
+      "file": "assets/runtime/18c4a72e49195bc68583.webp",
+      "status": 200,
+      "bytes": 42200
+    },
+    {
+      "logical_name": "assets/textures/mask-gau-meo-tinh-nghich.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/2b23d551244cfd204514.webp",
+      "file": "assets/runtime/2b23d551244cfd204514.webp",
+      "status": 200,
+      "bytes": 54946
+    },
+    {
+      "logical_name": "assets/textures/face-ninja-bao-lua.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/47dab5aba78331ef5d13.webp",
+      "file": "assets/runtime/47dab5aba78331ef5d13.webp",
+      "status": 200,
+      "bytes": 58670
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-meo-hung-hang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/eedae25847b9d229df54.webp",
+      "file": "assets/runtime/eedae25847b9d229df54.webp",
+      "status": 200,
+      "bytes": 28846
+    },
+    {
+      "logical_name": "assets/textures/bottom-boy-giao-thong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/83145902a854f2723826.webp",
+      "file": "assets/runtime/83145902a854f2723826.webp",
+      "status": 200,
+      "bytes": 94418
+    },
+    {
+      "logical_name": "assets/textures/shoes-anh-gau-bu.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d4d71be2a6c2f262de30.webp",
+      "file": "assets/runtime/d4d71be2a6c2f262de30.webp",
+      "status": 200,
+      "bytes": 36958
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-than-esports.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8f4774a3f390a97ca09a.webp",
+      "file": "assets/runtime/8f4774a3f390a97ca09a.webp",
+      "status": 200,
+      "bytes": 41562
+    },
+    {
+      "logical_name": "assets/textures/mask-giai-dieu-than-chet.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/180b4031b179f47dbeda.webp",
+      "file": "assets/runtime/180b4031b179f47dbeda.webp",
+      "status": 200,
+      "bytes": 43576
+    },
+    {
+      "logical_name": "assets/textures/face-tro-dua-hac-am.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/58a693d7298e9b4eea40.webp",
+      "file": "assets/runtime/58a693d7298e9b4eea40.webp",
+      "status": 200,
+      "bytes": 116770
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-mat-tich.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/e24ba6c54db1e69dc939.webp",
+      "file": "assets/runtime/e24ba6c54db1e69dc939.webp",
+      "status": 200,
+      "bytes": 23248
+    },
+    {
+      "logical_name": "assets/textures/bottom-boy-pho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/2e9d631cd6979ae03464.webp",
+      "file": "assets/runtime/2e9d631cd6979ae03464.webp",
+      "status": 200,
+      "bytes": 205972
+    },
+    {
+      "logical_name": "assets/textures/shoes-anh-trai-say-trang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/7df4a216726efafedc11.webp",
+      "file": "assets/runtime/7df4a216726efafedc11.webp",
+      "status": 200,
+      "bytes": 42716
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-than-phong-cach-tim.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/dbdf82a92f8af641e2cc.webp",
+      "file": "assets/runtime/dbdf82a92f8af641e2cc.webp",
+      "status": 200,
+      "bytes": 58576
+    },
+    {
+      "logical_name": "assets/textures/mask-hai-mat.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/9f883104f431274a7345.webp",
+      "file": "assets/runtime/9f883104f431274a7345.webp",
+      "status": 200,
+      "bytes": 29118
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-please.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/11a071023f0ce0a219b1.webp",
+      "file": "assets/runtime/11a071023f0ce0a219b1.webp",
+      "status": 200,
+      "bytes": 22914
+    },
+    {
+      "logical_name": "assets/textures/bottom-bao-to-cuc-tim.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/6165defede76ad428dae.webp",
+      "file": "assets/runtime/6165defede76ad428dae.webp",
+      "status": 200,
+      "bytes": 129348
+    },
+    {
+      "logical_name": "assets/textures/shoes-bang-chu-phi-dao.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/900c92f09bf91c08f36c.webp",
+      "file": "assets/runtime/900c92f09bf91c08f36c.webp",
+      "status": 200,
+      "bytes": 37064
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-than-phong-cach-vang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/d8049ad70e1e87b940a4.webp",
+      "file": "assets/runtime/d8049ad70e1e87b940a4.webp",
+      "status": 200,
+      "bytes": 61764
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-ran-ri.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b7a2161d6905498af600.webp",
+      "file": "assets/runtime/b7a2161d6905498af600.webp",
+      "status": 200,
+      "bytes": 41758
+    },
+    {
+      "logical_name": "assets/textures/bottom-bao-to-sam-set.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/0449232d70522557d115.webp",
+      "file": "assets/runtime/0449232d70522557d115.webp",
+      "status": 200,
+      "bytes": 139324
+    },
+    {
+      "logical_name": "assets/textures/shoes-bom-thu-don-sac.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/85ccb408e5aa4bf72d0a.webp",
+      "file": "assets/runtime/85ccb408e5aa4bf72d0a.webp",
+      "status": 200,
+      "bytes": 29008
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-than-phong-cach-xanh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/00941fe5d7ba39ceeb76.webp",
+      "file": "assets/runtime/00941fe5d7ba39ceeb76.webp",
+      "status": 200,
+      "bytes": 55384
+    },
+    {
+      "logical_name": "assets/textures/top-3-lo-trang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/daa1f543e24ce7d8862f.webp",
+      "file": "assets/runtime/daa1f543e24ce7d8862f.webp",
+      "status": 200,
+      "bytes": 31246
+    },
+    {
+      "logical_name": "assets/textures/bottom-bi-ngo-duong-pho.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/8e38b5834b44cc9aa23c.webp",
+      "file": "assets/runtime/8e38b5834b44cc9aa23c.webp",
+      "status": 200,
+      "bytes": 137644
+    },
+    {
+      "logical_name": "assets/textures/shoes-boy-bac-beo.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/846b5b9c73f4eba15bfc.webp",
+      "file": "assets/runtime/846b5b9c73f4eba15bfc.webp",
+      "status": 200,
+      "bytes": 29542
+    },
+    {
+      "logical_name": "assets/textures/hair-chien-than-phong-cach-do.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/a79a81df0b6714c69171.webp",
+      "file": "assets/runtime/a79a81df0b6714c69171.webp",
+      "status": 200,
+      "bytes": 59236
+    },
+    {
+      "logical_name": "assets/textures/mask-hac-huyet-chien-binh.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/854e6b7b31cf896516c0.webp",
+      "file": "assets/runtime/854e6b7b31cf896516c0.webp",
+      "status": 200,
+      "bytes": 34202
+    },
+    {
+      "logical_name": "assets/textures/top-anh-gau-bu.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/3ef839b68e2de025a6a0.webp",
+      "file": "assets/runtime/3ef839b68e2de025a6a0.webp",
+      "status": 200,
+      "bytes": 66948
+    },
+    {
+      "logical_name": "assets/textures/bottom-bich-vang.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/4c3766e7333e1dca1e35.webp",
+      "file": "assets/runtime/4c3766e7333e1dca1e35.webp",
+      "status": 200,
+      "bytes": 186070
+    },
+    {
+      "logical_name": "assets/textures/shoes-boy-giao-thong.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/5e2d948a966d0fcfdd79.webp",
+      "file": "assets/runtime/5e2d948a966d0fcfdd79.webp",
+      "status": 200,
+      "bytes": 43372
+    },
+    {
+      "logical_name": "assets/textures/top-thich-khach-hac-long-pattern-skin.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f3e1cd4ef905ce8ee135.webp",
+      "file": "assets/runtime/f3e1cd4ef905ce8ee135.webp",
+      "status": 200,
+      "bytes": 156682
+    },
+    {
+      "logical_name": "assets/textures/hair-chu-he-phong-tran-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/f42efa129c9644a5817f.webp",
+      "file": "assets/runtime/f42efa129c9644a5817f.webp",
+      "status": 200,
+      "bytes": 52924
+    },
+    {
+      "logical_name": "assets/textures/mask-ho-den-vu-tru-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ec69b977c3cc781dd301.webp",
+      "file": "assets/runtime/ec69b977c3cc781dd301.webp",
+      "status": 200,
+      "bytes": 38094
+    },
+    {
+      "logical_name": "assets/textures/top-anh-trai-say-trang-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ad634edbe236f3c6f8e5.webp",
+      "file": "assets/runtime/ad634edbe236f3c6f8e5.webp",
+      "status": 200,
+      "bytes": 262378
+    },
+    {
+      "logical_name": "assets/textures/top-anh-trai-say-trang-1.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/ad634edbe236f3c6f8e5.webp",
+      "file": "assets/runtime/ad634edbe236f3c6f8e5.webp",
+      "status": 200,
+      "bytes": 262378
+    },
+    {
+      "logical_name": "assets/textures/bottom-bo-rach-roi-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b82355628a3fc4216a0e.webp",
+      "file": "assets/runtime/b82355628a3fc4216a0e.webp",
+      "status": 200,
+      "bytes": 180898
+    },
+    {
+      "logical_name": "assets/textures/bottom-bo-rach-roi-1.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/b82355628a3fc4216a0e.webp",
+      "file": "assets/runtime/b82355628a3fc4216a0e.webp",
+      "status": 200,
+      "bytes": 180898
+    },
+    {
+      "logical_name": "assets/textures/shoes-bao-to-cuc-tim-0.png",
+      "url": "https://mods.cheatiosvip.net/assets/runtime/fe37b97f43f02cc29837.webp",
+      "file": "assets/runtime/fe37b97f43f02cc29837.webp",
+      "status": 200,
+      "bytes": 46564
+    }
+  ],
+  "dynamic_item_icons": [
+    {
+      "item_id": "action-ac-nhan-bo-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-ac-nhan-bo-cap.webp",
+      "file": "assets/item-icons/action-ac-nhan-bo-cap.webp",
+      "status": 200,
+      "bytes": 6328
+    },
+    {
+      "item_id": "action-booyah-phong-cach",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-booyah-phong-cach.webp",
+      "file": "assets/item-icons/action-booyah-phong-cach.webp",
+      "status": 200,
+      "bytes": 3056
+    },
+    {
+      "item_id": "action-con-thinh-no",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-con-thinh-no.webp",
+      "file": "assets/item-icons/action-con-thinh-no.webp",
+      "status": 200,
+      "bytes": 2824
+    },
+    {
+      "item_id": "action-dia-chan-sac-mau",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-dia-chan-sac-mau.webp",
+      "file": "assets/item-icons/action-dia-chan-sac-mau.webp",
+      "status": 200,
+      "bytes": 3382
+    },
+    {
+      "item_id": "action-duong-kiem-anh-sang",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-duong-kiem-anh-sang.webp",
+      "file": "assets/item-icons/action-duong-kiem-anh-sang.webp",
+      "status": 200,
+      "bytes": 1798
+    },
+    {
+      "item_id": "action-gia-nhap-chinh-phuc",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-gia-nhap-chinh-phuc.webp",
+      "file": "assets/item-icons/action-gia-nhap-chinh-phuc.webp",
+      "status": 200,
+      "bytes": 3294
+    },
+    {
+      "item_id": "action-hac-thach-long",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-hac-thach-long.webp",
+      "file": "assets/item-icons/action-hac-thach-long.webp",
+      "status": 200,
+      "bytes": 3130
+    },
+    {
+      "item_id": "action-ho-mua-goi-sung",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-ho-mua-goi-sung.webp",
+      "file": "assets/item-icons/action-ho-mua-goi-sung.webp",
+      "status": 200,
+      "bytes": 5704
+    },
+    {
+      "item_id": "action-huyet-nguyet-tram",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-huyet-nguyet-tram.webp",
+      "file": "assets/item-icons/action-huyet-nguyet-tram.webp",
+      "status": 200,
+      "bytes": 5350
+    },
+    {
+      "item_id": "action-long-vu-vang",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-long-vu-vang.webp",
+      "file": "assets/item-icons/action-long-vu-vang.webp",
+      "status": 200,
+      "bytes": 4326
+    },
+    {
+      "item_id": "action-luot-tren-may",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-luot-tren-may.webp",
+      "file": "assets/item-icons/action-luot-tren-may.webp",
+      "status": 200,
+      "bytes": 2284
+    },
+    {
+      "item_id": "action-m60-pha-mong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-m60-pha-mong.webp",
+      "file": "assets/item-icons/action-m60-pha-mong.webp",
+      "status": 200,
+      "bytes": 3758
+    },
+    {
+      "item_id": "action-phat-sung-sac-mau",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-phat-sung-sac-mau.webp",
+      "file": "assets/item-icons/action-phat-sung-sac-mau.webp",
+      "status": 200,
+      "bytes": 3788
+    },
+    {
+      "item_id": "action-phuong-hoang-xuat-the",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-phuong-hoang-xuat-the.webp",
+      "file": "assets/item-icons/action-phuong-hoang-xuat-the.webp",
+      "status": 200,
+      "bytes": 7286
+    },
+    {
+      "item_id": "action-sinh-ra-tu-lua",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-sinh-ra-tu-lua.webp",
+      "file": "assets/item-icons/action-sinh-ra-tu-lua.webp",
+      "status": 200,
+      "bytes": 2254
+    },
+    {
+      "item_id": "action-thi-uy-long-trao",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-thi-uy-long-trao.webp",
+      "file": "assets/item-icons/action-thi-uy-long-trao.webp",
+      "status": 200,
+      "bytes": 2916
+    },
+    {
+      "item_id": "action-thuc-tinh-long-toc",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-thuc-tinh-long-toc.webp",
+      "file": "assets/item-icons/action-thuc-tinh-long-toc.webp",
+      "status": 200,
+      "bytes": 1966
+    },
+    {
+      "item_id": "action-trieu-hoi-cuong-long",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-trieu-hoi-cuong-long.webp",
+      "file": "assets/item-icons/action-trieu-hoi-cuong-long.webp",
+      "status": 200,
+      "bytes": 2348
+    },
+    {
+      "item_id": "action-trieu-hoi-manh-ho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-trieu-hoi-manh-ho.webp",
+      "file": "assets/item-icons/action-trieu-hoi-manh-ho.webp",
+      "status": 200,
+      "bytes": 5220
+    },
+    {
+      "item_id": "action-trieu-hoi-rong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-trieu-hoi-rong.webp",
+      "file": "assets/item-icons/action-trieu-hoi-rong.webp",
+      "status": 200,
+      "bytes": 2132
+    },
+    {
+      "item_id": "action-trieu-hoi-sung",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-trieu-hoi-sung.webp",
+      "file": "assets/item-icons/action-trieu-hoi-sung.webp",
+      "status": 200,
+      "bytes": 2588
+    },
+    {
+      "item_id": "action-tu-long-xuat-hien",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-tu-long-xuat-hien.webp",
+      "file": "assets/item-icons/action-tu-long-xuat-hien.webp",
+      "status": 200,
+      "bytes": 2848
+    },
+    {
+      "item_id": "action-vo-luong-thoi-khong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/action-vo-luong-thoi-khong.webp",
+      "file": "assets/item-icons/action-vo-luong-thoi-khong.webp",
+      "status": 200,
+      "bytes": 1902
+    },
+    {
+      "item_id": "bottom-ac-quy",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-ac-quy.webp",
+      "file": "assets/item-icons/bottom-ac-quy.webp",
+      "status": 200,
+      "bytes": 6066
+    },
+    {
+      "item_id": "bottom-angelic-neon",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-angelic-neon.webp",
+      "file": "assets/item-icons/bottom-angelic-neon.webp",
+      "status": 200,
+      "bytes": 7174
+    },
+    {
+      "item_id": "bottom-bang-cuop-dem",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-bang-cuop-dem.webp",
+      "file": "assets/item-icons/bottom-bang-cuop-dem.webp",
+      "status": 200,
+      "bytes": 5954
+    },
+    {
+      "item_id": "bottom-bo-rach-roi",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-bo-rach-roi.webp",
+      "file": "assets/item-icons/bottom-bo-rach-roi.webp",
+      "status": 200,
+      "bytes": 4770
+    },
+    {
+      "item_id": "bottom-bong-chay",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-bong-chay.webp",
+      "file": "assets/item-icons/bottom-bong-chay.webp",
+      "status": 200,
+      "bytes": 8124
+    },
+    {
+      "item_id": "bottom-bushido",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-bushido.webp",
+      "file": "assets/item-icons/bottom-bushido.webp",
+      "status": 200,
+      "bytes": 10396
+    },
+    {
+      "item_id": "bottom-bushido-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-bushido-cao-cap.webp",
+      "file": "assets/item-icons/bottom-bushido-cao-cap.webp",
+      "status": 200,
+      "bytes": 7988
+    },
+    {
+      "item_id": "bottom-chien-binh-tho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-chien-binh-tho.webp",
+      "file": "assets/item-icons/bottom-chien-binh-tho.webp",
+      "status": 200,
+      "bytes": 5172
+    },
+    {
+      "item_id": "bottom-dau",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-dau.webp",
+      "file": "assets/item-icons/bottom-dau.webp",
+      "status": 200,
+      "bytes": 5244
+    },
+    {
+      "item_id": "bottom-dau-si-tho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-dau-si-tho.webp",
+      "file": "assets/item-icons/bottom-dau-si-tho.webp",
+      "status": 200,
+      "bytes": 5956
+    },
+    {
+      "item_id": "bottom-dau-sy-huyen-thoai",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-dau-sy-huyen-thoai.webp",
+      "file": "assets/item-icons/bottom-dau-sy-huyen-thoai.webp",
+      "status": 200,
+      "bytes": 6278
+    },
+    {
+      "item_id": "bottom-dong-phuc-anh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-dong-phuc-anh.webp",
+      "file": "assets/item-icons/bottom-dong-phuc-anh.webp",
+      "status": 200,
+      "bytes": 5388
+    },
+    {
+      "item_id": "bottom-duong-pho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-duong-pho.webp",
+      "file": "assets/item-icons/bottom-duong-pho.webp",
+      "status": 200,
+      "bytes": 8956
+    },
+    {
+      "item_id": "bottom-duong-pho-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-duong-pho-cao-cap.webp",
+      "file": "assets/item-icons/bottom-duong-pho-cao-cap.webp",
+      "status": 200,
+      "bytes": 6424
+    },
+    {
+      "item_id": "bottom-gojo",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-gojo.webp",
+      "file": "assets/item-icons/bottom-gojo.webp",
+      "status": 200,
+      "bytes": 4736
+    },
+    {
+      "item_id": "bottom-hac-tinh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-hac-tinh.webp",
+      "file": "assets/item-icons/bottom-hac-tinh.webp",
+      "status": 200,
+      "bytes": 5726
+    },
+    {
+      "item_id": "bottom-hoa-quyen-su",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-hoa-quyen-su.webp",
+      "file": "assets/item-icons/bottom-hoa-quyen-su.webp",
+      "status": 200,
+      "bytes": 7068
+    },
+    {
+      "item_id": "bottom-ky-hoi",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-ky-hoi.webp",
+      "file": "assets/item-icons/bottom-ky-hoi.webp",
+      "status": 200,
+      "bytes": 7570
+    },
+    {
+      "item_id": "bottom-ngu-thanh-phong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-ngu-thanh-phong.webp",
+      "file": "assets/item-icons/bottom-ngu-thanh-phong.webp",
+      "status": 200,
+      "bytes": 7318
+    },
+    {
+      "item_id": "bottom-nguoi-choi-squid-game",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-nguoi-choi-squid-game.webp",
+      "file": "assets/item-icons/bottom-nguoi-choi-squid-game.webp",
+      "status": 200,
+      "bytes": 6794
+    },
+    {
+      "item_id": "bottom-phong-cach-street",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-phong-cach-street.webp",
+      "file": "assets/item-icons/bottom-phong-cach-street.webp",
+      "status": 200,
+      "bytes": 6568
+    },
+    {
+      "item_id": "bottom-pyjama-gau-truc",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-pyjama-gau-truc.webp",
+      "file": "assets/item-icons/bottom-pyjama-gau-truc.webp",
+      "status": 200,
+      "bytes": 5304
+    },
+    {
+      "item_id": "bottom-quai-nhan-hu-khong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-quai-nhan-hu-khong.webp",
+      "file": "assets/item-icons/bottom-quai-nhan-hu-khong.webp",
+      "status": 200,
+      "bytes": 9346
+    },
+    {
+      "item_id": "bottom-sooc-den",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-sooc-den.webp",
+      "file": "assets/item-icons/bottom-sooc-den.webp",
+      "status": 200,
+      "bytes": 7632
+    },
+    {
+      "item_id": "bottom-tham-hiem-hong-thien",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-tham-hiem-hong-thien.webp",
+      "file": "assets/item-icons/bottom-tham-hiem-hong-thien.webp",
+      "status": 200,
+      "bytes": 7006
+    },
+    {
+      "item_id": "bottom-thien-than-hoang-kim",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-thien-than-hoang-kim.webp",
+      "file": "assets/item-icons/bottom-thien-than-hoang-kim.webp",
+      "status": 200,
+      "bytes": 6242
+    },
+    {
+      "item_id": "bottom-thien-than-thanh-thien",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-thien-than-thanh-thien.webp",
+      "file": "assets/item-icons/bottom-thien-than-thanh-thien.webp",
+      "status": 200,
+      "bytes": 7822
+    },
+    {
+      "item_id": "bottom-tho-purple",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-tho-purple.webp",
+      "file": "assets/item-icons/bottom-tho-purple.webp",
+      "status": 200,
+      "bytes": 4884
+    },
+    {
+      "item_id": "bottom-tho-red",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-tho-red.webp",
+      "file": "assets/item-icons/bottom-tho-red.webp",
+      "status": 200,
+      "bytes": 4646
+    },
+    {
+      "item_id": "bottom-tho-thien-ha",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-tho-thien-ha.webp",
+      "file": "assets/item-icons/bottom-tho-thien-ha.webp",
+      "status": 200,
+      "bytes": 9582
+    },
+    {
+      "item_id": "bottom-tho-yellow",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-tho-yellow.webp",
+      "file": "assets/item-icons/bottom-tho-yellow.webp",
+      "status": 200,
+      "bytes": 4480
+    },
+    {
+      "item_id": "bottom-tre-trau",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-tre-trau.webp",
+      "file": "assets/item-icons/bottom-tre-trau.webp",
+      "status": 200,
+      "bytes": 5642
+    },
+    {
+      "item_id": "bottom-ve-binh-tinh-tu",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-ve-binh-tinh-tu.webp",
+      "file": "assets/item-icons/bottom-ve-binh-tinh-tu.webp",
+      "status": 200,
+      "bytes": 4500
+    },
+    {
+      "item_id": "bottom-vo-dien-loi-than",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/bottom-vo-dien-loi-than.webp",
+      "file": "assets/item-icons/bottom-vo-dien-loi-than.webp",
+      "status": 200,
+      "bytes": 4838
+    },
+    {
+      "item_id": "face-tiec-cuong-loan",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/face-tiec-cuong-loan.webp",
+      "file": "assets/item-icons/face-tiec-cuong-loan.webp",
+      "status": 200,
+      "bytes": 6756
+    },
+    {
+      "item_id": "hair-bich-vang",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-bich-vang.webp",
+      "file": "assets/item-icons/hair-bich-vang.webp",
+      "status": 200,
+      "bytes": 8156
+    },
+    {
+      "item_id": "hair-bushido",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-bushido.webp",
+      "file": "assets/item-icons/hair-bushido.webp",
+      "status": 200,
+      "bytes": 9018
+    },
+    {
+      "item_id": "hair-bushido-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-bushido-cao-cap.webp",
+      "file": "assets/item-icons/hair-bushido-cao-cap.webp",
+      "status": 200,
+      "bytes": 6972
+    },
+    {
+      "item_id": "hair-chien-binh-tho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-chien-binh-tho.webp",
+      "file": "assets/item-icons/hair-chien-binh-tho.webp",
+      "status": 200,
+      "bytes": 7440
+    },
+    {
+      "item_id": "hair-chien-than-phong-cach-do",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-chien-than-phong-cach-do.webp",
+      "file": "assets/item-icons/hair-chien-than-phong-cach-do.webp",
+      "status": 200,
+      "bytes": 6868
+    },
+    {
+      "item_id": "hair-chien-than-phong-cach-tim",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-chien-than-phong-cach-tim.webp",
+      "file": "assets/item-icons/hair-chien-than-phong-cach-tim.webp",
+      "status": 200,
+      "bytes": 7080
+    },
+    {
+      "item_id": "hair-chien-than-phong-cach-vang",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-chien-than-phong-cach-vang.webp",
+      "file": "assets/item-icons/hair-chien-than-phong-cach-vang.webp",
+      "status": 200,
+      "bytes": 7572
+    },
+    {
+      "item_id": "hair-chien-than-phong-cach-xanh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-chien-than-phong-cach-xanh.webp",
+      "file": "assets/item-icons/hair-chien-than-phong-cach-xanh.webp",
+      "status": 200,
+      "bytes": 7186
+    },
+    {
+      "item_id": "hair-dao-si-do",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-dao-si-do.webp",
+      "file": "assets/item-icons/hair-dao-si-do.webp",
+      "status": 200,
+      "bytes": 6258
+    },
+    {
+      "item_id": "hair-duong-pho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-duong-pho.webp",
+      "file": "assets/item-icons/hair-duong-pho.webp",
+      "status": 200,
+      "bytes": 5162
+    },
+    {
+      "item_id": "hair-duong-pho-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-duong-pho-cao-cap.webp",
+      "file": "assets/item-icons/hair-duong-pho-cao-cap.webp",
+      "status": 200,
+      "bytes": 5028
+    },
+    {
+      "item_id": "hair-ghet-su-gia-doi",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-ghet-su-gia-doi.webp",
+      "file": "assets/item-icons/hair-ghet-su-gia-doi.webp",
+      "status": 200,
+      "bytes": 6496
+    },
+    {
+      "item_id": "hair-hac-tinh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-hac-tinh.webp",
+      "file": "assets/item-icons/hair-hac-tinh.webp",
+      "status": 200,
+      "bytes": 6138
+    },
+    {
+      "item_id": "hair-lan-song-nang-dong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-lan-song-nang-dong.webp",
+      "file": "assets/item-icons/hair-lan-song-nang-dong.webp",
+      "status": 200,
+      "bytes": 6222
+    },
+    {
+      "item_id": "hair-lang-khach-tim",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-lang-khach-tim.webp",
+      "file": "assets/item-icons/hair-lang-khach-tim.webp",
+      "status": 200,
+      "bytes": 6504
+    },
+    {
+      "item_id": "hair-phu-thuy",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-phu-thuy.webp",
+      "file": "assets/item-icons/hair-phu-thuy.webp",
+      "status": 200,
+      "bytes": 8442
+    },
+    {
+      "item_id": "hair-quai-nhan-hu-khong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-quai-nhan-hu-khong.webp",
+      "file": "assets/item-icons/hair-quai-nhan-hu-khong.webp",
+      "status": 200,
+      "bytes": 7450
+    },
+    {
+      "item_id": "hair-soai-ca-cuong-thi",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-soai-ca-cuong-thi.webp",
+      "file": "assets/item-icons/hair-soai-ca-cuong-thi.webp",
+      "status": 200,
+      "bytes": 7168
+    },
+    {
+      "item_id": "hair-soi-cong-nghe",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-soi-cong-nghe.webp",
+      "file": "assets/item-icons/hair-soi-cong-nghe.webp",
+      "status": 200,
+      "bytes": 8152
+    },
+    {
+      "item_id": "hair-su-gia-ac-ma",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-su-gia-ac-ma.webp",
+      "file": "assets/item-icons/hair-su-gia-ac-ma.webp",
+      "status": 200,
+      "bytes": 6842
+    },
+    {
+      "item_id": "hair-tho-purple",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-tho-purple.webp",
+      "file": "assets/item-icons/hair-tho-purple.webp",
+      "status": 200,
+      "bytes": 7384
+    },
+    {
+      "item_id": "hair-tho-quay",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-tho-quay.webp",
+      "file": "assets/item-icons/hair-tho-quay.webp",
+      "status": 200,
+      "bytes": 8486
+    },
+    {
+      "item_id": "hair-tho-san-huyet-quy",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-tho-san-huyet-quy.webp",
+      "file": "assets/item-icons/hair-tho-san-huyet-quy.webp",
+      "status": 200,
+      "bytes": 9426
+    },
+    {
+      "item_id": "hair-tho-thien-ha",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-tho-thien-ha.webp",
+      "file": "assets/item-icons/hair-tho-thien-ha.webp",
+      "status": 200,
+      "bytes": 10884
+    },
+    {
+      "item_id": "hair-tho-yellow",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-tho-yellow.webp",
+      "file": "assets/item-icons/hair-tho-yellow.webp",
+      "status": 200,
+      "bytes": 7170
+    },
+    {
+      "item_id": "hair-tieu-tien",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-tieu-tien.webp",
+      "file": "assets/item-icons/hair-tieu-tien.webp",
+      "status": 200,
+      "bytes": 10540
+    },
+    {
+      "item_id": "hair-titan-thiet-giap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-titan-thiet-giap.webp",
+      "file": "assets/item-icons/hair-titan-thiet-giap.webp",
+      "status": 200,
+      "bytes": 9886
+    },
+    {
+      "item_id": "hair-titan-tien-cong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-titan-tien-cong.webp",
+      "file": "assets/item-icons/hair-titan-tien-cong.webp",
+      "status": 200,
+      "bytes": 8506
+    },
+    {
+      "item_id": "hair-trai-ngo-ngao",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/hair-trai-ngo-ngao.webp",
+      "file": "assets/item-icons/hair-trai-ngo-ngao.webp",
+      "status": 200,
+      "bytes": 6014
+    },
+    {
+      "item_id": "mask-bang-che-mat-ao-lot",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-bang-che-mat-ao-lot.webp",
+      "file": "assets/item-icons/mask-bang-che-mat-ao-lot.webp",
+      "status": 200,
+      "bytes": 7418
+    },
+    {
+      "item_id": "mask-bang-che-mat-quan-lot",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-bang-che-mat-quan-lot.webp",
+      "file": "assets/item-icons/mask-bang-che-mat-quan-lot.webp",
+      "status": 200,
+      "bytes": 6196
+    },
+    {
+      "item_id": "mask-bushido",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-bushido.webp",
+      "file": "assets/item-icons/mask-bushido.webp",
+      "status": 200,
+      "bytes": 9018
+    },
+    {
+      "item_id": "mask-bushido-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-bushido-cao-cap.webp",
+      "file": "assets/item-icons/mask-bushido-cao-cap.webp",
+      "status": 200,
+      "bytes": 10224
+    },
+    {
+      "item_id": "mask-chien-than",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-chien-than.webp",
+      "file": "assets/item-icons/mask-chien-than.webp",
+      "status": 200,
+      "bytes": 5276
+    },
+    {
+      "item_id": "mask-chien-than-dung-nham",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-chien-than-dung-nham.webp",
+      "file": "assets/item-icons/mask-chien-than-dung-nham.webp",
+      "status": 200,
+      "bytes": 6080
+    },
+    {
+      "item_id": "mask-ffws-2025",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-ffws-2025.webp",
+      "file": "assets/item-icons/mask-ffws-2025.webp",
+      "status": 200,
+      "bytes": 4342
+    },
+    {
+      "item_id": "mask-hac-tinh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-hac-tinh.webp",
+      "file": "assets/item-icons/mask-hac-tinh.webp",
+      "status": 200,
+      "bytes": 4748
+    },
+    {
+      "item_id": "mask-ma-bup-be",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-ma-bup-be.webp",
+      "file": "assets/item-icons/mask-ma-bup-be.webp",
+      "status": 200,
+      "bytes": 4890
+    },
+    {
+      "item_id": "mask-ma-bup-be-nham-thach",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-ma-bup-be-nham-thach.webp",
+      "file": "assets/item-icons/mask-ma-bup-be-nham-thach.webp",
+      "status": 200,
+      "bytes": 5778
+    },
+    {
+      "item_id": "mask-noel",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-noel.webp",
+      "file": "assets/item-icons/mask-noel.webp",
+      "status": 200,
+      "bytes": 6634
+    },
+    {
+      "item_id": "mask-su-gia-ac-ma",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-su-gia-ac-ma.webp",
+      "file": "assets/item-icons/mask-su-gia-ac-ma.webp",
+      "status": 200,
+      "bytes": 6290
+    },
+    {
+      "item_id": "mask-tien-si-con-trung",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-tien-si-con-trung.webp",
+      "file": "assets/item-icons/mask-tien-si-con-trung.webp",
+      "status": 200,
+      "bytes": 4952
+    },
+    {
+      "item_id": "mask-titan-thiet-giap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-titan-thiet-giap.webp",
+      "file": "assets/item-icons/mask-titan-thiet-giap.webp",
+      "status": 200,
+      "bytes": 9886
+    },
+    {
+      "item_id": "mask-titan-tien-cong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-titan-tien-cong.webp",
+      "file": "assets/item-icons/mask-titan-tien-cong.webp",
+      "status": 200,
+      "bytes": 8506
+    },
+    {
+      "item_id": "mask-trai-ngo-ngao",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-trai-ngo-ngao.webp",
+      "file": "assets/item-icons/mask-trai-ngo-ngao.webp",
+      "status": 200,
+      "bytes": 4948
+    },
+    {
+      "item_id": "mask-vo-dien-loi-than",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/mask-vo-dien-loi-than.webp",
+      "file": "assets/item-icons/mask-vo-dien-loi-than.webp",
+      "status": 200,
+      "bytes": 6182
+    },
+    {
+      "item_id": "shoes-bong-gau-do",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-bong-gau-do.webp",
+      "file": "assets/item-icons/shoes-bong-gau-do.webp",
+      "status": 200,
+      "bytes": 5914
+    },
+    {
+      "item_id": "shoes-bong-ro",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-bong-ro.webp",
+      "file": "assets/item-icons/shoes-bong-ro.webp",
+      "status": 200,
+      "bytes": 6892
+    },
+    {
+      "item_id": "shoes-bushido",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-bushido.webp",
+      "file": "assets/item-icons/shoes-bushido.webp",
+      "status": 200,
+      "bytes": 8444
+    },
+    {
+      "item_id": "shoes-bushido-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-bushido-cao-cap.webp",
+      "file": "assets/item-icons/shoes-bushido-cao-cap.webp",
+      "status": 200,
+      "bytes": 6234
+    },
+    {
+      "item_id": "shoes-ca-map",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-ca-map.webp",
+      "file": "assets/item-icons/shoes-ca-map.webp",
+      "status": 200,
+      "bytes": 4038
+    },
+    {
+      "item_id": "shoes-ca-sau",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-ca-sau.webp",
+      "file": "assets/item-icons/shoes-ca-sau.webp",
+      "status": 200,
+      "bytes": 5538
+    },
+    {
+      "item_id": "shoes-dep-di-bien",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-dep-di-bien.webp",
+      "file": "assets/item-icons/shoes-dep-di-bien.webp",
+      "status": 200,
+      "bytes": 4122
+    },
+    {
+      "item_id": "shoes-hac-tinh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-hac-tinh.webp",
+      "file": "assets/item-icons/shoes-hac-tinh.webp",
+      "status": 200,
+      "bytes": 4156
+    },
+    {
+      "item_id": "shoes-hacker",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-hacker.webp",
+      "file": "assets/item-icons/shoes-hacker.webp",
+      "status": 200,
+      "bytes": 5544
+    },
+    {
+      "item_id": "shoes-he-vui-ve",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-he-vui-ve.webp",
+      "file": "assets/item-icons/shoes-he-vui-ve.webp",
+      "status": 200,
+      "bytes": 4160
+    },
+    {
+      "item_id": "shoes-hoa-quyen-su",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-hoa-quyen-su.webp",
+      "file": "assets/item-icons/shoes-hoa-quyen-su.webp",
+      "status": 200,
+      "bytes": 3486
+    },
+    {
+      "item_id": "shoes-hoang-de-hai-huoc",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-hoang-de-hai-huoc.webp",
+      "file": "assets/item-icons/shoes-hoang-de-hai-huoc.webp",
+      "status": 200,
+      "bytes": 6566
+    },
+    {
+      "item_id": "shoes-thanh-phong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-thanh-phong.webp",
+      "file": "assets/item-icons/shoes-thanh-phong.webp",
+      "status": 200,
+      "bytes": 3758
+    },
+    {
+      "item_id": "shoes-to-ong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-to-ong.webp",
+      "file": "assets/item-icons/shoes-to-ong.webp",
+      "status": 200,
+      "bytes": 3862
+    },
+    {
+      "item_id": "shoes-vo-dien-loi-than",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/shoes-vo-dien-loi-than.webp",
+      "file": "assets/item-icons/shoes-vo-dien-loi-than.webp",
+      "status": 200,
+      "bytes": 3502
+    },
+    {
+      "item_id": "top-3-lo-trang",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-3-lo-trang.webp",
+      "file": "assets/item-icons/top-3-lo-trang.webp",
+      "status": 200,
+      "bytes": 6538
+    },
+    {
+      "item_id": "top-ao-bong-bi",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-ao-bong-bi.webp",
+      "file": "assets/item-icons/top-ao-bong-bi.webp",
+      "status": 200,
+      "bytes": 8936
+    },
+    {
+      "item_id": "top-bong-ma-phia-tay",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-bong-ma-phia-tay.webp",
+      "file": "assets/item-icons/top-bong-ma-phia-tay.webp",
+      "status": 200,
+      "bytes": 11394
+    },
+    {
+      "item_id": "top-bushido",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-bushido.webp",
+      "file": "assets/item-icons/top-bushido.webp",
+      "status": 200,
+      "bytes": 13948
+    },
+    {
+      "item_id": "top-bushido-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-bushido-cao-cap.webp",
+      "file": "assets/item-icons/top-bushido-cao-cap.webp",
+      "status": 200,
+      "bytes": 11132
+    },
+    {
+      "item_id": "top-cau-thu-tay-dai",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-cau-thu-tay-dai.webp",
+      "file": "assets/item-icons/top-cau-thu-tay-dai.webp",
+      "status": 200,
+      "bytes": 9702
+    },
+    {
+      "item_id": "top-chien-binh-tho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-chien-binh-tho.webp",
+      "file": "assets/item-icons/top-chien-binh-tho.webp",
+      "status": 200,
+      "bytes": 9852
+    },
+    {
+      "item_id": "top-co-rua-den",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-co-rua-den.webp",
+      "file": "assets/item-icons/top-co-rua-den.webp",
+      "status": 200,
+      "bytes": 7362
+    },
+    {
+      "item_id": "top-co-rua-trang",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-co-rua-trang.webp",
+      "file": "assets/item-icons/top-co-rua-trang.webp",
+      "status": 200,
+      "bytes": 8888
+    },
+    {
+      "item_id": "top-cuop-bien-nam",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-cuop-bien-nam.webp",
+      "file": "assets/item-icons/top-cuop-bien-nam.webp",
+      "status": 200,
+      "bytes": 8920
+    },
+    {
+      "item_id": "top-da-biker",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-da-biker.webp",
+      "file": "assets/item-icons/top-da-biker.webp",
+      "status": 200,
+      "bytes": 10242
+    },
+    {
+      "item_id": "top-da-bong-anh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-da-bong-anh.webp",
+      "file": "assets/item-icons/top-da-bong-anh.webp",
+      "status": 200,
+      "bytes": 8324
+    },
+    {
+      "item_id": "top-da-bong-argentina",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-da-bong-argentina.webp",
+      "file": "assets/item-icons/top-da-bong-argentina.webp",
+      "status": 200,
+      "bytes": 9918
+    },
+    {
+      "item_id": "top-da-bong-brazill",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-da-bong-brazill.webp",
+      "file": "assets/item-icons/top-da-bong-brazill.webp",
+      "status": 200,
+      "bytes": 8318
+    },
+    {
+      "item_id": "top-da-bong-den",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-da-bong-den.webp",
+      "file": "assets/item-icons/top-da-bong-den.webp",
+      "status": 200,
+      "bytes": 6336
+    },
+    {
+      "item_id": "top-da-bong-duc",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-da-bong-duc.webp",
+      "file": "assets/item-icons/top-da-bong-duc.webp",
+      "status": 200,
+      "bytes": 8382
+    },
+    {
+      "item_id": "top-dau-si-huyen-thoai",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-dau-si-huyen-thoai.webp",
+      "file": "assets/item-icons/top-dau-si-huyen-thoai.webp",
+      "status": 200,
+      "bytes": 9530
+    },
+    {
+      "item_id": "top-duong-pho",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-duong-pho.webp",
+      "file": "assets/item-icons/top-duong-pho.webp",
+      "status": 200,
+      "bytes": 10162
+    },
+    {
+      "item_id": "top-duong-pho-cao-cap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-duong-pho-cao-cap.webp",
+      "file": "assets/item-icons/top-duong-pho-cao-cap.webp",
+      "status": 200,
+      "bytes": 6648
+    },
+    {
+      "item_id": "top-gojo",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-gojo.webp",
+      "file": "assets/item-icons/top-gojo.webp",
+      "status": 200,
+      "bytes": 6810
+    },
+    {
+      "item_id": "top-hac-ginh",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-hac-ginh.webp",
+      "file": "assets/item-icons/top-hac-ginh.webp",
+      "status": 200,
+      "bytes": 7386
+    },
+    {
+      "item_id": "top-lv-up",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-lv-up.webp",
+      "file": "assets/item-icons/top-lv-up.webp",
+      "status": 200,
+      "bytes": 9854
+    },
+    {
+      "item_id": "top-ngu-thanh-phong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-ngu-thanh-phong.webp",
+      "file": "assets/item-icons/top-ngu-thanh-phong.webp",
+      "status": 200,
+      "bytes": 11844
+    },
+    {
+      "item_id": "top-nguoi-choi-squid",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-nguoi-choi-squid.webp",
+      "file": "assets/item-icons/top-nguoi-choi-squid.webp",
+      "status": 200,
+      "bytes": 9956
+    },
+    {
+      "item_id": "top-peru",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-peru.webp",
+      "file": "assets/item-icons/top-peru.webp",
+      "status": 200,
+      "bytes": 8954
+    },
+    {
+      "item_id": "top-qua-den",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-qua-den.webp",
+      "file": "assets/item-icons/top-qua-den.webp",
+      "status": 200,
+      "bytes": 8592
+    },
+    {
+      "item_id": "top-quai-nhan-hu-khong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-quai-nhan-hu-khong.webp",
+      "file": "assets/item-icons/top-quai-nhan-hu-khong.webp",
+      "status": 200,
+      "bytes": 9346
+    },
+    {
+      "item_id": "top-quy-lua",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-quy-lua.webp",
+      "file": "assets/item-icons/top-quy-lua.webp",
+      "status": 200,
+      "bytes": 12986
+    },
+    {
+      "item_id": "top-thich-khach-bong-dem",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-thich-khach-bong-dem.webp",
+      "file": "assets/item-icons/top-thich-khach-bong-dem.webp",
+      "status": 200,
+      "bytes": 10222
+    },
+    {
+      "item_id": "top-thich-khach-kim-long",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-thich-khach-kim-long.webp",
+      "file": "assets/item-icons/top-thich-khach-kim-long.webp",
+      "status": 200,
+      "bytes": 12888
+    },
+    {
+      "item_id": "top-thiet-quyen",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-thiet-quyen.webp",
+      "file": "assets/item-icons/top-thiet-quyen.webp",
+      "status": 200,
+      "bytes": 12006
+    },
+    {
+      "item_id": "top-tho-neon",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-tho-neon.webp",
+      "file": "assets/item-icons/top-tho-neon.webp",
+      "status": 200,
+      "bytes": 11308
+    },
+    {
+      "item_id": "top-tho-purple",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-tho-purple.webp",
+      "file": "assets/item-icons/top-tho-purple.webp",
+      "status": 200,
+      "bytes": 10976
+    },
+    {
+      "item_id": "top-tho-quay",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-tho-quay.webp",
+      "file": "assets/item-icons/top-tho-quay.webp",
+      "status": 200,
+      "bytes": 11842
+    },
+    {
+      "item_id": "top-tho-yellow",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-tho-yellow.webp",
+      "file": "assets/item-icons/top-tho-yellow.webp",
+      "status": 200,
+      "bytes": 10626
+    },
+    {
+      "item_id": "top-thu-linh-binh-doan",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-thu-linh-binh-doan.webp",
+      "file": "assets/item-icons/top-thu-linh-binh-doan.webp",
+      "status": 200,
+      "bytes": 10874
+    },
+    {
+      "item_id": "top-titan-thiet-giap",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-titan-thiet-giap.webp",
+      "file": "assets/item-icons/top-titan-thiet-giap.webp",
+      "status": 200,
+      "bytes": 9886
+    },
+    {
+      "item_id": "top-titan-tien-cong",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-titan-tien-cong.webp",
+      "file": "assets/item-icons/top-titan-tien-cong.webp",
+      "status": 200,
+      "bytes": 8506
+    },
+    {
+      "item_id": "top-trai-ngo-ngao",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-trai-ngo-ngao.webp",
+      "file": "assets/item-icons/top-trai-ngo-ngao.webp",
+      "status": 200,
+      "bytes": 8938
+    },
+    {
+      "item_id": "top-ve-binh-tinh-tu",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-ve-binh-tinh-tu.webp",
+      "file": "assets/item-icons/top-ve-binh-tinh-tu.webp",
+      "status": 200,
+      "bytes": 9816
+    },
+    {
+      "item_id": "top-vo-dien-loi-than",
+      "url": "https://mods.cheatiosvip.net/assets/item-icons/top-vo-dien-loi-than.webp",
+      "file": "assets/item-icons/top-vo-dien-loi-than.webp",
+      "status": 200,
+      "bytes": 10130
+    }
+  ],
+  "css_assets": [
+    {
+      "url": "https://mods.cheatiosvip.net/assets/bg.gif",
+      "file": "assets/bg.gif",
+      "status": 200,
+      "bytes": 6092297
+    }
+  ]
+}

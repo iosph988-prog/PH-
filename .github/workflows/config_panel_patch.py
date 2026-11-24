@@ -156,118 +156,14 @@ texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackg
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
 
-# Download the Portuguese PH XITER visual project and add it as a local folder resource.
-# The PBX group is rooted beside the .xcodeproj, not inside the ThreeOneOSFive sources.
-visual_root = app.parent / "VisualProject"
-if not (visual_root / "index.html").is_file():
-    mediafire_page = "https://www.mediafire.com/file/pxee5hw5vjw7ir5/fantastic-integrity.zip/file"
-    page_html = urllib.request.urlopen(mediafire_page, timeout=45).read().decode("utf-8", "replace")
-    download_match = re.search(r"https://download[^\"']+\.zip", page_html)
-    if not download_match:
-        raise SystemExit("Portuguese visual project download URL not found")
-    project_zip = urllib.request.urlopen(download_match.group(0), timeout=180).read()
-    visual_root.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(io.BytesIO(project_zip)) as archive:
-        prefix = "ph-xiter-vip-railway-main/public/"
-        for member in archive.infolist():
-            if not member.filename.startswith(prefix) or member.filename.endswith("/"):
-                continue
-            relative = Path(member.filename[len(prefix):])
-            target = visual_root / relative
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(archive.read(member))
-    index_path = visual_root / "index.html"
-    visual_html = index_path.read_text()
-    visual_html = visual_html.replace("url('/assets/", "url('./assets/")
-    visual_html = visual_html.replace('url("/assets/', 'url("./assets/')
-    bridge = """\n// Compatibilidade com o visual integrado: o projeto original referencia
-// estas funções, mas não as define dentro do pacote local.
-window.fishCheckExport = window.fishCheckExport || (async () => null);
-window.fishChargeExport = window.fishChargeExport || (async () => {});
-const phNativeBase64 = bytes => {
-  const chunk = 0x8000; let binary = '';
-  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));
-  return btoa(binary);
-};
-const phSendNativeTexture = (name, version, bytes) => {
-  try {
-    const handler = window.webkit?.messageHandlers?.phvisualDownload;
-    if (!handler) return;
-    const source = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-    const looksLikeZip = source.length >= 4 && source[0] === 0x50 && source[1] === 0x4b;
-    let payload;
-    let relativePath;
-    if (looksLikeZip) {
-      const entries = fflate.unzipSync(source);
-      const rawPath = Object.keys(entries).find(path => (path.includes('Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/') || path.includes('/ios/optionalavatarres/gameassetbundles/')) && !path.endsWith('/'));
-      if (!rawPath) throw new Error('O ZIP não contém um AssetBundle iOS.');
-      const iosMarker = 'Documents/contentcache/Optional/ios/';
-      const markerIndex = rawPath.indexOf(iosMarker);
-      relativePath = markerIndex >= 0 ? rawPath.slice(markerIndex) : 'Documents/contentcache/Optional/' + rawPath.slice(rawPath.indexOf('ios/'));
-      payload = entries[rawPath];
-    } else {
-      const bundleName = String(name || 'optionalab_avatar').split('/').pop().replace(/\.(zip|3105)$/i, '') || 'optionalab_avatar';
-      relativePath = 'Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/' + bundleName;
-      payload = source;
-    }
-    if (!payload || !payload.length) throw new Error('Arquivo bruto do Criar MOD vazio.');
-    const id = 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-    const chunkSize = 0x8000;
-    const iosVersion = String(version).toLowerCase().includes('max') ? 'ios-max' : 'ios';
-    handler.postMessage({type:'begin', id, version: iosVersion, relativePath, total: Math.ceil(payload.length / chunkSize)});
-    for (let offset = 0, index = 0; offset < payload.length; offset += chunkSize, index++) {
-      handler.postMessage({type:'chunk', id, index, base64: phNativeBase64(payload.subarray(offset, Math.min(offset + chunkSize, payload.length)))});
-    }
-    handler.postMessage({type:'end', id});
-  } catch (error) {
-    try { window.webkit?.messageHandlers?.phvisualDownload?.postMessage({type:'error', message: String(error?.message || error)}); } catch {}
-    console.warn('PH native texture bridge failed', error);
-  }
-};
-"""
-    visual_html = visual_html.replace("const saveFile=(bytes,name)=>{", bridge + "\n  const saveFile=(bytes,name)=>{", 1)
-    export_anchor = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);"
-    export_replacement = "const packaged=await packageOne(version,bytes);\n        saveFile(packaged.bytes,packaged.name);\n        setTimeout(() => phSendNativeTexture(packaged.name,version,bytes), 0);"
-    visual_html = visual_html.replace(export_anchor, export_replacement, 1)
-    # The real button handler lives in wardrobe-app*.js and uses the
-    # synchronous package API. Send the raw bytes only after its browser
-    # download has been started; patching the secondary runtime alone has no
-    # effect on the visible Criar MOD button.
-    active_anchor = "setTimeout(()=>URL.revokeObjectURL(url),60000);"
-    active_replacement = "setTimeout(()=>URL.revokeObjectURL(url),60000);\n      setTimeout(() => phSendNativeTexture(packaged.name,version,bytes), 0);"
-    visual_js = next(visual_root.glob("wardrobe-app*.js"), None)
-    if visual_js:
-        active_js = visual_js.read_text()
-        active_js = active_js.replace(active_anchor, active_replacement, 1)
-        visual_js.write_text(active_js)
-    index_path.write_text(visual_html)
+# O projeto visual é publicado remotamente pela API Railway em /api/visual.
+# Ele não é baixado nem embutido na IPA.
+visual_remote_url = "https://api-production-182c.up.railway.app/api/visual/"
 
 project_file = app.parent / "ThreeOneOSFive.xcodeproj/project.pbxproj"
 if not project_file.is_file():
     raise SystemExit(f"Xcode project file missing: {project_file}")
 pbx = project_file.read_text()
-if "path = VisualProject;" not in pbx:
-    file_id = uuid.uuid4().hex[:24].upper()
-    build_id = uuid.uuid4().hex[:24].upper()
-    file_ref = f"\t\t{file_id} /* VisualProject */ = {{isa = PBXFileReference; lastKnownFileType = folder; path = VisualProject; sourceTree = \"<group>\"; }};\n"
-    build_ref = f"\t\t{build_id} /* VisualProject */ = {{isa = PBXBuildFile; fileRef = {file_id} /* VisualProject */; }};\n"
-    pbx = pbx.replace("/* End PBXFileReference section */", file_ref + "/* End PBXFileReference section */", 1)
-    pbx = pbx.replace("/* End PBXBuildFile section */", build_ref + "/* End PBXBuildFile section */", 1)
-    root_match = re.search(r"mainGroup\s*=\s*([A-Za-z0-9_-]+)(?: /\* .*? \*/)?;", pbx)
-    if not root_match:
-        raise SystemExit("Xcode main group not found")
-    root_id = root_match.group(1)
-    group_match = re.search(rf"{root_id}(?: /\*.*?\*/)? = \{{.*?children = \((.*?)\);", pbx, re.S)
-    if not group_match:
-        raise SystemExit("Xcode root group children not found")
-    insert_at = group_match.start(1) + len(group_match.group(1))
-    pbx = pbx[:insert_at] + f"\n\t\t\t\t{file_id} /* VisualProject */," + pbx[insert_at:]
-    resources_match = re.search(r"(isa = PBXResourcesBuildPhase;.*?files = \((.*?)\n\s*\);)", pbx, re.S)
-    if not resources_match:
-        raise SystemExit("Xcode resources phase not found")
-    resources_end = resources_match.start(2) + len(resources_match.group(2))
-    pbx = pbx[:resources_end] + f"\n\t\t\t\t{build_id} /* VisualProject */," + pbx[resources_end:]
-    project_file.write_text(pbx)
 
 # Add AppSection.config and expose it in the generated ContentView navigation.
 nav = nav_file.read_text()
@@ -1060,31 +956,18 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
 }
 private struct VisualProjectWebView: UIViewRepresentable {
     func makeCoordinator() -> PHVisualDownloadHandler { PHVisualDownloadHandler() }
-
     func makeUIView(context: Context) -> WKWebView {
-        let directRoot = Bundle.main.bundleURL.appendingPathComponent("VisualProject", isDirectory: true)
-        let projectRoot = FileManager.default.fileExists(atPath: directRoot.path)
-            ? directRoot
-            : Bundle.main.url(forResource: "VisualProject", withExtension: nil)
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
         configuration.websiteDataStore = .default()
         configuration.userContentController.add(context.coordinator, name: "phvisualDownload")
-        if let projectRoot {
-            configuration.setURLSchemeHandler(VisualProjectSchemeHandler(root: projectRoot), forURLScheme: "phvisual")
-        }
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = true
-        if let projectRoot {
-            let index = projectRoot.appendingPathComponent("index.html")
-            if FileManager.default.fileExists(atPath: index.path) {
-                webView.load(URLRequest(url: URL(string: "phvisual://localhost/index.html")!))
-            }
-        }
+        webView.load(URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/visual/")!))
         return webView
     }
 
