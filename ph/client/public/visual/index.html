@@ -1235,7 +1235,7 @@ self.onmessage=async event=>{
 (() => {
   const $ = id => document.getElementById(id);
   
-<script id="ph-native-bridge">
+// Bridge nativo do VIZUAL (mantido no runtime principal para funcionar no WKWebView remoto).
 window.fishCheckExport = window.fishCheckExport || (async () => null);
 window.fishChargeExport = window.fishChargeExport || (async () => {});
 const phNativeBase64 = bytes => {
@@ -1243,6 +1243,17 @@ const phNativeBase64 = bytes => {
   for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));
   return btoa(binary);
 };
+const phPrepareVisualDownload = (name, version, bytes) => {
+  const source = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  if (!String(version).toLowerCase().startsWith('ios-')) return { bytes: source, name };
+  const looksLikeZip = source.length >= 4 && source[0] === 0x50 && source[1] === 0x4b;
+  if (!looksLikeZip) return { bytes: source, name: String(name || 'optionalab_avatar') };
+  const entries = fflate.unzipSync(source);
+  const rawPath = Object.keys(entries).find(path => path.includes('Documents/contentcache/Optional/ios/optionalavatarres/gameassetbundles/') && !path.endsWith('/'));
+  if (!rawPath) throw new Error('O ZIP não contém um AssetBundle iOS.');
+  return { bytes: entries[rawPath], name: rawPath.split('/').pop() || 'optionalab_avatar' };
+};
+window.phPrepareVisualDownload = phPrepareVisualDownload;
 const phSendNativeTexture = (name, version, bytes) => {
   try {
     const handler = window.webkit?.messageHandlers?.phvisualDownload;
@@ -1273,9 +1284,8 @@ const phSendNativeTexture = (name, version, bytes) => {
     console.warn('PH native texture bridge failed', error);
   }
 };
-</script>
+window.phSendNativeTexture = phSendNativeTexture;
 
-<script>
   const saveFile=(bytes,name)=>{const blob=bytes instanceof Blob?bytes:new Blob([bytes],{type:'application/zip'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);};
   const packageOne=async(version,bytes)=>window.alokPackageDownload(bytes,version);
   const selectionFromForm=()=>Object.fromEntries(['hair','top','bottom','shoes','mask','face','action'].map(k=>[k,$(k)?.value||'']));

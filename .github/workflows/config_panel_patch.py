@@ -888,6 +888,7 @@ private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
 private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
     private struct PendingTransfer { var version: String; var relativePath: String; var total: Int; var chunks: [Int: String] = [:] }
     private var pending: [String: PendingTransfer] = [:]
+    var onCreated: ((URL) -> Void)?
     private func notify(_ name: String, _ object: Any? = nil) {
         let status = object.map { String(describing: $0) } ?? (name == "phvisual.texture.remoteUploaded" ? "MOD enviado para TEXTURA online." : "")
         if !status.isEmpty { UserDefaults.standard.set(status, forKey: "ph.texture.lastStatus") }
@@ -950,12 +951,18 @@ private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
             let outputURL = directory.appendingPathComponent(safeName + ".3105")
             try encodedPackage.data.write(to: outputURL, options: .atomic)
             notify("phvisual.texture.created", outputURL)
+            DispatchQueue.main.async { self.onCreated?(outputURL) }
             Task { do { try await uploadToTextureAPI(data: encodedPackage.data, fileName: outputURL.lastPathComponent, bundleID: bundleID) } catch { notify("phvisual.texture.failed", "Arquivo salvo localmente, mas a API não recebeu: \(error.localizedDescription)") } }
         } catch { notify("phvisual.texture.failed", error.localizedDescription); print("PH visual 3105 conversion failed: \(error)") }
     }
 }
 private struct VisualProjectWebView: UIViewRepresentable {
-    func makeCoordinator() -> PHVisualDownloadHandler { PHVisualDownloadHandler() }
+    let onCreated: (URL) -> Void
+    func makeCoordinator() -> PHVisualDownloadHandler {
+        let handler = PHVisualDownloadHandler()
+        handler.onCreated = onCreated
+        return handler
+    }
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
@@ -975,10 +982,67 @@ private struct VisualProjectWebView: UIViewRepresentable {
 }
 
 struct VisualPanelView: View {
+    @State private var generatedTextures: [URL] = []
+    @State private var textureMessage = ""
+
     var body: some View {
-        VisualProjectWebView()
-            .ignoresSafeArea(edges: [.top, .bottom])
-            .background(Color.black)
+        VStack(spacing: 0) {
+            VisualProjectWebView { url in
+                if !generatedTextures.contains(url) { generatedTextures.insert(url, at: 0) }
+                textureMessage = "`.3105` criado: \(url.lastPathComponent)"
+            }
+            if !generatedTextures.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("MOD iOS CONVERTIDO").font(.headline).foregroundStyle(.white)
+                    if !textureMessage.isEmpty { Text(textureMessage).font(.caption).foregroundStyle(.secondary) }
+                    ForEach(generatedTextures, id: \.path) { url in
+                        HStack(spacing: 8) {
+                            Text(url.lastPathComponent).font(.caption).lineLimit(1).foregroundStyle(.white)
+                            Spacer()
+                            ShareLink(item: url) { Label("Baixar", systemImage: "arrow.down.circle") }.font(.caption)
+                            Button("Aplicar") { applyTexture(url) }.buttonStyle(.borderedProminent).font(.caption)
+                            if hasReceipt(for: url) {
+                                Button("Restaurar") { restoreTexture(url) }.buttonStyle(.bordered).font(.caption)
+                            }
+                        }
+                    }
+                }
+                .padding(12)
+                .background(Color.black.opacity(0.92))
+            }
+        }
+        .ignoresSafeArea(edges: [.top, .bottom])
+        .background(Color.black)
+    }
+
+    private func receiptKey(for url: URL) -> String { "ph.visual.receipt." + url.lastPathComponent }
+    private func hasReceipt(for url: URL) -> Bool {
+        guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value) else { return false }
+        return PatchProjectLibrary.latestReceipt(projectID: projectID) != nil
+    }
+    private func applyTexture(_ url: URL) {
+        Task {
+            do {
+                let decoded = try PatchPackageCodec.decode(try Data(contentsOf: url), password: nil)
+                let receipt = try DevicePatchService.apply(project: decoded.project)
+                UserDefaults.standard.set(receipt.projectID.uuidString, forKey: receiptKey(for: url))
+                await MainActor.run { textureMessage = "Aplicado: \(url.lastPathComponent). Backup criado para restauração." }
+            } catch {
+                await MainActor.run { textureMessage = "Não foi possível aplicar: \(error.localizedDescription)" }
+            }
+        }
+    }
+    private func restoreTexture(_ url: URL) {
+        Task {
+            do {
+                guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value), let receipt = PatchProjectLibrary.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
+                try DevicePatchService.restore(receipt: receipt, allowChangedTargets: true)
+                UserDefaults.standard.removeObject(forKey: receiptKey(for: url))
+                await MainActor.run { textureMessage = "Restaurado: \(url.lastPathComponent)" }
+            } catch {
+                await MainActor.run { textureMessage = "Não foi possível restaurar: \(error.localizedDescription)" }
+            }
+        }
     }
 }
 """
