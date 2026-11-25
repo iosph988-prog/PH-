@@ -1022,7 +1022,7 @@ self.onmessage=async event=>{
    if(!refs) return Promise.reject(Error('Dados ausentes para '+item.name+' para a versão selecionada.'));
    patches.push(refs);for(const hash of Object.values(refs))objects[hash]=engine.objects[hash];
   }
-  const hair=assets.itemCatalog.hair[selection.hair];const useHairMotion=hair?.id==='hair-dao-si-do' && !!hair.motionPatchByVersion?.[version];const base={...(assets.characterId==='ignis'?(assets.itemCatalog.top[selection.top]?.id==='top-sasuke'?engine.sasukeVfxBases[version]:engine.bases[version]):(useHairMotion?engine.hairMotionBases[version]:engine.bases[version])),compactCAB:assets.characterId==='alok'||donorSasuke},compressed={};
+  const hair=assets.itemCatalog.hair[selection.hair];const useHairMotion=hair?.id==='hair-dao-si-do' && !!hair.motionPatchByVersion?.[version];const base={...(assets.characterId==='ignis'?(assets.itemCatalog.top[selection.top]?.id==='top-sasuke'?engine.sasukeVfxBases[version]:engine.bases[version]):(useHairMotion?engine.hairMotionBases[version]:engine.bases[version])),compactCAB:false},compressed={};
   const chosen={};for(const refs of patches)for(const [pid,hash]of Object.entries(refs))chosen[pid]=objects[hash];
   const blocks=[...base.fast.metadata,...base.fast.resources,...base.fast.blocks.map(b=>chosen[b.pid]||b)];
   for(const block of blocks)compressed[block.key]=engine.compressed[block.key];
