@@ -974,7 +974,17 @@ private struct VisualProjectWebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = true
-        webView.load(URLRequest(url: URL(string: "https://cdn.jsdelivr.net/gh/iosph988-prog/PH-@main/ph/client/public/visual/index.html")!))
+        let visualURL = URL(string: "https://cdn.jsdelivr.net/gh/iosph988-prog/PH-@main/ph/client/public/visual/index.html")!
+        let visualBaseURL = visualURL.deletingLastPathComponent()
+        URLSession.shared.dataTask(with: visualURL) { data, _, error in
+            guard let data, let html = String(data: data, encoding: .utf8), error == nil else {
+                DispatchQueue.main.async {
+                    webView.load(URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/visual/")!))
+                }
+                return
+            }
+            DispatchQueue.main.async { webView.loadHTMLString(html, baseURL: visualBaseURL) }
+        }.resume()
         return webView
     }
 
