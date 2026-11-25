@@ -108,17 +108,25 @@ jobs:
         run: |
           set -euo pipefail
           APP_SWIFT=source/3105-1.1.1/ThreeOneOSFive/App.swift
-          curl -fsSL https://files.manuscdn.com/user_upload_by_module/session_file/310519663912938762/PqdDhCNKFTkScSzG.swift -o /tmp/CalculatorGateView.swift
+          cp CompassCalculatorGate.swift /tmp/CalculatorGateView.swift
           python3 - "$APP_SWIFT" /tmp/CalculatorGateView.swift <<'PY'
           from pathlib import Path
           import sys
           app = Path(sys.argv[1])
           component = Path(sys.argv[2]).read_text()
           t = app.read_text()
-          if 'private var calculatorUnlocked = false' not in t:
-              t = t.replace('    @State private var isLicensed = false\n', '    @State private var isLicensed = false\n    @State private var calculatorUnlocked = false\n', 1)
+          if 'private var compassUnlocked = false' not in t:
+              t = t.replace('    @State private var isLicensed = false\n', '    @State private var isLicensed = false\n    @State private var compassUnlocked = false\n    @State private var calculatorUnlocked = false\n', 1)
           t = t.replace('.opacity(showOnboarding || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && isLicensed)', '.opacity(showOnboarding || !calculatorUnlocked || !isLicensed ? 0 : 1)\n                    .allowsHitTesting(!showOnboarding && calculatorUnlocked && isLicensed)', 1)
-          gate = '''                if !showOnboarding && !calculatorUnlocked {
+          gate = '''                if !showOnboarding && !compassUnlocked {
+                    CompassGateView {
+                        withAnimation(.easeInOut(duration: 0.25)) { compassUnlocked = true }
+                    }
+                    .ignoresSafeArea()
+                    .zIndex(4)
+                }
+
+                if !showOnboarding && compassUnlocked && !calculatorUnlocked {
                     CalculatorGateView {
                         withAnimation(.easeInOut(duration: 0.25)) { calculatorUnlocked = true }
                     }
@@ -128,7 +136,7 @@ jobs:
 
           '''
           marker = '                if !showOnboarding && !isLicensed {'
-          if 'CalculatorGateView {' not in t and marker in t:
+          if 'CompassGateView {' not in t and marker in t:
               t = t.replace(marker, gate + marker, 1)
           if 'private struct CalculatorGateView' not in t:
               t += '\n' + component
