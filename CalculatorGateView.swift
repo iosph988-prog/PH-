@@ -92,19 +92,34 @@ private struct CalculatorKey: View {
     let isOperator: Bool
     let isUtility: Bool
     let action: () -> Void
+    private var keyColor: Color {
+        if isOperator { return Color(red: 1.0, green: 0.584, blue: 0.0) }
+        if isUtility { return Color(red: 0.36, green: 0.36, blue: 0.38) }
+        return Color(red: 0.18, green: 0.18, blue: 0.20)
+    }
     var body: some View {
         Button(action: action) {
-            Group {
-                if symbol == "⌫" { Image(systemName: "delete.left") }
-                else if symbol == "+/−" { Image(systemName: "plus.slash.minus") }
-                else { Text(symbol) }
-            }
-            .font(.system(size: symbol == "⌫" ? 34 : (symbol == "AC" ? 35 : 40), weight: .regular, design: .rounded))
-            .foregroundStyle(.white)
-            .frame(width: side, height: side)
-            .background(isOperator && !isUtility ? Color.orange : (isUtility ? Color(white: 0.38) : Color(white: 0.20)), in: Circle())
+            label
+                .font(.system(size: symbol == "⌫" ? 34 : (symbol == "AC" ? 35 : 40), weight: .regular, design: .rounded))
+                .foregroundStyle(.white)
+                .frame(width: side, height: side)
+                .background(keyColor, in: Circle())
         }
         .buttonStyle(.plain)
+    }
+
+    @ViewBuilder
+    private var label: some View {
+        switch symbol {
+        case "⌫": Image(systemName: "delete.left")
+        case "+/−": Image(systemName: "plus.slash.minus")
+        case "÷": Image(systemName: "divide")
+        case "×": Image(systemName: "multiply")
+        case "−": Image(systemName: "minus")
+        case "+": Image(systemName: "plus")
+        case "=": Image(systemName: "equal")
+        default: Text(symbol)
+        }
     }
 }
 
