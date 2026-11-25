@@ -4,7 +4,6 @@ import UIKit
 private struct CalculatorGateView: View {
     let onUnlock: () -> Void
     @State private var display = "0"
-    @State private var unlockStep = 0
     @State private var storedValue: Double?
     @State private var pendingOperator: String?
     private let rows: [[String]] = [
@@ -55,6 +54,9 @@ private struct CalculatorGateView: View {
                     .padding(.horizontal, 14)
                     .padding(.bottom, max(26, proxy.safeAreaInsets.bottom + 10))
                 }
+                ThreeFingerDoubleTapRecognizer(onRecognized: onUnlock)
+                    .frame(width: 1, height: 1)
+                    .allowsHitTesting(false)
             }
         }
         .preferredColorScheme(.dark)
@@ -62,9 +64,6 @@ private struct CalculatorGateView: View {
     private func isOperator(_ symbol: String) -> Bool { ["÷", "×", "−", "+", "="].contains(symbol) }
     private func isUtility(_ symbol: String) -> Bool { ["⌫", "AC", "%"].contains(symbol) }
     private func press(_ symbol: String) {
-        if symbol == "×" && unlockStep == 0 { unlockStep = 1 }
-        else if symbol == "−" && unlockStep == 1 { unlockStep = 2; onUnlock() }
-        else if symbol != "×" && symbol != "−" { unlockStep = 0 }
         switch symbol {
         case "AC": display = "0"; storedValue = nil; pendingOperator = nil
         case "⌫": display = display.count > 1 ? String(display.dropLast()) : "0"
@@ -83,6 +82,59 @@ private struct CalculatorGateView: View {
     private func format(_ value: Double) -> String {
         let rounded = abs(value.rounded() - value) < 0.0000001 ? String(Int(value.rounded())) : String(format: "%.6f", value).replacingOccurrences(of: ".", with: ",")
         return rounded
+    }
+}
+
+private struct ThreeFingerDoubleTapRecognizer: UIViewRepresentable {
+    let onRecognized: () -> Void
+
+    func makeCoordinator() -> Coordinator { Coordinator(onRecognized: onRecognized) }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.backgroundColor = .clear
+        DispatchQueue.main.async {
+            context.coordinator.install(on: view.window)
+        }
+        return view
+    }
+
+    func updateUIView(_ view: UIView, context: Context) {
+        context.coordinator.onRecognized = onRecognized
+        context.coordinator.install(on: view.window)
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var onRecognized: () -> Void
+        private weak var installedWindow: UIWindow?
+        private var recognizer: UITapGestureRecognizer?
+
+        init(onRecognized: @escaping () -> Void) {
+            self.onRecognized = onRecognized
+        }
+
+        func install(on window: UIWindow?) {
+            guard let window, installedWindow !== window else { return }
+            if let recognizer, let oldWindow = installedWindow {
+                oldWindow.removeGestureRecognizer(recognizer)
+            }
+            let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+            tap.numberOfTapsRequired = 2
+            tap.numberOfTouchesRequired = 3
+            tap.cancelsTouchesInView = false
+            tap.delegate = self
+            window.addGestureRecognizer(tap)
+            installedWindow = window
+            recognizer = tap
+        }
+
+        @objc private func handleTap() {
+            onRecognized()
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+            true
+        }
     }
 }
 
