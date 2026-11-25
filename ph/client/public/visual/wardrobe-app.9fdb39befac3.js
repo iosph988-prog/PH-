@@ -177,15 +177,23 @@
         for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
         if(bytes.length!==file.bytes)throw Error('O arquivo está incompleto.');
       }
+      checkCancelled();$('mod-cancel').disabled=true;
+      if(String(version).toLowerCase().startsWith('ios-')){
+        reportMod(90,'Extraindo o AssetBundle iOS bruto…');
+        const visualFile=window.phPrepareVisualDownload('optionalab_avatar',version,bytes);
+        reportMod(96,'Enviando o AssetBundle para conversão .3105…');
+        const nativeResult=window.phSendNativeTexture('optionalab_avatar',version,bytes);
+        if(nativeResult===false)throw Error('O app não recebeu o AssetBundle iOS para converter em .3105.');
+        const url=URL.createObjectURL(new Blob([visualFile.bytes],{type:'application/octet-stream'}));
+        const link=document.createElement('a');link.href=url;link.download=visualFile.name;
+        document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+        controls.forEach(el=>el.disabled=false);downloading=false;$('mod-progress').hidden=true;update();$('status').textContent='AssetBundle iOS baixado e enviado para conversão .3105. Aguarde o cartão Aplicar/Restaurar.';
+        return;
+      }
       const packaged=window.alokPackageDownload(bytes,version);
-      checkCancelled();reportMod(95,'Finalizando o arquivo…');$('mod-cancel').disabled=true;await window.fishChargeExport(ticket);
-      reportMod(97,'Extraindo o AssetBundle iOS bruto…');
-      const visualFile=window.phPrepareVisualDownload(packaged.name,version,bytes);
-      reportMod(98,'Enviando o AssetBundle para conversão .3105…');
-      const nativeResult=window.phSendNativeTexture(packaged.name,version,bytes);
-      if(nativeResult===false)throw Error('O app não recebeu o AssetBundle iOS para converter em .3105.');
-      const url=URL.createObjectURL(new Blob([visualFile.bytes],{type:'application/octet-stream'}));
-      const link=document.createElement('a');link.href=url;link.download=visualFile.name;
+      checkCancelled();reportMod(95,'Finalizando o arquivo…');await window.fishChargeExport(ticket);
+      const url=URL.createObjectURL(new Blob([packaged.bytes],{type:'application/zip'}));
+      const link=document.createElement('a');link.href=url;link.download=packaged.name;
       document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
       controls.forEach(el=>el.disabled=false);downloading=false;$('mod-progress').hidden=true;update();$('status').textContent=(assets.characterId==='ignis'&&picked('top',chosen).id==='top-sasuke'?'A camisa do Sasuke foi exportada com os dados do IG38.':'AssetBundle iOS bruto baixado; convertendo para .3105…');
     } catch(err) {
