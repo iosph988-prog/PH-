@@ -37,6 +37,8 @@ def add_app_storage(source: str, struct_name: str) -> str:
 
 
 swift = patch_file.read_text()
+if '.christmasTheme()' not in swift:
+    swift = swift.replace('.preferredColorScheme(.dark)', '.preferredColorScheme(.dark)\n        .christmasTheme()')
 if "import WebKit" not in swift:
     swift = swift.replace("import SwiftUI", "import SwiftUI\nimport WebKit", 1)
 if "import PhotosUI" not in swift:
@@ -82,6 +84,8 @@ swift = swift.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(sys
 patch_file.write_text(swift)
 
 texture = texture_file.read_text()
+if '.christmasTheme()' not in texture:
+    texture = texture.replace('.preferredColorScheme(.dark)', '.preferredColorScheme(.dark)\n        .christmasTheme()')
 texture = add_app_storage(texture, "TextureOnlineView")
 texture = texture.replace(
     'struct TextureOnlineView: View {\n',
@@ -251,6 +255,49 @@ content = content.replace(old_tab_icon, new_tab_icon, 1)
 content_file.write_text(content)
 
 config_swift = r'''
+
+struct ChristmasThemeModifier: ViewModifier {
+    private let hollyRed = Color(red: 0.92, green: 0.12, blue: 0.16)
+    private let pineGreen = Color(red: 0.04, green: 0.34, blue: 0.21)
+    private let warmGold = Color(red: 1.0, green: 0.72, blue: 0.20)
+    private let snowflakes = [
+        (x: 0.08, y: 0.12, size: 12.0, opacity: 0.42),
+        (x: 0.23, y: 0.28, size: 8.0, opacity: 0.28),
+        (x: 0.42, y: 0.09, size: 10.0, opacity: 0.35),
+        (x: 0.63, y: 0.23, size: 9.0, opacity: 0.30),
+        (x: 0.82, y: 0.11, size: 13.0, opacity: 0.38),
+        (x: 0.94, y: 0.34, size: 8.0, opacity: 0.28),
+        (x: 0.14, y: 0.62, size: 9.0, opacity: 0.24),
+        (x: 0.76, y: 0.68, size: 11.0, opacity: 0.24)
+    ]
+
+    func body(content: Content) -> some View {
+        content
+            .tint(hollyRed)
+            .overlay {
+                GeometryReader { proxy in
+                    ZStack {
+                        LinearGradient(colors: [pineGreen.opacity(0.16), .clear, hollyRed.opacity(0.07)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                        ForEach(Array(snowflakes.enumerated()), id: \.offset) { _, flake in
+                            Text("✦")
+                                .font(.system(size: flake.size, weight: .bold))
+                                .foregroundStyle(Color.white.opacity(flake.opacity))
+                                .position(x: proxy.size.width * flake.x, y: proxy.size.height * flake.y)
+                        }
+                        VStack {
+                            Rectangle().fill(warmGold.opacity(0.72)).frame(height: 1)
+                            Spacer()
+                        }
+                    }
+                }
+                .allowsHitTesting(false)
+            }
+    }
+}
+
+extension View {
+    func christmasTheme() -> some View { modifier(ChristmasThemeModifier()) }
+}
 
 private struct ConfigBackgroundChoice: Identifiable {
     let title: String
@@ -462,6 +509,7 @@ struct ConfigPanelView: View {
         }
         .onDisappear { fpsMonitor.stop() }
         .preferredColorScheme(.dark)
+        .christmasTheme()
     }
 
     private var header: some View {

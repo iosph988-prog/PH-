@@ -2397,6 +2397,7 @@ jobs:
                       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                   }
                   .background(background.ignoresSafeArea())
+                  .christmasTheme()
                   .overlay(Rectangle().stroke(red.opacity(0.72), lineWidth: 1.2).padding(9).ignoresSafeArea())
                   .task {
                       await loadCatalog()
