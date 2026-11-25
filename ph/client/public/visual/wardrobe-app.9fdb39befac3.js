@@ -24,6 +24,44 @@
   let fourDownloadUrls=[];
   window.addEventListener('beforeunload',()=>fourDownloadUrls.forEach(url=>URL.revokeObjectURL(url)));
   const storageKey = () => 'wardrobe-selection-'+assets.characterId+'-' + getVersion();
+  const licenseApiUrl='https://api-production-182c.up.railway.app/api/license/validate';
+  const licenseSessionKey='ph-xiter-visual-license';
+  const visualDeviceId=()=>{
+    let id='';try{id=sessionStorage.getItem('ph-xiter-visual-device')||'';}catch{}
+    if(!id){id='web-'+crypto.randomUUID?.()||'web-'+Date.now()+'-'+Math.random().toString(36).slice(2);try{sessionStorage.setItem('ph-xiter-visual-device',id);}catch{}}
+    return id;
+  };
+  const licenseState={valid:false,busy:false,key:''};
+  const licenseMessage=(text,error=false)=>{const node=$('license-status');if(node){node.textContent=text;node.classList.toggle('error',error);}};
+  const setLicenseState=(valid,key='')=>{licenseState.valid=valid;licenseState.key=key;window.dispatchEvent(new CustomEvent('ph-license-change',{detail:{valid}}));};
+  async function validateVisualLicense(force=false){
+    if(licenseState.busy)return false;
+    let key='';try{key=sessionStorage.getItem(licenseSessionKey)||'';}catch{}
+    key=String($('license-key')?.value||key).trim();
+    if(!key){setLicenseState(false);licenseMessage('Digite sua key para liberar o Criar MOD.',true);$('license-key')?.focus();return false;}
+    if(licenseState.valid&&!force&&licenseState.key===key)return true;
+    licenseState.busy=true;setLicenseState(false);licenseMessage('Validando key na API…');
+    const button=$('license-validate');if(button)button.disabled=true;
+    let supportUrl='';
+    try{
+      const response=await fetch(licenseApiUrl,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({key,device_id:visualDeviceId(),package:'com.apple.mobile.MobileHouseArrest',app_version:'2026.10.07'})});
+      const data=await response.json().catch(()=>({}));
+      supportUrl=typeof data.supportUrl==='string'?data.supportUrl:'';
+      if(response.status!==200||data.valid!==true)throw new Error(data.message||'Key inválida ou expirada.');
+      try{sessionStorage.setItem(licenseSessionKey,key);}catch{}
+      setLicenseState(true,key);licenseMessage(data.expiresAt?'Key válida até '+new Date(data.expiresAt).toLocaleString('pt-BR'):'Key válida. Criar MOD liberado.');
+      const support=$('license-support');if(support)support.hidden=true;
+      return true;
+    }catch(error){
+      setLicenseState(false);licenseMessage(error?.message||'Não foi possível validar a key agora.',true);
+      const support=$('license-support');if(support){support.hidden=!/^https:\/\//i.test(supportUrl);if(!support.hidden){const link=support.querySelector('a');if(link)link.href=supportUrl;}}
+      return false;
+    }finally{licenseState.busy=false;if(button)button.disabled=false;}
+  }
+  window.phValidateBeforeExport=()=>validateVisualLicense();
+  $('license-validate')?.addEventListener('click',()=>validateVisualLicense(true));
+  $('license-key')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();validateVisualLicense(true);}});
+  try{const saved=sessionStorage.getItem(licenseSessionKey);if(saved&&$('license-key'))$('license-key').value=saved;}catch{}
   function fileForSelection(s=selection()) {
 
     if((!assets.voiceProfile?.enabled||getVoice()==='alok') && fields.every(k=>picked(k,s).default)) return assets.originals[getVersion()];
@@ -91,8 +129,8 @@
     $('selection-summary').textContent=fields.map(k=>captions[k]+': '+picked(k,s).name).join(' · ');
     if(assets.characterId==='alok')$('selection-summary').textContent+='';
     try { localStorage.setItem(storageKey(),JSON.stringify(Object.fromEntries(fields.map(k=>[k,picked(k,s).id])))); } catch {}
-    $('download').disabled = downloading || !file;
-    $('download-all').disabled = downloading || !file;
+    $('download').disabled = downloading || !file || !licenseState.valid;
+    $('download-all').disabled = downloading || !file || !licenseState.valid;
     $('download-all-label').textContent = downloading ? 'Preparando arquivo…' : 'Criar 4 versões';
     $('download-label').textContent = downloading ? 'Preparando arquivo…' : file
       ? (file.dynamic ? 'Criar MOD · '+(assets.mixEngine.bases[getVersion()].physicalSize/1048576).toFixed(2)+' MB' : (assets.characterId==='ignis'?'Baixar arquivo · ':'Baixar '+assets.characterName+' original · ')+(file.bytes/1048576).toFixed(2)+' MB')
@@ -106,6 +144,7 @@
     window.dispatchEvent(new CustomEvent('wardrobe-change',{detail:s}));
   }
   window.alokWardrobe={get assets(){return assets;},selection,getVersion,getVoice,picked,fileForSelection,ready:Promise.resolve(assets.manifest)};
+  window.addEventListener('ph-license-change',update);
   function updateCharacterLabels(){
     document.querySelector('.character-name').textContent=assets.characterName.toUpperCase();
     document.querySelector('.watermark').textContent='PH XITER';
@@ -160,6 +199,7 @@
   updateVersionLabels();
   $('download').addEventListener('click',async()=>{
     const chosen=selection(), version=getVersion(), file=fileForSelection(chosen); if(!file || downloading) return;
+    if(!(await validateVisualLicense())){update();return;}
     downloading=true; update();startMod();
     const controls=[...document.querySelectorAll('select, #randomize, #reset, #download-all')];controls.forEach(el=>el.disabled=true);
     try {
@@ -202,6 +242,7 @@
   });
   $('download-all').addEventListener('click',async()=>{
     if(downloading)return;
+    if(!(await validateVisualLicense())){update();return;}
     const chosen=selection();
     downloading=true;update();startMod();
     const controls=[...document.querySelectorAll('select, #randomize, #reset')];controls.forEach(el=>el.disabled=true);
