@@ -69,6 +69,10 @@ async function startServer() {
     ? path.resolve(import.meta.dirname, "../..", "client", "public", "visual")
     : path.resolve(import.meta.dirname, "public", "visual");
   app.use("/api/visual", express.static(visualPublicRoot, { index: "index.html" }));
+  const skinPublicRoot = process.env.NODE_ENV === "development"
+    ? path.resolve(import.meta.dirname, "../..", "client", "public", "skin")
+    : path.resolve(import.meta.dirname, "public", "skin");
+  app.use("/api/skin", express.static(skinPublicRoot, { index: "index.html" }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   app.post("/api/auth/local/login", async (req, res) => {
