@@ -33,7 +33,7 @@ private struct CalculatorGateView: View {
                             .overlay(Circle().stroke(Color.white.opacity(0.12), lineWidth: 1))
                     }
                     .padding(.horizontal, 18)
-                    .padding(.top, max(18, proxy.safeAreaInsets.top + 2))
+                    .padding(.top, max(28, proxy.safeAreaInsets.top + 12))
                     .frame(height: 92, alignment: .top)
                     Text(display)
                         .font(.system(size: 56, weight: .regular, design: .rounded))
