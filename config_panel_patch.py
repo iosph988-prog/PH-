@@ -137,10 +137,6 @@ content = content.replace(
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill")',
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintpalette.fill")',
 )
-if 'case .config: return "Config"' not in content:
-    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .config: return "Config"', 1)
-if 'case .config: return "gearshape.fill"' not in content:
-    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .config: return "gearshape.fill"', 1)
 content = content.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintpalette.fill"', 1)
 old_tab_icon = 'Image(systemName: systemImage)'
 new_tab_icon = '''Group {
