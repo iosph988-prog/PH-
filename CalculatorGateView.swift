@@ -110,10 +110,25 @@ private struct CalculatorKey: View {
 
 private struct CalculatorGlyph: View {
     var body: some View {
-        VStack(spacing: 2) {
-            RoundedRectangle(cornerRadius: 2).stroke(.white, lineWidth: 2).frame(width: 18, height: 13)
-            HStack(spacing: 2) { ForEach(0..<3, id: \.self) { _ in Circle().fill(.white).frame(width: 3, height: 3) } }
-            HStack(spacing: 2) { ForEach(0..<3, id: \.self) { _ in Circle().fill(.white).frame(width: 3, height: 3) } }
+        ZStack {
+            RoundedRectangle(cornerRadius: 4, style: .continuous)
+                .fill(Color.white)
+                .frame(width: 22, height: 25)
+            VStack(spacing: 3) {
+                RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                    .fill(Color.black.opacity(0.82))
+                    .frame(width: 14, height: 5)
+                HStack(spacing: 2) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        Circle().fill(Color.black.opacity(0.80)).frame(width: 3, height: 3)
+                    }
+                }
+                HStack(spacing: 2) {
+                    ForEach(0..<3, id: \.self) { _ in
+                        Circle().fill(Color.black.opacity(0.80)).frame(width: 3, height: 3)
+                    }
+                }
+            }
         }
     }
 }
