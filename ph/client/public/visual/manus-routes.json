@@ -1,1 +1,12 @@
-{"routes":[{"path":"/","title":"PH CHEATS VIP"}]}
+{
+  "routes": [
+    {
+      "path": "/",
+      "title": "PH CHEATS VIP"
+    },
+    {
+      "path": "/skin/",
+      "title": "PH XITER — Visual de Skin"
+    }
+  ]
+}

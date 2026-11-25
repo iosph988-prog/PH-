@@ -92,7 +92,7 @@ texture = texture.replace(
     '                              Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))\n',
     '''                              Text(message).font(.caption).foregroundStyle(accentColor.opacity(0.72))
                               if !localGeneratedTextures.isEmpty {
-                                  Text("MODS CRIADOS NO VIZUAL").font(.headline).foregroundStyle(accentColor)
+                                  Text("MODS CRIADOS NO SITE DA SKIN").font(.headline).foregroundStyle(accentColor)
                                   ForEach(localGeneratedTextures, id: \\.path) { url in
                                       HStack(spacing: 10) {
                                           Image(systemName: "doc.badge.gearshape").foregroundStyle(accentColor)
@@ -156,9 +156,6 @@ texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackg
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
 
-# O projeto visual é carregado remotamente pelo CDN público do repositório.
-# Ele não é baixado nem embutido na IPA; o CDN sempre acompanha o branch main.
-visual_remote_url = "https://cdn.jsdelivr.net/gh/iosph988-prog/PH-@main/ph/client/public/visual/index.html"
 
 project_file = app.parent / "ThreeOneOSFive.xcodeproj/project.pbxproj"
 if not project_file.is_file():
@@ -171,15 +168,13 @@ if "    case config\n" not in nav:
     if "    case misc\n" not in nav:
         raise SystemExit("MISC enum case not found")
     nav = nav.replace("    case misc\n", "    case misc\n    case config\n", 1)
-if "    case visual\n" not in nav:
-    nav = nav.replace("    case config\n", "    case visual\n    case config\n", 1)
 nav = nav.replace(
     "[.patches, .external, .texture, .misc].filter(isVisible)",
-    "[.patches, .external, .texture, .visual, .misc, .config].filter(isVisible)",
+    "[.patches, .external, .texture, .misc, .config].filter(isVisible)",
 )
 nav = nav.replace(
     "case .home, .files, .patches, .external, .texture, .misc:",
-    "case .home, .files, .patches, .external, .texture, .visual, .misc, .config:",
+    "case .home, .files, .patches, .external, .texture, .misc, .config:",
 )
 nav_file.write_text(nav)
 
@@ -194,37 +189,21 @@ if "case .config:\n            ConfigPanelView()" not in content:
     child_indent = match.group("child") or match.group("case") + "    "
     replacement = (
         match.group("case") + "case .misc:\n" + child_indent + "MiscToolsView()\n"
-        + match.group("case") + "case .visual:\n" + child_indent + "VisualPanelView()\n"
         + match.group("case") + "case .config:\n" + child_indent + "ConfigPanelView()"
     )
     content = content[:match.start()] + replacement + content[match.end():]
 content = content.replace(
     "[.patches, .external, .texture, .misc].filter(isVisible)",
-    "[.patches, .external, .texture, .visual, .misc, .config].filter(isVisible)",
+    "[.patches, .external, .texture, .misc, .config].filter(isVisible)",
 )
 content = content.replace(
     "[AppSection.patches, .external, .texture, .misc]",
-    "[AppSection.patches, .external, .texture, .visual, .misc, .config]",
+    "[AppSection.patches, .external, .texture, .misc, .config]",
 )
 content = content.replace(
     "ForEach([AppSection.patches, .external, .texture, .misc])",
-    "ForEach([AppSection.patches, .external, .texture, .visual, .misc, .config])",
+    "ForEach([AppSection.patches, .external, .texture, .misc, .config])",
 )
-# Insert VIZUAL immediately after TEXTURA.
-if 'sectionContent(.visual)' not in content:
-    tab_pattern = re.compile(
-        r'(?m)^(?P<i1>[ \t]*)sectionContent\(\.texture\)\n'
-        r'(?P<i2>[ \t]*)\.tabItem \{ CompactTabLabel\(title: "TEXTURA", systemImage: "(?:paintbrush|paintpalette)\.fill"\) \}\n'
-        r'(?P<i3>[ \t]*)\.tag\(AppSection\.texture\.rawValue\)'
-    )
-    match = tab_pattern.search(content)
-    if not match:
-        raise SystemExit("TEXTURA compact tab anchor not found")
-    new_tab = (match.group(0)
-        + "\n" + match.group("i1") + "sectionContent(.visual)"
-        + "\n" + match.group("i2") + '.tabItem { CompactTabLabel(title: "VIZUAL", systemImage: "tshirt.fill") }'
-        + "\n" + match.group("i3") + ".tag(AppSection.visual.rawValue)")
-    content = content[:match.start()] + new_tab + content[match.end():]
 # Insert the fifth compact tab after MISC.
 if 'sectionContent(.config)' not in content:
     tab_pattern = re.compile(
@@ -243,16 +222,6 @@ if 'sectionContent(.config)' not in content:
     )
     content = content[:match.start()] + new_tab + content[match.end():]
 # Keep the regular-size navigation labels exhaustive and readable.
-if 'case .visual: return "VIZUAL"' not in content:
-    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .visual: return "VIZUAL"', 1)
-if 'case .visual: return "tshirt.fill"' not in content:
-    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .visual: return "tshirt.fill"', 1)
-if 'case .config: return "Config"' not in content:
-    content = content.replace('case .misc: return "MISC"', 'case .misc: return "MISC"\n        case .config: return "Config"', 1)
-if 'case .config: return "gearshape.fill"' not in content:
-    content = content.replace('case .misc: return "eye.fill"', 'case .misc: return "eye.fill"\n        case .config: return "gearshape.fill"', 1)
-content = content.replace('title: language.text(section.titleKey)', 'title: section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey))')
-content = content.replace('Label(language.text(section.titleKey), systemImage: section.systemImage)', 'Label(section == .config ? "Config" : (section == .visual ? "VIZUAL" : language.text(section.titleKey)), systemImage: section.systemImage)')
 content = content.replace(
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintbrush.fill")',
     'CompactTabLabel(title: "TEXTURA", systemImage: "paintpalette.fill")',
@@ -260,9 +229,7 @@ content = content.replace(
 content = content.replace('case .texture: return "paintbrush.fill"', 'case .texture: return "paintpalette.fill"', 1)
 old_tab_icon = 'Image(systemName: systemImage)'
 new_tab_icon = '''Group {
-                if title == "VIZUAL" {
-                    Image(systemName: "tshirt.fill")
-                } else if title == "TEXTURA" {
+                if title == "TEXTURA" {
                     ZStack(alignment: .bottomTrailing) {
                         Image(systemName: "paintpalette.fill")
                         Image(systemName: "paintbrush.pointed.fill")
@@ -832,233 +799,3 @@ if "import WebKit" not in patch_file.read_text():
     else:
         current = "import WebKit\n" + current
     patch_file.write_text(current)
-
-visual_swift = r"""
-
-private final class VisualProjectSchemeHandler: NSObject, WKURLSchemeHandler {
-    private let root: URL
-
-    init(root: URL) {
-        self.root = root.standardizedFileURL
-    }
-
-    func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
-        guard let url = urlSchemeTask.request.url else {
-            urlSchemeTask.didFailWithError(NSError(domain: "VisualProject", code: 1))
-            return
-        }
-        let relativePath = url.path.removingPercentEncoding ?? url.path
-        let fileURL = root.appendingPathComponent(relativePath.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
-            .standardizedFileURL
-        guard fileURL.path.hasPrefix(root.path + "/"), FileManager.default.fileExists(atPath: fileURL.path) else {
-            urlSchemeTask.didFailWithError(NSError(domain: "VisualProject", code: 404))
-            return
-        }
-        do {
-            let data = try Data(contentsOf: fileURL)
-            let mime: String
-            switch fileURL.pathExtension.lowercased() {
-            case "html": mime = "text/html"
-            case "js": mime = "application/javascript"
-            case "css": mime = "text/css"
-            case "json": mime = "application/json"
-            case "webp": mime = "image/webp"
-            case "png": mime = "image/png"
-            case "jpg", "jpeg": mime = "image/jpeg"
-            case "svg": mime = "image/svg+xml"
-            default: mime = "application/octet-stream"
-            }
-            let response = HTTPURLResponse(
-                url: url,
-                statusCode: 200,
-                httpVersion: "HTTP/1.1",
-                headerFields: ["Content-Type": mime, "Content-Length": "\(data.count)"]
-            )!
-            urlSchemeTask.didReceive(response)
-            urlSchemeTask.didReceive(data)
-            urlSchemeTask.didFinish()
-        } catch {
-            urlSchemeTask.didFailWithError(error)
-        }
-    }
-
-    func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
-}
-
-private final class PHVisualDownloadHandler: NSObject, WKScriptMessageHandler {
-    private struct PendingTransfer { var version: String; var relativePath: String; var total: Int; var chunks: [Int: String] = [:] }
-    private var pending: [String: PendingTransfer] = [:]
-    var onCreated: ((URL) -> Void)?
-    private func notify(_ name: String, _ object: Any? = nil) {
-        let status = object.map { String(describing: $0) } ?? (name == "phvisual.texture.remoteUploaded" ? "MOD enviado para TEXTURA online." : "")
-        if !status.isEmpty { UserDefaults.standard.set(status, forKey: "ph.texture.lastStatus") }
-        DispatchQueue.main.async { NotificationCenter.default.post(name: Notification.Name(name), object: object) }
-    }
-    private func uploadToTextureAPI(data: Data, fileName: String, bundleID: String) async throws {
-        guard let key = LicenseStore.storedKey, !key.isEmpty else { throw NSError(domain: "TextureUpload", code: 401, userInfo: [NSLocalizedDescriptionKey: "Faça login antes de criar o MOD."]) }
-        guard let endpoint = URL(string: "https://api-production-182c.up.railway.app/api/patches/texture/upload") else { throw URLError(.badURL) }
-        var request = URLRequest(url: endpoint); request.httpMethod = "POST"; request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        let body: [String: Any] = [
-            "key": key,
-            "device_id": UIDevice.current.identifierForVendor?.uuidString ?? "texture-device",
-            "package": Bundle.main.bundleIdentifier ?? "com.apple.mobile.MobileHouseArrest",
-            "app_version": Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
-            "file_name": fileName,
-            "title": "PH XITER \(fileName)",
-            "game": bundleID.contains("freefiremax") ? "free-fire-max" : "free-fire",
-            "data_base64": data.base64EncodedString()
-        ]
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        let (responseData, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-            let serverMessage = (try? JSONSerialization.jsonObject(with: responseData) as? [String: Any])?["message"] as? String
-            throw NSError(domain: "TextureUpload", code: (response as? HTTPURLResponse)?.statusCode ?? 500, userInfo: [NSLocalizedDescriptionKey: serverMessage ?? "A API recusou o upload do MOD."])
-        }
-        notify("phvisual.texture.remoteUploaded")
-    }
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.name == "phvisualDownload", let body = message.body as? [String: Any], let type = body["type"] as? String else { return }
-        if type == "error", let text = body["message"] as? String { notify("phvisual.texture.failed", text); return }
-        guard let id = body["id"] as? String else { notify("phvisual.texture.failed", "O visual não enviou o identificador da transferência."); return }
-        if type == "begin" {
-            guard let version = body["version"] as? String, let relativePath = body["relativePath"] as? String, let total = (body["total"] as? NSNumber)?.intValue, total > 0 else { notify("phvisual.texture.failed", "Transferência do AssetBundle inválida."); return }
-            pending[id] = PendingTransfer(version: version, relativePath: relativePath, total: total); return
-        }
-        if type == "chunk" {
-            guard let index = (body["index"] as? NSNumber)?.intValue, let encoded = body["base64"] as? String, var transfer = pending[id], index >= 0, index < transfer.total else { notify("phvisual.texture.failed", "Bloco inválido recebido do visual."); return }
-            transfer.chunks[index] = encoded; pending[id] = transfer; return
-        }
-        guard type == "end", let transfer = pending.removeValue(forKey: id) else { notify("phvisual.texture.failed", "Finalização da transferência inválida."); return }
-        guard transfer.chunks.count == transfer.total else { notify("phvisual.texture.failed", "A transferência do AssetBundle terminou incompleta."); return }
-        var bundleData = Data()
-        for index in 0..<transfer.total {
-            guard let encoded = transfer.chunks[index], let chunkData = Data(base64Encoded: encoded) else {
-                notify("phvisual.texture.failed", "Não foi possível decodificar o bloco \(index + 1) do AssetBundle."); return
-            }
-            bundleData.append(chunkData)
-        }
-        guard !bundleData.isEmpty else { notify("phvisual.texture.failed", "Não foi possível reconstruir o AssetBundle."); return }
-        do {
-            let isMax = transfer.version.hasSuffix("-max"); let bundleID = isMax ? "com.dts.freefiremax" : "com.dts.freefireth"
-            let relativePath = transfer.relativePath
-            guard relativePath.hasPrefix("Documents/contentcache/Optional/ios/"), relativePath.contains("optionalavatarres/gameassetbundles/") else { throw NSError(domain: "TextureUpload", code: 422, userInfo: [NSLocalizedDescriptionKey: "O visual não forneceu um AssetBundle iOS."]) }
-            let bundleName = URL(fileURLWithPath: relativePath).lastPathComponent
-            let project = PatchProject(name: "PH XITER \(bundleName)", author: "PH XITER", bundleIdentifiers: [bundleID], rules: [PatchRule(bundleID: bundleID, relativePath: relativePath, replacementFilename: bundleName, replacementData: bundleData)])
-            let encodedPackage = try PatchPackageCodec.encodeLegacyV2(project: project, password: nil)
-            let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("TextureCatalog", isDirectory: true)
-            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            let safeName = bundleName.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "\\", with: "_")
-            let outputURL = directory.appendingPathComponent(safeName + ".3105")
-            try encodedPackage.data.write(to: outputURL, options: .atomic)
-            notify("phvisual.texture.created", outputURL)
-            DispatchQueue.main.async { self.onCreated?(outputURL) }
-            Task { do { try await uploadToTextureAPI(data: encodedPackage.data, fileName: outputURL.lastPathComponent, bundleID: bundleID) } catch { notify("phvisual.texture.failed", "Arquivo salvo localmente, mas a API não recebeu: \(error.localizedDescription)") } }
-        } catch { notify("phvisual.texture.failed", error.localizedDescription); print("PH visual 3105 conversion failed: \(error)") }
-    }
-}
-private struct VisualProjectWebView: UIViewRepresentable {
-    let onCreated: (URL) -> Void
-    func makeCoordinator() -> PHVisualDownloadHandler {
-        let handler = PHVisualDownloadHandler()
-        handler.onCreated = onCreated
-        return handler
-    }
-    func makeUIView(context: Context) -> WKWebView {
-        let configuration = WKWebViewConfiguration()
-        configuration.allowsInlineMediaPlayback = true
-        configuration.websiteDataStore = .default()
-        configuration.userContentController.add(context.coordinator, name: "phvisualDownload")
-        let webView = WKWebView(frame: .zero, configuration: configuration)
-        webView.isOpaque = false
-        webView.backgroundColor = .clear
-        webView.scrollView.backgroundColor = .clear
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
-        webView.allowsBackForwardNavigationGestures = true
-        let visualURL = URL(string: "https://cdn.jsdelivr.net/gh/iosph988-prog/PH-@main/ph/client/public/visual/index.html")!
-        let visualBaseURL = visualURL.deletingLastPathComponent()
-        URLSession.shared.dataTask(with: visualURL) { data, _, error in
-            guard let data, let html = String(data: data, encoding: .utf8), error == nil else {
-                DispatchQueue.main.async {
-                    webView.load(URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/visual/")!))
-                }
-                return
-            }
-            DispatchQueue.main.async { webView.loadHTMLString(html, baseURL: visualBaseURL) }
-        }.resume()
-        return webView
-    }
-
-    func updateUIView(_ webView: WKWebView, context: Context) {}
-}
-
-struct VisualPanelView: View {
-    @State private var generatedTextures: [URL] = []
-    @State private var textureMessage = ""
-
-    var body: some View {
-        ZStack(alignment: .bottom) {
-            VisualProjectWebView { url in
-                if !generatedTextures.contains(url) { generatedTextures.insert(url, at: 0) }
-                textureMessage = "`.3105` criado: \(url.lastPathComponent)"
-            }
-            if !generatedTextures.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("MOD iOS CONVERTIDO").font(.headline).foregroundStyle(.white)
-                    if !textureMessage.isEmpty { Text(textureMessage).font(.caption).foregroundStyle(.secondary) }
-                    ForEach(generatedTextures, id: \.path) { url in
-                        HStack(spacing: 8) {
-                            Text(url.lastPathComponent).font(.caption).lineLimit(1).foregroundStyle(.white)
-                            Spacer()
-                            ShareLink(item: url) { Label("Baixar", systemImage: "arrow.down.circle") }.font(.caption)
-                            Button("Aplicar") { applyTexture(url) }.buttonStyle(.borderedProminent).font(.caption)
-                            if hasReceipt(for: url) {
-                                Button("Restaurar") { restoreTexture(url) }.buttonStyle(.bordered).font(.caption)
-                            }
-                        }
-                    }
-                }
-                .padding(12)
-                .background(Color.black.opacity(0.92))
-                .clipShape(RoundedRectangle(cornerRadius: 14))
-                .padding(.horizontal, 10)
-                .padding(.bottom, 84)
-            }
-        }
-        .ignoresSafeArea(edges: [.top, .bottom])
-        .background(Color.black)
-    }
-
-    private func receiptKey(for url: URL) -> String { "ph.visual.receipt." + url.lastPathComponent }
-    private func hasReceipt(for url: URL) -> Bool {
-        guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value) else { return false }
-        return DevicePatchService.latestReceipt(projectID: projectID) != nil
-    }
-    private func applyTexture(_ url: URL) {
-        Task {
-            do {
-                let decoded = try PatchPackageCodec.decode(try Data(contentsOf: url), password: nil)
-                let receipt = try DevicePatchService.apply(project: decoded.project)
-                UserDefaults.standard.set(receipt.projectID.uuidString, forKey: receiptKey(for: url))
-                await MainActor.run { textureMessage = "Aplicado: \(url.lastPathComponent). Backup criado para restauração." }
-            } catch {
-                await MainActor.run { textureMessage = "Não foi possível aplicar: \(error.localizedDescription)" }
-            }
-        }
-    }
-    private func restoreTexture(_ url: URL) {
-        Task {
-            do {
-                guard let value = UserDefaults.standard.string(forKey: receiptKey(for: url)), let projectID = UUID(uuidString: value), let receipt = DevicePatchService.latestReceipt(projectID: projectID) else { throw PatchPackageError.restoreFailed }
-                try DevicePatchService.restore(receipt: receipt, allowChangedTargets: true)
-                UserDefaults.standard.removeObject(forKey: receiptKey(for: url))
-                await MainActor.run { textureMessage = "Restaurado: \(url.lastPathComponent)" }
-            } catch {
-                await MainActor.run { textureMessage = "Não foi possível restaurar: \(error.localizedDescription)" }
-            }
-        }
-    }
-}
-"""
-if "struct VisualPanelView: View" not in patch_file.read_text():
-    with patch_file.open("a") as handle:
-        handle.write(visual_swift)
