@@ -156,9 +156,9 @@ texture = texture.replace(texture_bg, "configBackgroundColor(hex: globalAppBackg
 texture = texture.replace('Image(systemName: "paintbrush.pointed.fill")', 'Image(systemName: "paintpalette.fill")', 1)
 texture_file.write_text(texture)
 
-# O projeto visual é publicado remotamente pela API Railway em /api/visual.
-# Ele não é baixado nem embutido na IPA.
-visual_remote_url = "https://api-production-182c.up.railway.app/api/visual/"
+# O projeto visual é carregado remotamente pelo CDN público do repositório.
+# Ele não é baixado nem embutido na IPA; o CDN sempre acompanha o branch main.
+visual_remote_url = "https://cdn.jsdelivr.net/gh/iosph988-prog/PH-@main/ph/client/public/visual/index.html"
 
 project_file = app.parent / "ThreeOneOSFive.xcodeproj/project.pbxproj"
 if not project_file.is_file():
@@ -974,7 +974,7 @@ private struct VisualProjectWebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = .clear
         webView.scrollView.contentInsetAdjustmentBehavior = .never
         webView.allowsBackForwardNavigationGestures = true
-        webView.load(URLRequest(url: URL(string: "https://api-production-182c.up.railway.app/api/visual/")!))
+        webView.load(URLRequest(url: URL(string: "https://cdn.jsdelivr.net/gh/iosph988-prog/PH-@main/ph/client/public/visual/index.html")!))
         return webView
     }
 
